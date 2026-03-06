@@ -1,0 +1,98 @@
+openapi: "3.0.3"
+info:
+  title: DELViON Health API
+  description: Global Diagnostic SaaS Platform REST API
+  version: "1.0.0"
+  contact:
+    name: DELViON Health Engineering
+    email: engineering@delvion.com
+
+servers:
+  - url: http://localhost:3001/api/v1
+    description: Local development
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        statusCode: { type: integer }
+        message: { type: string }
+        timestamp: { type: string, format: date-time }
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email & password
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+      responses:
+        '200':
+          description: Login successful
+        '401':
+          description: Invalid credentials
+
+  /patients:
+    get:
+      tags: [Patients]
+      summary: List patients
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Patient list
+    post:
+      tags: [Patients]
+      summary: Register new patient
+      responses:
+        '201':
+          description: Patient created
+
+  /orders:
+    get:
+      tags: [Orders]
+      summary: List orders
+      responses:
+        '200':
+          description: Order list
+    post:
+      tags: [Orders]
+      summary: Create order
+      responses:
+        '201':
+          description: Order created
+
+  /samples/accession:
+    post:
+      tags: [Samples]
+      summary: Accession a sample
+      responses:
+        '201':
+          description: Sample accessioned with barcode

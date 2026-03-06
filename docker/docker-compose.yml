@@ -1,0 +1,205 @@
+version: "3.9"
+
+networks:
+  delvion-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongo_data:
+  redis_data:
+  minio_data:
+  meilisearch_data:
+
+services:
+  # ─── PostgreSQL 15 ───────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: delvion-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: delvion_dev
+      POSTGRES_USER: delvion
+      POSTGRES_PASSWORD: delvion123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - delvion-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U delvion -d delvion_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ─── MongoDB 7 ───────────────────────────────
+  mongo:
+    image: mongo:7
+    container_name: delvion-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: delvion
+      MONGO_INITDB_ROOT_PASSWORD: delvion123
+      MONGO_INITDB_DATABASE: delvion_dev
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - delvion-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ─── Redis 7 ─────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: delvion-redis
+    restart: unless-stopped
+    command: redis-server --requirepass delvion123 --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - delvion-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "delvion123", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── MinIO ───────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: delvion-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: delvion_minio
+      MINIO_ROOT_PASSWORD: delvion_minio_secret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - delvion-network
+
+  # ─── Meilisearch ─────────────────────────────
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: delvion-meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: delvion_meili_master_key
+      MEILI_ENV: development
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - delvion-network
+
+  # ─── MailHog (Email testing) ──────────────────
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: delvion-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    networks:
+      - delvion-network
+
+  # ─── NestJS API ──────────────────────────────
+  app-api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+      target: development
+    container_name: delvion-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://delvion:delvion123@postgres:5432/delvion_dev
+      MONGODB_URI: mongodb://delvion:delvion123@mongo:27017/delvion_dev?authSource=admin
+      REDIS_URL: redis://:delvion123@redis:6379
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: delvion_minio
+      MINIO_SECRET_KEY: delvion_minio_secret
+      MINIO_BUCKET: delvion-dev
+      MEILISEARCH_HOST: http://meilisearch:7700
+      MEILISEARCH_MASTER_KEY: delvion_meili_master_key
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      JWT_SECRET: dev_jwt_secret_change_in_production
+      JWT_REFRESH_SECRET: dev_jwt_refresh_secret_change_in_production
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    volumes:
+      - ../apps/api:/app/apps/api
+      - ../packages:/app/packages
+      - /app/node_modules
+      - /app/apps/api/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - delvion-network
+
+  # ─── Next.js Web ─────────────────────────────
+  app-web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+      target: development
+    container_name: delvion-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_WS_URL: ws://localhost:3001
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: dev_nextauth_secret_change_in_production
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../apps/web:/app/apps/web
+      - ../packages:/app/packages
+      - /app/node_modules
+      - /app/apps/web/node_modules
+      - /app/apps/web/.next
+    depends_on:
+      - app-api
+    networks:
+      - delvion-network
+
+
+  ai-service:
+    build:
+      context: ../apps/ai-service
+      dockerfile: Dockerfile
+    container_name: delvion-ai
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      ALLOWED_ORIGINS: http://localhost:3001
+      DATABASE_URL: postgresql://delvion:delvion123@postgres:5432/delvion_dev
+      REDIS_URL: redis://:delvion123@redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - delvion-network

@@ -1,0 +1,36 @@
+{
+  "symptoms": {
+    "fatigue": ["CBC", "TSH", "Vitamin D", "Ferritin", "HbA1c", "Vitamin B12"],
+    "fever": ["CBC", "Malaria Antigen", "Dengue NS1", "Widal", "Blood Culture"],
+    "diabetes_screening": ["Blood Glucose Fasting", "HbA1c", "Urine Routine"],
+    "thyroid": ["TSH", "T3", "T4", "Anti-TPO"],
+    "liver": ["LFT", "SGOT", "SGPT", "Bilirubin", "Alkaline Phosphatase"],
+    "kidney": ["KFT", "Creatinine", "Urea", "Uric Acid", "Urine Routine"],
+    "heart": ["Lipid Profile", "ECG", "Troponin I", "CK-MB", "LDH"],
+    "anemia": ["CBC", "Ferritin", "Vitamin B12", "Folate", "Peripheral Smear"],
+    "weight_gain": ["TSH", "HbA1c", "Insulin Fasting", "Cortisol", "Lipid Profile"],
+    "hair_loss": ["TSH", "Ferritin", "Vitamin D", "Vitamin B12", "CBC"],
+    "chest_pain": ["ECG", "Troponin I", "CK-MB", "D-Dimer", "Lipid Profile"],
+    "headache": ["CBC", "Blood Glucose", "Blood Pressure Panel"],
+    "joint_pain": ["Uric Acid", "RA Factor", "Anti-CCP", "CRP", "ESR"],
+    "pregnancy": ["Beta HCG", "CBC", "Blood Group", "Thyroid Profile", "TORCH"],
+    "annual_checkup": ["CBC", "LFT", "KFT", "Lipid Profile", "Blood Glucose Fasting", "HbA1c", "TSH", "Urine Routine", "ECG", "Vitamin D"],
+    "hypertension": ["KFT", "Urine Routine", "Lipid Profile", "Blood Glucose", "ECG"],
+    "infection": ["CBC", "CRP", "ESR", "Procalcitonin", "Blood Culture"],
+    "vitamin_deficiency": ["Vitamin D", "Vitamin B12", "Folate", "Ferritin"],
+    "throat_pain": ["CBC", "Throat Swab Culture", "ASO Titre"],
+    "urinary": ["Urine Routine", "Urine Culture", "KFT", "PSA"],
+    "skin_issues": ["CBC", "Allergy Panel", "IgE Total", "ANA", "TSH"],
+    "corporate_health": ["CBC", "LFT", "KFT", "Lipid Profile", "Blood Glucose", "HbA1c", "TSH", "Chest X-Ray", "ECG", "Urine Routine", "Stool Routine", "HIV", "HBsAg", "Anti-HCV"]
+  },
+  "conditions": {
+    "diabetes": ["HbA1c", "Blood Glucose Fasting", "Blood Glucose PP", "Insulin Fasting", "KFT", "Urine Microalbumin", "Lipid Profile"],
+    "hypertension": ["KFT", "Electrolytes", "Lipid Profile", "ECG", "Urine Routine"],
+    "thyroid_disorder": ["TSH", "T3", "T4", "Anti-TPO", "Anti-TG"],
+    "pcod": ["FSH", "LH", "Testosterone", "DHEAS", "Prolactin", "AMH", "Insulin Fasting", "TSH"],
+    "anemia": ["CBC", "Peripheral Smear", "Ferritin", "Vitamin B12", "Folate", "Reticulocyte Count"],
+    "liver_disease": ["LFT", "PT/INR", "Albumin", "Bilirubin", "Viral Hepatitis Panel"],
+    "kidney_disease": ["KFT", "eGFR", "Urine Microalbumin", "Urine ACR", "Electrolytes", "CBC"],
+    "heart_disease": ["Lipid Profile", "Troponin", "BNP", "Homocysteine", "hs-CRP", "ECG"]
+  }
+}

@@ -1,0 +1,202 @@
+export declare enum Role {
+    SUPER_ADMIN = "SUPER_ADMIN",
+    TENANT_ADMIN = "TENANT_ADMIN",
+    LAB_MANAGER = "LAB_MANAGER",
+    PATHOLOGIST = "PATHOLOGIST",
+    LAB_TECHNICIAN = "LAB_TECHNICIAN",
+    FRONT_DESK = "FRONT_DESK",
+    PHLEBOTOMIST = "PHLEBOTOMIST",
+    FIELD_SALES_REP = "FIELD_SALES_REP",
+    FINANCE_EXECUTIVE = "FINANCE_EXECUTIVE",
+    HR_MANAGER = "HR_MANAGER",
+    PROCUREMENT_MANAGER = "PROCUREMENT_MANAGER",
+    DOCTOR = "DOCTOR",
+    PATIENT = "PATIENT",
+    CORPORATE_CLIENT = "CORPORATE_CLIENT",
+    IT_ADMIN = "IT_ADMIN"
+}
+export declare enum OrderStatus {
+    DRAFT = "DRAFT",
+    PENDING = "PENDING",
+    CONFIRMED = "CONFIRMED",
+    PENDING_COLLECTION = "PENDING_COLLECTION",
+    SAMPLE_COLLECTED = "SAMPLE_COLLECTED",
+    RECEIVED = "RECEIVED",
+    SAMPLE_REJECTED = "SAMPLE_REJECTED",
+    PENDING_PROCESSING = "PENDING_PROCESSING",
+    IN_PROCESSING = "IN_PROCESSING",
+    PENDING_APPROVAL = "PENDING_APPROVAL",
+    RESULTED = "RESULTED",
+    APPROVED = "APPROVED",
+    REPORTED = "REPORTED",
+    DISPATCHED = "DISPATCHED",
+    DELIVERED = "DELIVERED",
+    ARCHIVED = "ARCHIVED",
+    CANCELLED = "CANCELLED"
+}
+export declare enum SampleRejectionReason {
+    HEMOLYZED = "HEMOLYZED",
+    INSUFFICIENT_QUANTITY = "INSUFFICIENT_QUANTITY",
+    WRONG_TUBE = "WRONG_TUBE",
+    UNLABELED = "UNLABELED",
+    MISLABELED = "MISLABELED",
+    CLOTTED = "CLOTTED",
+    LEAKED = "LEAKED",
+    CONTAMINATED = "CONTAMINATED",
+    EXPIRED = "EXPIRED",
+    OTHER = "OTHER"
+}
+export declare enum CollectionType {
+    WALK_IN = "WALK_IN",
+    HOME_COLLECTION = "HOME_COLLECTION",
+    B2B = "B2B",
+    CAMP = "CAMP",
+    OUTSOURCE_RECEIVED = "OUTSOURCE_RECEIVED"
+}
+export declare enum SampleStatus {
+    PENDING_COLLECTION = "PENDING_COLLECTION",
+    COLLECTED = "COLLECTED",
+    IN_TRANSIT = "IN_TRANSIT",
+    RECEIVED = "RECEIVED",
+    PROCESSING = "PROCESSING",
+    STORED = "STORED",
+    REJECTED = "REJECTED",
+    DISPOSED = "DISPOSED"
+}
+export declare enum ResultInterpretation {
+    NORMAL = "NORMAL",
+    ABNORMAL = "ABNORMAL",
+    CRITICAL = "CRITICAL",
+    INCONCLUSIVE = "INCONCLUSIVE"
+}
+export declare enum ReportStatus {
+    GENERATED = "GENERATED",
+    DRAFT = "DRAFT",
+    PENDING_REVIEW = "PENDING_REVIEW",
+    SIGNED = "SIGNED",
+    DELIVERED = "DELIVERED",
+    AMENDED = "AMENDED"
+}
+export declare enum InvoiceStatus {
+    DRAFT = "DRAFT",
+    SENT = "SENT",
+    PAID = "PAID",
+    PARTIALLY_PAID = "PARTIALLY_PAID",
+    OVERDUE = "OVERDUE",
+    CANCELLED = "CANCELLED"
+}
+export declare enum PaymentMethod {
+    CASH = "CASH",
+    CARD = "CARD",
+    UPI = "UPI",
+    WALLET = "WALLET",
+    INSURANCE = "INSURANCE",
+    BANK_TRANSFER = "BANK_TRANSFER",
+    CREDIT = "CREDIT"
+}
+export declare enum PaymentStatus {
+    PENDING = "PENDING",
+    COMPLETED = "COMPLETED",
+    FAILED = "FAILED",
+    REFUNDED = "REFUNDED"
+}
+export declare enum NoteType {
+    CALL = "CALL",
+    EMAIL = "EMAIL",
+    MEETING = "MEETING",
+    NOTE = "NOTE"
+}
+export declare enum ClaimStatus {
+    DRAFT = "DRAFT",
+    SUBMITTED = "SUBMITTED",
+    PENDING = "PENDING",
+    APPROVED = "APPROVED",
+    REJECTED = "REJECTED",
+    APPEALED = "APPEALED",
+    SETTLED = "SETTLED"
+}
+export declare enum LeadSource {
+    WEBSITE = "WEBSITE",
+    WHATSAPP = "WHATSAPP",
+    CALL_CENTER = "CALL_CENTER",
+    FIELD_REP = "FIELD_REP",
+    HOSPITAL = "HOSPITAL",
+    CAMPAIGN = "CAMPAIGN",
+    REFERRAL = "REFERRAL"
+}
+export declare enum LeadStatus {
+    NEW = "NEW",
+    QUALIFIED = "QUALIFIED",
+    PROPOSAL = "PROPOSAL",
+    NEGOTIATION = "NEGOTIATION",
+    WON = "WON",
+    LOST = "LOST"
+}
+export declare enum AppointmentType {
+    HOME_COLLECTION = "HOME_COLLECTION",
+    WALK_IN = "WALK_IN",
+    CORPORATE = "CORPORATE"
+}
+export declare enum AppointmentStatus {
+    SCHEDULED = "SCHEDULED",
+    CONFIRMED = "CONFIRMED",
+    EN_ROUTE = "EN_ROUTE",
+    COLLECTED = "COLLECTED",
+    CANCELLED = "CANCELLED",
+    NO_SHOW = "NO_SHOW"
+}
+export declare enum POStatus {
+    DRAFT = "DRAFT",
+    SENT = "SENT",
+    CONFIRMED = "CONFIRMED",
+    PARTIALLY_RECEIVED = "PARTIALLY_RECEIVED",
+    RECEIVED = "RECEIVED",
+    CANCELLED = "CANCELLED"
+}
+export declare enum GLAccountType {
+    ASSET = "ASSET",
+    LIABILITY = "LIABILITY",
+    EQUITY = "EQUITY",
+    REVENUE = "REVENUE",
+    EXPENSE = "EXPENSE"
+}
+export declare enum ReportApprovalStatus {
+    PENDING = "PENDING",
+    APPROVED = "APPROVED",
+    REJECTED = "REJECTED",
+    AUTO_APPROVED = "AUTO_APPROVED"
+}
+export declare enum DispatchStatus {
+    NOT_SENT = "NOT_SENT",
+    SENT = "SENT",
+    DELIVERED = "DELIVERED",
+    FAILED = "FAILED"
+}
+export declare enum DispatchChannel {
+    EMAIL = "EMAIL",
+    SMS = "SMS",
+    WHATSAPP = "WHATSAPP"
+}
+export declare enum OutsourceStatus {
+    PENDING_DISPATCH = "PENDING_DISPATCH",
+    DISPATCHED = "DISPATCHED",
+    RECEIVED_BY_REFLAB = "RECEIVED_BY_REFLAB",
+    RESULTS_PENDING = "RESULTS_PENDING",
+    RESULTS_RECEIVED = "RESULTS_RECEIVED",
+    COMPLETED = "COMPLETED",
+    CANCELLED = "CANCELLED"
+}
+export declare enum B2BInvoiceStatus {
+    B2B_DRAFT = "B2B_DRAFT",
+    B2B_SENT = "B2B_SENT",
+    B2B_PARTIAL = "B2B_PARTIAL",
+    B2B_PAID = "B2B_PAID",
+    B2B_OVERDUE = "B2B_OVERDUE",
+    B2B_CANCELLED = "B2B_CANCELLED"
+}
+export declare enum ApprovalStatus {
+    APPROVAL_PENDING = "APPROVAL_PENDING",
+    APPROVAL_APPROVED = "APPROVAL_APPROVED",
+    APPROVAL_REJECTED = "APPROVAL_REJECTED"
+}
+//# sourceMappingURL=enums.d.ts.map

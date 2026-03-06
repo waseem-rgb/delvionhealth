@@ -1,0 +1,69 @@
+import { TrendingUp, TrendingDown, type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface KPICardProps {
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  change?: number;
+  changeLabel?: string;
+  icon: LucideIcon;
+  iconColor?: string;
+  isLoading?: boolean;
+}
+
+export function KPICard({
+  title,
+  value,
+  subtitle,
+  change,
+  changeLabel = "vs yesterday",
+  icon: Icon,
+  iconColor = "bg-slate-100 text-slate-500",
+  isLoading = false,
+}: KPICardProps) {
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+        <div className="flex items-start justify-between mb-3">
+          <div className="w-10 h-10 rounded-lg bg-slate-100 animate-pulse" />
+          <div className="w-16 h-6 rounded-full bg-slate-100 animate-pulse" />
+        </div>
+        <div className="w-24 h-7 bg-slate-100 rounded animate-pulse mb-2" />
+        <div className="w-32 h-4 bg-slate-100 rounded animate-pulse" />
+      </div>
+    );
+  }
+
+  const isPositive = change !== undefined && change >= 0;
+  const isNegative = change !== undefined && change < 0;
+
+  return (
+    <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between mb-3">
+        <div className={cn("p-2.5 rounded-lg", iconColor.split(" ")[0])}>
+          <Icon className={cn("w-5 h-5", iconColor.split(" ")[1] ?? iconColor)} size={20} />
+        </div>
+        {change !== undefined && (
+          <div
+            className={cn(
+              "flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full",
+              isPositive ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
+            )}
+          >
+            {isPositive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+            {Math.abs(change).toFixed(1)}%
+          </div>
+        )}
+      </div>
+      <p className="text-2xl font-bold text-slate-900">{value}</p>
+      <p className="text-sm text-slate-500 mt-0.5">{title}</p>
+      {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
+      {change !== undefined && changeLabel && (
+        <p className={cn("text-xs mt-1", isPositive ? "text-green-600" : isNegative ? "text-red-500" : "text-slate-400")}>
+          {changeLabel}
+        </p>
+      )}
+    </div>
+  );
+}

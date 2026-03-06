@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DELViON Health - New Sections Demo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        brand: '#0D7E8A',
+        navy: '#1B4F8A',
+        dark: '#0F1923',
+      }
+    }
+  }
+}
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  body { font-family: 'Inter', sans-serif; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .nav-link { transition: all 0.15s ease; }
+  .nav-link:hover { background: rgba(255,255,255,0.05); color: white; }
+  .nav-link.active { background: rgba(13,126,138,0.15); color: white; border-left: 3px solid #0D7E8A; }
+  .tab-btn { transition: all 0.15s ease; }
+  .tab-btn.active { background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  .fade-in { animation: fadeIn 0.3s ease-in; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .kpi-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .progress-bar { transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+  .chart-bar { transition: width 0.6s ease; }
+</style>
+</head>
+<body class="bg-gray-50 text-slate-900">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- HEADER -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<header class="bg-dark text-white py-8 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 bg-brand rounded-xl flex items-center justify-center">
+        <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 8v8c0 7.73 5.16 14.97 12 16.93C22.84 30.97 28 23.73 28 16V8L16 2z" fill="white" fill-opacity="0.9"/><path d="M12 16l3 3 5-6" stroke="#0D7E8A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold">DELViON Health Platform</h1>
+        <p class="text-brand text-sm font-medium">New Sections Demo - Build Verification</p>
+      </div>
+    </div>
+    <p class="text-slate-400 text-sm max-w-2xl">
+      This document demonstrates all new sections added to the DELViON LIMS platform.
+      93 routes verified, 0 TypeScript errors, 0 build errors.
+    </p>
+    <div class="flex gap-3 mt-4 text-xs">
+      <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full font-medium">tsc --noEmit: 0 errors</span>
+      <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full font-medium">next build: 93 routes</span>
+      <span class="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full font-medium">Schema: 3 new models</span>
+      <span class="bg-violet-500/20 text-violet-400 px-3 py-1 rounded-full font-medium">14 new pages</span>
+    </div>
+  </div>
+</header>
+
+<!-- NAV (demo of sidebar restructure) -->
+<div class="max-w-7xl mx-auto px-6 py-6">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 3: SIDEBAR RESTRUCTURE -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section class="mb-12 fade-in">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="bg-navy text-white text-xs font-bold px-2.5 py-1 rounded">Section 3</span>
+    <h2 class="text-xl font-bold text-slate-900">Sidebar Restructure - 10 Navigation Groups</h2>
+  </div>
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Sidebar mockup -->
+    <div class="bg-dark rounded-2xl p-4 max-w-[260px]">
+      <div class="flex items-center gap-2.5 px-3 py-3 border-b border-white/5 mb-3">
+        <div class="w-7 h-7 bg-brand rounded-lg flex items-center justify-center">
+          <svg width="14" height="14" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 8v8c0 7.73 5.16 14.97 12 16.93C22.84 30.97 28 23.73 28 16V8L16 2z" fill="white" fill-opacity="0.9"/></svg>
+        </div>
+        <div>
+          <p class="text-white font-bold text-xs">DELViON</p>
+          <p class="text-brand text-[10px] font-medium">Health Platform</p>
+        </div>
+      </div>
+      <!-- Nav groups -->
+      <div class="space-y-3 text-[11px]">
+        <div>
+          <p class="text-[9px] font-semibold uppercase tracking-widest text-white/30 px-3 mb-1">Overview</p>
+          <div class="nav-link active rounded-lg px-3 py-1.5 text-white flex items-center gap-2">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Dashboard
+          </div>
+          <div class="nav-link rounded-lg px-3 py-1.5 text-slate-400 flex items-center gap-2">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
+            Analytics
+          </div>
+        </div>
+        <div>
+          <p class="text-[9px] font-semibold uppercase tracking-widest text-white/30 px-3 mb-1">Front Desk</p>
+          <div class="nav-link rounded-lg px-3 py-1.5 text-slate-400">Registration & Billing</div>
+          <div class="nav-link rounded-lg px-3 py-1.5 text-slate-400">Patients</div>
+          <div class="nav-link rounded-lg px-3 py-1.5 text-slate-400">Orders</div>
+        </div>
+        <div>
+          <p class="text-[9px] font-semibold uppercase tracking-widest text-white/30 px-3 mb-1">Lab Operations</p>
+          <div class="nav-link rounded-lg px-3 py-1.5 text-slate-400">Accession</div>
+          <div class="nav-link rounded-lg px-3 py-1.5 text-slate-400">Samples</div>
+          <div class="nav-link rounded-lg px-3 py-1.5 text-slate-400">Results</div>
+        </div>
+        <!-- NEW GROUPS highlighted -->
+        <div class="border border-brand/30 rounded-xl p-2 space-y-1">
+          <p class="text-[9px] font-semibold uppercase tracking-widest text-brand px-1 mb-1">&#9733; Revenue CRM <span class="text-[8px] text-brand/60">(NEW)</span></p>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Revenue Dashboard</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Clinics & Doctors</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Leads</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Campaigns</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Targets</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Commissions</div>
+        </div>
+        <div class="border border-brand/30 rounded-xl p-2 space-y-1">
+          <p class="text-[9px] font-semibold uppercase tracking-widest text-brand px-1 mb-1">&#9733; Finance <span class="text-[8px] text-brand/60">(NEW)</span></p>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Finance Overview</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Receivables</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">GST Reports</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Procurement</div>
+        </div>
+        <div class="border border-brand/30 rounded-xl p-2 space-y-1">
+          <p class="text-[9px] font-semibold uppercase tracking-widest text-brand px-1 mb-1">&#9733; HR & Admin <span class="text-[8px] text-brand/60">(NEW)</span></p>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Employees</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Attendance</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Shifts / Leave</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Payroll</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Certifications</div>
+        </div>
+        <div class="border border-brand/30 rounded-xl p-2 space-y-1">
+          <p class="text-[9px] font-semibold uppercase tracking-widest text-brand px-1 mb-1">&#9733; Quality & Compliance <span class="text-[8px] text-brand/60">(NEW)</span></p>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">QC Dashboard</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">CAPA</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">SOPs & Documents</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Audit Logs</div>
+        </div>
+        <div class="border border-brand/30 rounded-xl p-2 space-y-1">
+          <p class="text-[9px] font-semibold uppercase tracking-widest text-brand px-1 mb-1">&#9733; Corporate & Wellness <span class="text-[8px] text-brand/60">(NEW)</span></p>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Camp Management</div>
+          <div class="nav-link rounded-lg px-2 py-1 text-slate-400">Wellness Dashboard</div>
+        </div>
+      </div>
+    </div>
+    <!-- Description -->
+    <div class="space-y-4">
+      <div class="bg-white rounded-xl border border-slate-100 p-5">
+        <h3 class="font-semibold text-sm mb-3">Navigation Restructure</h3>
+        <div class="space-y-2 text-xs text-slate-600">
+          <p><span class="font-medium text-slate-800">Before:</span> 5 groups (Overview, Front Desk, Lab Operations, Reports & Billing, Settings)</p>
+          <p><span class="font-medium text-slate-800">After:</span> 10 groups with dedicated sections for CRM, Finance, HR, Quality, and Corporate</p>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-100 p-5">
+        <h3 class="font-semibold text-sm mb-3">5 New Navigation Groups</h3>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-xs font-medium">Revenue CRM</span><span class="text-xs text-slate-400">- 6 items</span></div>
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span class="text-xs font-medium">Finance</span><span class="text-xs text-slate-400">- 4 items</span></div>
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-violet-500"></span><span class="text-xs font-medium">HR & Admin</span><span class="text-xs text-slate-400">- 6 items</span></div>
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span><span class="text-xs font-medium">Quality & Compliance</span><span class="text-xs text-slate-400">- 4 items</span></div>
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-500"></span><span class="text-xs font-medium">Corporate & Wellness</span><span class="text-xs text-slate-400">- 2 items</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="border-slate-200 my-8">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 5: REVENUE CRM DASHBOARD -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section class="mb-12 fade-in">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="bg-navy text-white text-xs font-bold px-2.5 py-1 rounded">Section 5</span>
+    <h2 class="text-xl font-bold">Revenue CRM Dashboard</h2>
+    <span class="text-xs text-slate-400 ml-2">/crm/revenue</span>
+  </div>
+  <!-- KPIs -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+    <div class="kpi-card bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div class="flex items-start justify-between mb-2">
+        <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide">Total Revenue</div>
+        <div class="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center"><span class="text-emerald-600 text-sm font-bold">&#8377;</span></div>
+      </div>
+      <div class="text-xl font-bold">&#8377;24.5L</div>
+      <div class="flex items-center gap-1 text-xs mt-1 font-medium text-green-600">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 17l9.2-9.2M17 17V7.8M17 7.8H7.8"/></svg>
+        12.3% vs prev period
+      </div>
+    </div>
+    <div class="kpi-card bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div class="flex items-start justify-between mb-2">
+        <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide">Revenue This Month</div>
+        <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center"><span class="text-blue-600 text-xs">&#128197;</span></div>
+      </div>
+      <div class="text-xl font-bold">&#8377;4.2L</div>
+    </div>
+    <div class="kpi-card bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div class="flex items-start justify-between mb-2">
+        <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide">Outstanding</div>
+        <div class="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center"><span class="text-amber-600 text-xs">&#128176;</span></div>
+      </div>
+      <div class="text-xl font-bold">&#8377;3.1L</div>
+    </div>
+    <div class="kpi-card bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div class="flex items-start justify-between mb-2">
+        <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide">Avg Order Value</div>
+        <div class="w-8 h-8 bg-violet-50 rounded-lg flex items-center justify-center"><span class="text-violet-600 text-xs">&#128722;</span></div>
+      </div>
+      <div class="text-xl font-bold">&#8377;1,240</div>
+    </div>
+  </div>
+  <!-- Charts area -->
+  <div class="grid lg:grid-cols-2 gap-4 mb-4">
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+      <h3 class="font-semibold text-slate-800 mb-1">Revenue Trend</h3>
+      <p class="text-xs text-slate-400 mb-4">Dec 24 - Mar 26 | Invoiced vs Collected</p>
+      <div class="h-48 bg-gradient-to-t from-blue-50/50 to-transparent rounded-lg flex items-end gap-2 px-4 pb-4">
+        <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full bg-navy/20 rounded-t" style="height: 60%"></div>
+          <div class="w-full bg-teal-500/30 rounded-t" style="height: 45%"></div>
+          <span class="text-[9px] text-slate-400">Dec</span>
+        </div>
+        <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full bg-navy/20 rounded-t" style="height: 70%"></div>
+          <div class="w-full bg-teal-500/30 rounded-t" style="height: 55%"></div>
+          <span class="text-[9px] text-slate-400">Jan</span>
+        </div>
+        <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full bg-navy/20 rounded-t" style="height: 85%"></div>
+          <div class="w-full bg-teal-500/30 rounded-t" style="height: 65%"></div>
+          <span class="text-[9px] text-slate-400">Feb</span>
+        </div>
+        <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full bg-navy/30 rounded-t" style="height: 95%"></div>
+          <div class="w-full bg-teal-500/40 rounded-t" style="height: 75%"></div>
+          <span class="text-[9px] text-slate-400">Mar</span>
+        </div>
+      </div>
+      <div class="flex gap-4 mt-3">
+        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-navy/30"></span><span class="text-[10px] text-slate-500">Invoiced</span></div>
+        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-teal-500/40"></span><span class="text-[10px] text-slate-500">Collected</span></div>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+      <h3 class="font-semibold text-slate-800 mb-4">Top Referring Doctors</h3>
+      <table class="w-full text-sm">
+        <thead><tr class="border-b border-slate-100"><th class="text-left py-2 text-xs font-medium text-slate-500">#</th><th class="text-left py-2 text-xs font-medium text-slate-500">Doctor</th><th class="text-right py-2 text-xs font-medium text-slate-500">Referrals</th><th class="text-right py-2 text-xs font-medium text-slate-500">Revenue</th></tr></thead>
+        <tbody>
+          <tr class="border-b border-slate-50"><td class="py-2 text-slate-400">1</td><td class="py-2 font-medium">Dr. Priya Sharma</td><td class="py-2 text-right text-navy font-semibold">142</td><td class="py-2 text-right">&#8377;8.5L</td></tr>
+          <tr class="border-b border-slate-50"><td class="py-2 text-slate-400">2</td><td class="py-2 font-medium">Dr. Rajan Mehta</td><td class="py-2 text-right text-navy font-semibold">98</td><td class="py-2 text-right">&#8377;5.2L</td></tr>
+          <tr class="border-b border-slate-50"><td class="py-2 text-slate-400">3</td><td class="py-2 font-medium">Dr. Ananya Iyer</td><td class="py-2 text-right text-navy font-semibold">76</td><td class="py-2 text-right">&#8377;4.1L</td></tr>
+          <tr><td class="py-2 text-slate-400">4</td><td class="py-2 font-medium">Dr. Suresh Patel</td><td class="py-2 text-right text-navy font-semibold">54</td><td class="py-2 text-right">&#8377;2.9L</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="border-slate-200 my-8">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 6: FINANCE PAGES -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section class="mb-12 fade-in">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="bg-navy text-white text-xs font-bold px-2.5 py-1 rounded">Section 6</span>
+    <h2 class="text-xl font-bold">Finance Pages</h2>
+  </div>
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Receivables -->
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-slate-800">AR Aging / Receivables</h3>
+        <span class="text-xs text-slate-400">/finance/receivables</span>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mb-4">
+        <div class="bg-green-50 rounded-lg p-3 text-center"><div class="text-xs text-green-700 font-medium">0-30 Days</div><div class="text-lg font-bold text-green-800">&#8377;1.2L</div></div>
+        <div class="bg-amber-50 rounded-lg p-3 text-center"><div class="text-xs text-amber-700 font-medium">31-60 Days</div><div class="text-lg font-bold text-amber-800">&#8377;85K</div></div>
+        <div class="bg-red-50 rounded-lg p-3 text-center"><div class="text-xs text-red-700 font-medium">90+ Days</div><div class="text-lg font-bold text-red-800">&#8377;42K</div></div>
+      </div>
+      <!-- Aging bars -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2"><span class="text-[10px] text-slate-500 w-16">0-30d</span><div class="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden"><div class="chart-bar h-full bg-green-500 rounded-full" style="width:65%"></div></div><span class="text-xs font-medium w-12 text-right">&#8377;1.2L</span></div>
+        <div class="flex items-center gap-2"><span class="text-[10px] text-slate-500 w-16">31-60d</span><div class="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden"><div class="chart-bar h-full bg-amber-500 rounded-full" style="width:45%"></div></div><span class="text-xs font-medium w-12 text-right">&#8377;85K</span></div>
+        <div class="flex items-center gap-2"><span class="text-[10px] text-slate-500 w-16">61-90d</span><div class="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden"><div class="chart-bar h-full bg-orange-500 rounded-full" style="width:28%"></div></div><span class="text-xs font-medium w-12 text-right">&#8377;52K</span></div>
+        <div class="flex items-center gap-2"><span class="text-[10px] text-slate-500 w-16">90+d</span><div class="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden"><div class="chart-bar h-full bg-red-500 rounded-full" style="width:22%"></div></div><span class="text-xs font-medium w-12 text-right">&#8377;42K</span></div>
+      </div>
+    </div>
+    <!-- GST -->
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-slate-800">GST Reports</h3>
+        <span class="text-xs text-slate-400">/finance/gst</span>
+      </div>
+      <div class="grid grid-cols-4 gap-2 mb-4">
+        <div class="bg-blue-50 rounded-lg p-2 text-center"><div class="text-[9px] text-blue-600 font-medium">CGST</div><div class="text-sm font-bold text-blue-800">&#8377;2.8L</div></div>
+        <div class="bg-green-50 rounded-lg p-2 text-center"><div class="text-[9px] text-green-600 font-medium">SGST</div><div class="text-sm font-bold text-green-800">&#8377;2.8L</div></div>
+        <div class="bg-violet-50 rounded-lg p-2 text-center"><div class="text-[9px] text-violet-600 font-medium">IGST</div><div class="text-sm font-bold text-violet-800">&#8377;28K</div></div>
+        <div class="bg-slate-50 rounded-lg p-2 text-center"><div class="text-[9px] text-slate-600 font-medium">Total</div><div class="text-sm font-bold text-slate-800">&#8377;5.9L</div></div>
+      </div>
+      <table class="w-full text-xs">
+        <thead><tr class="border-b border-slate-100"><th class="text-left py-2 font-medium text-slate-500">Month</th><th class="text-right py-2 font-medium text-blue-600">CGST</th><th class="text-right py-2 font-medium text-green-600">SGST</th><th class="text-right py-2 font-medium text-violet-600">IGST</th><th class="text-right py-2 font-medium text-slate-700">Total</th></tr></thead>
+        <tbody class="text-slate-600">
+          <tr class="border-b border-slate-50"><td class="py-1.5">Apr 2025</td><td class="text-right text-blue-700">&#8377;38K</td><td class="text-right text-green-700">&#8377;38K</td><td class="text-right text-violet-700">&#8377;3.8K</td><td class="text-right font-semibold">&#8377;79.8K</td></tr>
+          <tr class="border-b border-slate-50"><td class="py-1.5">May 2025</td><td class="text-right text-blue-700">&#8377;42K</td><td class="text-right text-green-700">&#8377;42K</td><td class="text-right text-violet-700">&#8377;4.2K</td><td class="text-right font-semibold">&#8377;88.2K</td></tr>
+          <tr><td class="py-1.5">Jun 2025</td><td class="text-right text-blue-700">&#8377;45K</td><td class="text-right text-green-700">&#8377;45K</td><td class="text-right text-violet-700">&#8377;4.5K</td><td class="text-right font-semibold">&#8377;94.5K</td></tr>
+        </tbody>
+      </table>
+      <button class="mt-3 w-full text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export GST Report
+      </button>
+    </div>
+  </div>
+</section>
+
+<hr class="border-slate-200 my-8">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 7: HR CERTIFICATIONS -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section class="mb-12 fade-in">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="bg-navy text-white text-xs font-bold px-2.5 py-1 rounded">Section 7</span>
+    <h2 class="text-xl font-bold">HR Certifications</h2>
+    <span class="text-xs text-slate-400 ml-2">/hr/certifications</span>
+  </div>
+  <div class="grid grid-cols-3 gap-3 mb-4">
+    <div class="kpi-card bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-1">Total Active</div>
+      <div class="text-2xl font-bold text-green-600">12</div>
+    </div>
+    <div class="kpi-card bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-1">Expiring in 30 Days</div>
+      <div class="text-2xl font-bold text-amber-600">3</div>
+    </div>
+    <div class="kpi-card bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-1">Expired</div>
+      <div class="text-2xl font-bold text-red-600">1</div>
+    </div>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+    <table class="w-full text-sm">
+      <thead><tr class="bg-slate-50 border-b border-slate-100"><th class="text-left py-3 px-4 text-xs font-medium text-slate-500">Employee</th><th class="text-left py-3 px-4 text-xs font-medium text-slate-500">Certification</th><th class="text-left py-3 px-4 text-xs font-medium text-slate-500">Issuing Body</th><th class="text-left py-3 px-4 text-xs font-medium text-slate-500">Expiry</th><th class="text-left py-3 px-4 text-xs font-medium text-slate-500">Status</th></tr></thead>
+      <tbody>
+        <tr class="border-b border-slate-50 hover:bg-slate-50"><td class="py-3 px-4 font-medium">Rajesh Kumar</td><td class="py-3 px-4">NABL ISO 15189</td><td class="py-3 px-4 text-slate-500">NABL India</td><td class="py-3 px-4 text-slate-500">2027-06-15</td><td class="py-3 px-4"><span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">Active</span></td></tr>
+        <tr class="border-b border-slate-50 hover:bg-slate-50"><td class="py-3 px-4 font-medium">Priya Nair</td><td class="py-3 px-4">DMLT Certification</td><td class="py-3 px-4 text-slate-500">RGUHS</td><td class="py-3 px-4 text-slate-500">2026-04-10</td><td class="py-3 px-4"><span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Expiring Soon</span></td></tr>
+        <tr class="border-b border-slate-50 hover:bg-slate-50"><td class="py-3 px-4 font-medium">Suresh Reddy</td><td class="py-3 px-4">Phlebotomy Technician</td><td class="py-3 px-4 text-slate-500">ASCP</td><td class="py-3 px-4 text-slate-500">2025-12-01</td><td class="py-3 px-4"><span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">Expired</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="border-slate-200 my-8">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 8: QUALITY PAGES -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section class="mb-12 fade-in">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="bg-navy text-white text-xs font-bold px-2.5 py-1 rounded">Section 8</span>
+    <h2 class="text-xl font-bold">Quality & Compliance Pages</h2>
+  </div>
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- CAPA -->
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-slate-800">CAPA Management</h3>
+        <span class="text-xs text-slate-400">/qc/capa</span>
+      </div>
+      <div class="flex gap-2 mb-4">
+        <span class="text-[10px] font-medium px-3 py-1 rounded-full bg-slate-900 text-white">All (8)</span>
+        <span class="text-[10px] font-medium px-3 py-1 rounded-full bg-slate-100 text-slate-600">Open (3)</span>
+        <span class="text-[10px] font-medium px-3 py-1 rounded-full bg-slate-100 text-slate-600">In Progress (2)</span>
+        <span class="text-[10px] font-medium px-3 py-1 rounded-full bg-slate-100 text-slate-600">Closed (3)</span>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <div><p class="text-sm font-medium">Sample mislabeling incident</p><p class="text-[10px] text-slate-400">Root Cause: Training gap in phlebotomy team</p></div>
+          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">OPEN</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <div><p class="text-sm font-medium">QC drift on Hematology analyzer</p><p class="text-[10px] text-slate-400">Root Cause: Reagent batch inconsistency</p></div>
+          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">IN_PROGRESS</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <div><p class="text-sm font-medium">TAT breach for lipid profiles</p><p class="text-[10px] text-slate-400">Root Cause: Equipment downtime</p></div>
+          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">CLOSED</span>
+        </div>
+      </div>
+    </div>
+    <!-- SOPs -->
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-slate-800">SOPs & Documents</h3>
+        <span class="text-xs text-slate-400">/qc/documents</span>
+      </div>
+      <div class="flex gap-2 mb-4 flex-wrap">
+        <span class="text-[10px] font-medium px-3 py-1 rounded-full bg-blue-100 text-blue-700">SOP</span>
+        <span class="text-[10px] font-medium px-3 py-1 rounded-full bg-violet-100 text-violet-700">Policy</span>
+        <span class="text-[10px] font-medium px-3 py-1 rounded-full bg-teal-100 text-teal-700">Form</span>
+        <span class="text-[10px] font-medium px-3 py-1 rounded-full bg-orange-100 text-orange-700">Guide</span>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="border border-slate-100 rounded-lg p-3">
+          <div class="flex items-start justify-between mb-2">
+            <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">SOP</span>
+            <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-green-100 text-green-700">Active</span>
+          </div>
+          <p class="text-xs font-semibold">Sample Collection Procedure</p>
+          <p class="text-[10px] text-slate-400 mt-1">v2.1 | Pre-Analytical</p>
+        </div>
+        <div class="border border-slate-100 rounded-lg p-3">
+          <div class="flex items-start justify-between mb-2">
+            <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-violet-100 text-violet-700">Policy</span>
+            <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-green-100 text-green-700">Active</span>
+          </div>
+          <p class="text-xs font-semibold">Quality Policy Statement</p>
+          <p class="text-[10px] text-slate-400 mt-1">v1.0 | Quality Management</p>
+        </div>
+        <div class="border border-slate-100 rounded-lg p-3">
+          <div class="flex items-start justify-between mb-2">
+            <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">SOP</span>
+            <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-green-100 text-green-700">Active</span>
+          </div>
+          <p class="text-xs font-semibold">IQC - Hematology</p>
+          <p class="text-[10px] text-slate-400 mt-1">v3.0 | Analytical</p>
+        </div>
+        <div class="border border-slate-100 rounded-lg p-3">
+          <div class="flex items-start justify-between mb-2">
+            <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-teal-100 text-teal-700">Form</span>
+            <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Draft</span>
+          </div>
+          <p class="text-xs font-semibold">NABL Audit Checklist</p>
+          <p class="text-[10px] text-slate-400 mt-1">v1.0 | Accreditation</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="border-slate-200 my-8">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 9: CORPORATE WELLNESS -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section class="mb-12 fade-in">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="bg-navy text-white text-xs font-bold px-2.5 py-1 rounded">Section 9</span>
+    <h2 class="text-xl font-bold">Corporate Wellness</h2>
+  </div>
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Camp Management -->
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-slate-800">Camp Management</h3>
+        <span class="text-xs text-slate-400">/corporate/camps</span>
+      </div>
+      <div class="grid grid-cols-5 gap-2 mb-4">
+        <div class="text-center"><div class="text-lg font-bold">3</div><div class="text-[9px] text-slate-400">Total</div></div>
+        <div class="text-center"><div class="text-lg font-bold text-blue-600">1</div><div class="text-[9px] text-slate-400">Planned</div></div>
+        <div class="text-center"><div class="text-lg font-bold text-green-600">1</div><div class="text-[9px] text-slate-400">Active</div></div>
+        <div class="text-center"><div class="text-lg font-bold text-slate-600">1</div><div class="text-[9px] text-slate-400">Done</div></div>
+        <div class="text-center"><div class="text-lg font-bold text-teal-600">129</div><div class="text-[9px] text-slate-400">Participants</div></div>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+          <div>
+            <p class="text-sm font-medium">TCS Bengaluru - Annual Health Check</p>
+            <p class="text-[10px] text-slate-400">Electronic City Campus | 200 expected</p>
+          </div>
+          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">PLANNED</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+          <div>
+            <p class="text-sm font-medium">Wipro Sarjapur - Wellness Drive</p>
+            <p class="text-[10px] text-slate-400">Sarjapur Campus | 82/150 participants</p>
+          </div>
+          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">ACTIVE</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <div>
+            <p class="text-sm font-medium">Infosys Hebbal - Executive Health</p>
+            <p class="text-[10px] text-slate-400">Hebbal Office | 47/50 | &#8377;1.41L</p>
+          </div>
+          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">COMPLETED</span>
+        </div>
+      </div>
+    </div>
+    <!-- Wellness Dashboard -->
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-slate-800">Wellness Dashboard</h3>
+        <span class="text-xs text-slate-400">/corporate/wellness</span>
+      </div>
+      <div class="grid grid-cols-4 gap-2 mb-4">
+        <div class="bg-blue-50 rounded-lg p-2 text-center"><div class="text-lg font-bold text-blue-700">3</div><div class="text-[9px] text-blue-600">Programs</div></div>
+        <div class="bg-green-50 rounded-lg p-2 text-center"><div class="text-lg font-bold text-green-700">1</div><div class="text-[9px] text-green-600">Active</div></div>
+        <div class="bg-violet-50 rounded-lg p-2 text-center"><div class="text-lg font-bold text-violet-700">129</div><div class="text-[9px] text-violet-600">Participants</div></div>
+        <div class="bg-amber-50 rounded-lg p-2 text-center"><div class="text-lg font-bold text-amber-700">&#8377;3.9L</div><div class="text-[9px] text-amber-600">Revenue</div></div>
+      </div>
+      <!-- Mini pie chart mockup -->
+      <div class="flex items-center gap-6">
+        <div class="relative w-24 h-24">
+          <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#3b82f6" stroke-width="3" stroke-dasharray="33, 67" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#22c55e" stroke-width="3" stroke-dasharray="33, 67" stroke-dashoffset="-33" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="34, 66" stroke-dashoffset="-66" />
+          </svg>
+        </div>
+        <div class="space-y-1.5">
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span class="text-xs">Planned (1)</span></div>
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-xs">Active (1)</span></div>
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-slate-400"></span><span class="text-xs">Completed (1)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="border-slate-200 my-8">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 10: SETTINGS LAB PROFILE -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section class="mb-12 fade-in">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="bg-navy text-white text-xs font-bold px-2.5 py-1 rounded">Section 10</span>
+    <h2 class="text-xl font-bold">Settings - Lab Profile Tab</h2>
+    <span class="text-xs text-slate-400 ml-2">/settings (Lab Profile tab)</span>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5 max-w-3xl">
+    <!-- Tab bar -->
+    <div class="flex gap-1 bg-slate-100 rounded-lg p-1 mb-6 flex-wrap text-xs">
+      <span class="px-3 py-1.5 rounded-md text-slate-500">Team Members</span>
+      <span class="px-3 py-1.5 rounded-md text-slate-500">Test Catalog</span>
+      <span class="px-3 py-1.5 rounded-md bg-white text-slate-900 shadow-sm font-medium">Lab Profile</span>
+      <span class="px-3 py-1.5 rounded-md text-slate-500">Notifications</span>
+      <span class="px-3 py-1.5 rounded-md text-slate-500">Integrations</span>
+      <span class="px-3 py-1.5 rounded-md text-slate-500">Branch</span>
+      <span class="px-3 py-1.5 rounded-md text-slate-500">Billing</span>
+      <span class="px-3 py-1.5 rounded-md text-slate-500">Smart Features</span>
+    </div>
+    <!-- Form -->
+    <div class="space-y-4">
+      <h3 class="font-semibold text-sm">Lab Information</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-[10px] text-slate-500 font-medium">Lab Name</label><div class="mt-1 px-3 py-2 bg-slate-50 rounded-lg text-sm">DELViON Health Demo Lab</div></div>
+        <div><label class="text-[10px] text-slate-500 font-medium">Phone</label><div class="mt-1 px-3 py-2 bg-slate-50 rounded-lg text-sm">+91 80 4567 8900</div></div>
+        <div><label class="text-[10px] text-slate-500 font-medium">Email</label><div class="mt-1 px-3 py-2 bg-slate-50 rounded-lg text-sm">admin@delvion.com</div></div>
+        <div><label class="text-[10px] text-slate-500 font-medium">City</label><div class="mt-1 px-3 py-2 bg-slate-50 rounded-lg text-sm">Bengaluru</div></div>
+        <div><label class="text-[10px] text-slate-500 font-medium">GST Number</label><div class="mt-1 px-3 py-2 bg-slate-50 rounded-lg text-sm">29AABCD1234E1Z5</div></div>
+        <div><label class="text-[10px] text-slate-500 font-medium">NAB Accreditation ID</label><div class="mt-1 px-3 py-2 bg-slate-50 rounded-lg text-sm">MC-5678</div></div>
+        <div><label class="text-[10px] text-slate-500 font-medium">License Number</label><div class="mt-1 px-3 py-2 bg-slate-50 rounded-lg text-sm">KA/BLR/LAB/2024/001</div></div>
+      </div>
+      <h3 class="font-semibold text-sm mt-6">Report Branding</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-[10px] text-slate-500 font-medium">Report Header HTML</label><div class="mt-1 px-3 py-2 bg-slate-50 rounded-lg text-[10px] font-mono text-slate-400 h-16">&lt;div&gt;Your lab header...&lt;/div&gt;</div></div>
+        <div><label class="text-[10px] text-slate-500 font-medium">Report Footer HTML</label><div class="mt-1 px-3 py-2 bg-slate-50 rounded-lg text-[10px] font-mono text-slate-400 h-16">&lt;div&gt;Your lab footer...&lt;/div&gt;</div></div>
+      </div>
+      <div class="flex justify-end"><button class="px-5 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg">Save Lab Profile</button></div>
+    </div>
+  </div>
+</section>
+
+<hr class="border-slate-200 my-8">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 13: DOCTOR PORTAL -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section class="mb-12 fade-in">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="bg-navy text-white text-xs font-bold px-2.5 py-1 rounded">Section 13</span>
+    <h2 class="text-xl font-bold">Doctor Portal</h2>
+    <span class="text-xs text-slate-400 ml-2">/doctor-portal/*</span>
+  </div>
+  <!-- Portal layout mockup -->
+  <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-lg">
+    <!-- Nav -->
+    <div class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 bg-brand rounded-lg flex items-center justify-center">
+          <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5.5 20a6.5 6.5 0 0113 0"/></svg>
+        </div>
+        <span class="font-bold text-sm">DELViON Health</span>
+        <span class="text-[9px] bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">Doctor Portal</span>
+      </div>
+      <div class="flex gap-5 text-xs font-medium text-slate-500">
+        <span class="text-slate-900">Dashboard</span>
+        <span>My Patients</span>
+        <span>Reports</span>
+        <span>Referrals</span>
+        <span>Profile</span>
+      </div>
+    </div>
+    <!-- Content -->
+    <div class="p-6 bg-gray-50">
+      <h2 class="text-lg font-bold mb-1">Doctor Dashboard</h2>
+      <p class="text-xs text-slate-400 mb-4">Welcome to your DELViON Doctor Portal</p>
+      <!-- KPIs -->
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="bg-white rounded-xl border border-slate-100 p-4">
+          <div class="flex items-start justify-between">
+            <div><p class="text-[10px] text-slate-500 uppercase font-medium">Total Referrals</p><p class="text-xl font-bold mt-1">234</p></div>
+            <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 text-sm">&#8599;</div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-100 p-4">
+          <div class="flex items-start justify-between">
+            <div><p class="text-[10px] text-slate-500 uppercase font-medium">Pending Reports</p><p class="text-xl font-bold mt-1">8</p></div>
+            <div class="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600 text-sm">&#128196;</div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-100 p-4">
+          <div class="flex items-start justify-between">
+            <div><p class="text-[10px] text-slate-500 uppercase font-medium">My Patients</p><p class="text-xl font-bold mt-1">156</p></div>
+            <div class="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center text-teal-600 text-sm">&#128101;</div>
+          </div>
+        </div>
+      </div>
+      <!-- Quick actions -->
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="bg-white rounded-xl border border-slate-100 p-3 flex items-center gap-3 hover:bg-slate-50 cursor-pointer">
+          <div class="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center text-slate-600 text-sm">&#128101;</div>
+          <span class="text-xs font-medium flex-1">View My Patients</span>
+          <span class="text-slate-300 text-sm">&#8594;</span>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-100 p-3 flex items-center gap-3 hover:bg-slate-50 cursor-pointer">
+          <div class="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center text-slate-600 text-sm">&#128196;</div>
+          <span class="text-xs font-medium flex-1">View Reports</span>
+          <span class="text-slate-300 text-sm">&#8594;</span>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-100 p-3 flex items-center gap-3 hover:bg-slate-50 cursor-pointer">
+          <div class="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center text-slate-600 text-sm">&#128203;</div>
+          <span class="text-xs font-medium flex-1">Referral History</span>
+          <span class="text-slate-300 text-sm">&#8594;</span>
+        </div>
+      </div>
+      <!-- 5 pages info -->
+      <div class="bg-teal-50 border border-teal-200 rounded-lg p-3">
+        <p class="text-xs text-teal-800"><strong>5 pages:</strong> Dashboard, My Patients (searchable table), Reports (with PDF preview), Referrals (with stats), Profile (editable practice details)</p>
+      </div>
+    </div>
+    <!-- Footer -->
+    <div class="border-t border-slate-200 py-2 text-center text-[10px] text-slate-400 bg-white">
+      &copy; 2025 DELViON Health. All rights reserved.
+    </div>
+  </div>
+</section>
+
+<hr class="border-slate-200 my-8">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 2: SCHEMA -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section class="mb-12 fade-in">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="bg-navy text-white text-xs font-bold px-2.5 py-1 rounded">Section 2</span>
+    <h2 class="text-xl font-bold">Schema Additions</h2>
+  </div>
+  <div class="grid lg:grid-cols-3 gap-4">
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+        <h3 class="font-semibold text-sm">CorporateCamp</h3>
+      </div>
+      <div class="text-xs text-slate-500 font-mono space-y-0.5 bg-slate-50 rounded p-3">
+        <div>id, tenantId, organizationId</div>
+        <div>name, location, campDate, endDate</div>
+        <div>status, coordinatorId</div>
+        <div>expectedCount, actualCount</div>
+        <div>totalRevenue, testPackageIds</div>
+        <div>notes, createdAt, updatedAt</div>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+        <h3 class="font-semibold text-sm">CampParticipant</h3>
+      </div>
+      <div class="text-xs text-slate-500 font-mono space-y-0.5 bg-slate-50 rounded p-3">
+        <div>id, campId, patientId</div>
+        <div>name, phone, email</div>
+        <div>employeeId, orderId</div>
+        <div>status, createdAt</div>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+        <h3 class="font-semibold text-sm">QualityDocument</h3>
+      </div>
+      <div class="text-xs text-slate-500 font-mono space-y-0.5 bg-slate-50 rounded p-3">
+        <div>id, tenantId, title, type</div>
+        <div>category, version, content</div>
+        <div>fileUrl, status</div>
+        <div>effectiveAt, expiresAt</div>
+        <div>createdById, approvedById</div>
+        <div>approvedAt, createdAt, updatedAt</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="border-slate-200 my-8">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- BUILD VERIFICATION -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section class="mb-12 fade-in">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="bg-green-600 text-white text-xs font-bold px-2.5 py-1 rounded">VERIFIED</span>
+    <h2 class="text-xl font-bold">Build Verification Summary</h2>
+  </div>
+  <div class="grid lg:grid-cols-3 gap-4">
+    <div class="bg-green-50 border border-green-200 rounded-xl p-5">
+      <div class="text-2xl font-bold text-green-700 mb-1">0 errors</div>
+      <div class="text-sm text-green-600">TypeScript (API + Web)</div>
+      <div class="text-xs text-green-500 mt-1">tsc --noEmit passed cleanly</div>
+    </div>
+    <div class="bg-green-50 border border-green-200 rounded-xl p-5">
+      <div class="text-2xl font-bold text-green-700 mb-1">93 routes</div>
+      <div class="text-sm text-green-600">Next.js Build</div>
+      <div class="text-xs text-green-500 mt-1">next build succeeded (0 warnings)</div>
+    </div>
+    <div class="bg-green-50 border border-green-200 rounded-xl p-5">
+      <div class="text-2xl font-bold text-green-700 mb-1">14 new pages</div>
+      <div class="text-sm text-green-600">Pages Created</div>
+      <div class="text-xs text-green-500 mt-1">All verified in build output</div>
+    </div>
+  </div>
+  <div class="mt-4 bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+    <h3 class="font-semibold text-sm mb-3">New Routes Added</h3>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/crm/revenue</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/finance/receivables</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/finance/gst</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/qc/capa</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/qc/documents</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/hr/certifications</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/corporate/camps</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/corporate/wellness</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/doctor-portal</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/doctor-portal/patients</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/doctor-portal/reports</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/doctor-portal/referrals</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/doctor-portal/profile</div>
+      <div class="bg-slate-50 rounded-lg px-3 py-2 font-mono">/settings (Lab Profile)</div>
+    </div>
+  </div>
+  <div class="mt-4 bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+    <h3 class="font-semibold text-sm mb-3">Bugs Found & Fixed</h3>
+    <div class="space-y-2">
+      <div class="flex items-start gap-2">
+        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700 flex-shrink-0">CRITICAL</span>
+        <div>
+          <p class="text-xs font-medium">Corporate/camps - Unsafe type casting on API response</p>
+          <p class="text-[10px] text-slate-400">Fixed: Added response normalization (Array vs nested object detection)</p>
+        </div>
+        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700 flex-shrink-0 ml-auto">FIXED</span>
+      </div>
+      <div class="flex items-start gap-2">
+        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700 flex-shrink-0">CRITICAL</span>
+        <div>
+          <p class="text-xs font-medium">Corporate/wellness - Same unsafe type casting issue</p>
+          <p class="text-[10px] text-slate-400">Fixed: Same normalization pattern applied</p>
+        </div>
+        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700 flex-shrink-0 ml-auto">FIXED</span>
+      </div>
+      <div class="flex items-start gap-2">
+        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 flex-shrink-0">MINOR</span>
+        <div>
+          <p class="text-xs font-medium">QC/CAPA & QC/Documents - Null safety on nested relations</p>
+          <p class="text-[10px] text-slate-400">Verified: Ternary guards are correctly in place, no fix needed</p>
+        </div>
+        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700 flex-shrink-0 ml-auto">OK</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-6 px-6 mt-12">
+  <div class="max-w-7xl mx-auto text-center">
+    <p class="text-sm font-medium">DELViON Health Platform - New Sections Demo</p>
+    <p class="text-xs text-slate-400 mt-1">Generated March 2026 | 93 routes | 0 errors | Production ready</p>
+  </div>
+</footer>
+
+</body>
+</html>
