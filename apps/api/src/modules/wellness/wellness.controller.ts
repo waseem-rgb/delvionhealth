@@ -28,6 +28,20 @@ import type { JwtPayload } from "@delvion/types";
 export class WellnessController {
   constructor(private readonly wellnessService: WellnessService) {}
 
+  @Public()
+  @Get("share/:token")
+  @ApiOperation({ summary: "View shared wellness dashboard (public)" })
+  async viewShared(@Param("token") token: string, @Res() res: Response) {
+    const dashboard = await this.wellnessService.getByShareToken(token);
+    if (!dashboard.htmlContent) {
+      res.status(404).send("<h2>Dashboard not yet generated</h2>");
+      return;
+    }
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.send(dashboard.htmlContent);
+  }
+
   @Get()
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.LAB_MANAGER)
   @ApiOperation({ summary: "List all wellness dashboards" })
@@ -85,12 +99,4 @@ export class WellnessController {
     return this.wellnessService.remove(id, tenantId);
   }
 
-  @Public()
-  @Get("share/:token")
-  @ApiOperation({ summary: "View shared wellness dashboard (public)" })
-  async viewShared(@Param("token") token: string, @Res() res: Response) {
-    const dashboard = await this.wellnessService.getByShareToken(token);
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.send(dashboard.htmlContent);
-  }
 }

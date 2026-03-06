@@ -93,7 +93,9 @@
       "Bash(git config user.name \"waseem-rgb\")",
       "Bash(git config user.email \"waseem@predlabs.in\")",
       "Bash(git status -u)",
-      "Bash(git add -A)"
+      "Bash(git add -A)",
+      "Bash(git remote add origin https://github.com/waseem-rgb/delvionhealth.git)",
+      "Bash(git push -u origin main)"
     ],
     "additionalDirectories": [
       "/Users/waseemafsar/Desktop/live_project/devlon/apps/web/src/app/(dashboard)/organisations",
