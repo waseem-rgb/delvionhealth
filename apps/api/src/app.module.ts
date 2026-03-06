@@ -45,6 +45,7 @@ import { TestNotesModule } from "./modules/test-notes/test-notes.module";
 import { SmartReportModule } from "./modules/smart-report/smart-report.module";
 import { VoiceAgentModule } from "./modules/voice-agent/voice-agent.module";
 import { WellnessModule } from "./modules/wellness/wellness.module";
+import { QualityModule } from "./modules/quality/quality.module";
 import { TenantMiddleware } from "./common/middleware/tenant.middleware";
 
 @Module({
@@ -109,6 +110,7 @@ import { TenantMiddleware } from "./common/middleware/tenant.middleware";
     SmartReportModule,
     VoiceAgentModule,
     WellnessModule,
+    QualityModule,
   ],
 })
 export class AppModule {

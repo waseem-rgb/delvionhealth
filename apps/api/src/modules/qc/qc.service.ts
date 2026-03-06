@@ -1,9 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
+import { AiService } from "../ai/ai.service";
 
 @Injectable()
 export class QcService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly aiService: AiService,
+  ) {}
 
   // Keep existing findAll for backward compat
   async findAll(tenantId: string): Promise<unknown[]> {
@@ -215,5 +219,268 @@ export class QcService {
     return this.prisma.criticalValueAck.create({
       data: { tenantId, testResultId: resultId, acknowledgedById: userId, notes },
     });
+  }
+
+  // ── Quality Audit Entries ──────────────────────────────────────────────
+
+  async logAuditEntry(tenantId: string, dto: { action: string; entityType?: string; entityId?: string; description?: string; metadata?: Record<string, unknown>; performedById?: string }) {
+    return this.prisma.qualityAuditEntry.create({
+      data: {
+        tenantId,
+        action: dto.action,
+        entityType: dto.entityType,
+        entityId: dto.entityId,
+        description: dto.description,
+        metadata: dto.metadata ? JSON.parse(JSON.stringify(dto.metadata)) : undefined,
+        performedById: dto.performedById,
+      },
+    });
+  }
+
+  async findAuditEntries(tenantId: string, query: { action?: string; entityType?: string; from?: string; to?: string; page?: number; limit?: number }) {
+    const { page = 1, limit = 30 } = query;
+    const skip = (page - 1) * limit;
+    const where: Record<string, unknown> = { tenantId };
+    if (query.action) where["action"] = query.action;
+    if (query.entityType) where["entityType"] = query.entityType;
+    if (query.from || query.to) {
+      where["performedAt"] = {};
+      if (query.from) (where["performedAt"] as Record<string, unknown>)["gte"] = new Date(query.from);
+      if (query.to) (where["performedAt"] as Record<string, unknown>)["lte"] = new Date(query.to);
+    }
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.qualityAuditEntry.findMany({ where, orderBy: { performedAt: "desc" }, skip, take: limit }),
+      this.prisma.qualityAuditEntry.count({ where }),
+    ]);
+    return { data, total, page, limit };
+  }
+
+  // ── Non-Conformances ──────────────────────────────────────────────────
+
+  async createNonConformance(tenantId: string, userId: string, dto: { title: string; description?: string; category?: string; severity?: string; source?: string; assignedToId?: string }) {
+    const count = await this.prisma.nonConformance.count({ where: { tenantId } });
+    const ncNumber = `NC-${String(count + 1).padStart(4, "0")}`;
+    const nc = await this.prisma.nonConformance.create({
+      data: {
+        tenantId,
+        ncNumber,
+        title: dto.title,
+        description: dto.description,
+        category: dto.category,
+        severity: dto.severity,
+        source: dto.source,
+        assignedToId: dto.assignedToId,
+        createdById: userId,
+      },
+    });
+    await this.logAuditEntry(tenantId, { action: "NC_CREATED", entityType: "NonConformance", entityId: nc.id, description: `Non-conformance ${ncNumber} created`, performedById: userId });
+    return nc;
+  }
+
+  async findNonConformances(tenantId: string, query: { status?: string; severity?: string; category?: string; page?: number; limit?: number }) {
+    const { page = 1, limit = 20 } = query;
+    const skip = (page - 1) * limit;
+    const where: Record<string, unknown> = { tenantId };
+    if (query.status) where["status"] = query.status;
+    if (query.severity) where["severity"] = query.severity;
+    if (query.category) where["category"] = query.category;
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.nonConformance.findMany({ where, orderBy: { createdAt: "desc" }, skip, take: limit }),
+      this.prisma.nonConformance.count({ where }),
+    ]);
+    return { data, total, page, limit };
+  }
+
+  async updateNonConformance(id: string, tenantId: string, userId: string, dto: { status?: string; rootCause?: string; resolution?: string; capaId?: string; resolvedAt?: string; closedAt?: string }) {
+    const data: Record<string, unknown> = {};
+    if (dto.status) data["status"] = dto.status;
+    if (dto.rootCause) data["rootCause"] = dto.rootCause;
+    if (dto.resolution) data["resolution"] = dto.resolution;
+    if (dto.capaId) data["capaId"] = dto.capaId;
+    if (dto.resolvedAt) data["resolvedAt"] = new Date(dto.resolvedAt);
+    if (dto.closedAt) data["closedAt"] = new Date(dto.closedAt);
+    const nc = await this.prisma.nonConformance.update({ where: { id }, data });
+    await this.logAuditEntry(tenantId, { action: "NC_UPDATED", entityType: "NonConformance", entityId: id, description: `Non-conformance updated: ${dto.status ?? "fields changed"}`, performedById: userId });
+    return nc;
+  }
+
+  // ── EQAS Rounds & Results ─────────────────────────────────────────────
+
+  async createEQASRound(tenantId: string, userId: string, dto: { programName: string; roundNumber: string; year: number; startDate?: string; endDate?: string; notes?: string }) {
+    return this.prisma.eQASRound.create({
+      data: {
+        tenantId,
+        programName: dto.programName,
+        roundNumber: dto.roundNumber,
+        year: dto.year,
+        startDate: dto.startDate ? new Date(dto.startDate) : undefined,
+        endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+        notes: dto.notes,
+        createdById: userId,
+      },
+    });
+  }
+
+  async findEQASRounds(tenantId: string, query: { year?: number; status?: string; page?: number; limit?: number }) {
+    const { page = 1, limit = 20 } = query;
+    const skip = (page - 1) * limit;
+    const where: Record<string, unknown> = { tenantId };
+    if (query.year) where["year"] = query.year;
+    if (query.status) where["status"] = query.status;
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.eQASRound.findMany({ where, orderBy: { createdAt: "desc" }, skip, take: limit, include: { results: true } }),
+      this.prisma.eQASRound.count({ where }),
+    ]);
+    return { data, total, page, limit };
+  }
+
+  async addEQASResults(roundId: string, results: { analyte: string; assignedValue?: number; reportedValue?: number; acceptableRange?: string; notes?: string }[]) {
+    const created = await this.prisma.eQASResult.createMany({
+      data: results.map((r) => {
+        const sdi = r.assignedValue && r.reportedValue ? (r.reportedValue - r.assignedValue) / (r.assignedValue * 0.1 || 1) : null;
+        const evaluation = sdi !== null ? (Math.abs(sdi) <= 2 ? "ACCEPTABLE" : Math.abs(sdi) <= 3 ? "NEEDS_REVIEW" : "UNACCEPTABLE") : null;
+        return {
+          roundId,
+          analyte: r.analyte,
+          assignedValue: r.assignedValue,
+          reportedValue: r.reportedValue,
+          sdi,
+          acceptableRange: r.acceptableRange,
+          evaluation,
+          notes: r.notes,
+        };
+      }),
+    });
+    // Compute overall score for the round
+    const allResults = await this.prisma.eQASResult.findMany({ where: { roundId } });
+    const acceptable = allResults.filter((r) => r.evaluation === "ACCEPTABLE").length;
+    const overallScore = allResults.length > 0 ? Math.round((acceptable / allResults.length) * 100) : 0;
+    await this.prisma.eQASRound.update({ where: { id: roundId }, data: { overallScore, status: "SUBMITTED" } });
+    return created;
+  }
+
+  // ── Instrument Maintenance Logs ───────────────────────────────────────
+
+  async createMaintenanceLog(tenantId: string, userId: string, dto: { instrumentId: string; type?: string; description?: string; performedAt?: string; nextDueAt?: string; notes?: string; status?: string }) {
+    return this.prisma.instrumentMaintenanceLog.create({
+      data: {
+        tenantId,
+        instrumentId: dto.instrumentId,
+        type: dto.type ?? "PREVENTIVE",
+        description: dto.description,
+        performedAt: dto.performedAt ? new Date(dto.performedAt) : new Date(),
+        nextDueAt: dto.nextDueAt ? new Date(dto.nextDueAt) : undefined,
+        notes: dto.notes,
+        status: dto.status ?? "COMPLETED",
+        performedById: userId,
+      },
+    });
+  }
+
+  async findMaintenanceLogs(tenantId: string, query: { instrumentId?: string; type?: string; status?: string; page?: number; limit?: number }) {
+    const { page = 1, limit = 20 } = query;
+    const skip = (page - 1) * limit;
+    const where: Record<string, unknown> = { tenantId };
+    if (query.instrumentId) where["instrumentId"] = query.instrumentId;
+    if (query.type) where["type"] = query.type;
+    if (query.status) where["status"] = query.status;
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.instrumentMaintenanceLog.findMany({ where, orderBy: { performedAt: "desc" }, skip, take: limit, include: { instrument: { select: { name: true, serialNumber: true } } } }),
+      this.prisma.instrumentMaintenanceLog.count({ where }),
+    ]);
+    return { data, total, page, limit };
+  }
+
+  // ── Quality Documents (extended) ──────────────────────────────────────
+
+  async createDocument(tenantId: string, userId: string, dto: { title: string; type?: string; category?: string; version?: string; content?: string; effectiveAt?: string; expiresAt?: string }) {
+    return this.prisma.qualityDocument.create({
+      data: {
+        tenantId,
+        title: dto.title,
+        type: dto.type ?? "SOP",
+        category: dto.category,
+        version: dto.version ?? "1.0",
+        content: dto.content,
+        effectiveAt: dto.effectiveAt ? new Date(dto.effectiveAt) : undefined,
+        expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
+        createdById: userId,
+      },
+    });
+  }
+
+  async findDocuments(tenantId: string, query: { type?: string; status?: string; page?: number; limit?: number }) {
+    const { page = 1, limit = 20 } = query;
+    const skip = (page - 1) * limit;
+    const where: Record<string, unknown> = { tenantId };
+    if (query.type) where["type"] = query.type;
+    if (query.status) where["status"] = query.status;
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.qualityDocument.findMany({ where, orderBy: { createdAt: "desc" }, skip, take: limit }),
+      this.prisma.qualityDocument.count({ where }),
+    ]);
+    return { data, total, page, limit };
+  }
+
+  async approveDocument(id: string, tenantId: string, userId: string) {
+    const doc = await this.prisma.qualityDocument.update({
+      where: { id },
+      data: { status: "ACTIVE", approvedById: userId, approvedAt: new Date() },
+    });
+    await this.logAuditEntry(tenantId, { action: "DOCUMENT_APPROVED", entityType: "QualityDocument", entityId: id, description: `Document "${doc.title}" approved`, performedById: userId });
+    return doc;
+  }
+
+  // ── QC Dashboard Stats ────────────────────────────────────────────────
+
+  async getDashboardStats(tenantId: string) {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const [totalRuns, failedRuns, warningRuns, openCapas, openNCs, activeDocuments, overdueMaintenanceLogs] = await this.prisma.$transaction([
+      this.prisma.qCEntry.count({ where: { tenantId, runAt: { gte: thirtyDaysAgo } } }),
+      this.prisma.qCEntry.count({ where: { tenantId, runAt: { gte: thirtyDaysAgo }, result: "FAIL" as never } }),
+      this.prisma.qCEntry.count({ where: { tenantId, runAt: { gte: thirtyDaysAgo }, result: "WARNING" as never } }),
+      this.prisma.cAPA.count({ where: { tenantId, status: { in: ["OPEN", "IN_PROGRESS"] as never[] } } }),
+      this.prisma.nonConformance.count({ where: { tenantId, status: { in: ["OPEN", "UNDER_INVESTIGATION"] } } }),
+      this.prisma.qualityDocument.count({ where: { tenantId, status: "ACTIVE" } }),
+      this.prisma.instrumentMaintenanceLog.count({ where: { tenantId, status: "OVERDUE" } }),
+    ]);
+
+    const passRate = totalRuns > 0 ? Math.round(((totalRuns - failedRuns) / totalRuns) * 100) : 100;
+
+    return {
+      totalRuns,
+      failedRuns,
+      warningRuns,
+      passRate,
+      openCapas,
+      openNCs,
+      activeDocuments,
+      overdueMaintenanceLogs,
+    };
+  }
+
+  // ── AI CAPA Assist ────────────────────────────────────────────────────
+
+  async aiCapaAssist(tenantId: string, capaDescription: string, rootCause?: string) {
+    const systemPrompt = `You are a quality management expert for a diagnostic laboratory (NABL/CAP accredited).
+Given a CAPA (Corrective and Preventive Action) description and optional root cause, provide:
+1. **Root Cause Analysis**: If not provided, suggest probable root causes using 5-Why or Fishbone method
+2. **Corrective Actions**: Immediate steps to fix the issue (2-3 bullet points)
+3. **Preventive Actions**: Long-term steps to prevent recurrence (2-3 bullet points)
+4. **Risk Assessment**: Brief assessment of patient safety risk (LOW/MEDIUM/HIGH)
+5. **Timeline**: Suggested timeline for implementation
+
+Be specific to diagnostic laboratory operations. Keep response under 500 words. Use markdown formatting.`;
+
+    const userMessage = `CAPA Description: ${capaDescription}${rootCause ? `\nRoot Cause: ${rootCause}` : "\nRoot cause not yet identified — please suggest."}`;
+
+    try {
+      const response = await this.aiService.complete(systemPrompt, userMessage, 1200);
+      return { suggestion: response.text, generatedAt: new Date().toISOString() };
+    } catch {
+      return { suggestion: "AI service is temporarily unavailable. Please try again later.", generatedAt: new Date().toISOString() };
+    }
   }
 }

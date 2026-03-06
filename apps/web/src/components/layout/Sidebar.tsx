@@ -162,10 +162,14 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Quality & Compliance",
     roles: [Role.LAB_MANAGER, Role.PATHOLOGIST, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
     items: [
-      { label: "QC Dashboard", href: "/qc", icon: ShieldCheck },
-      { label: "CAPA", href: "/qc/capa", icon: ClipboardCheck },
-      { label: "SOPs & Documents", href: "/qc/documents", icon: BookOpenCheck },
-      { label: "Audit Logs", href: "/settings/audit-logs", icon: ScrollText },
+      { label: "QC Dashboard", href: "/quality", icon: ShieldCheck },
+      { label: "CAPA", href: "/quality/capa", icon: ClipboardCheck },
+      { label: "SOPs & Documents", href: "/quality/sops", icon: BookOpen },
+      { label: "Audit Logs", href: "/quality/audit-logs", icon: ScrollText },
+      { label: "Compliance Dashboard", href: "/quality/compliance", icon: Scale },
+      { label: "Document Vault", href: "/quality/vault", icon: Shield },
+      { label: "Quality Forms", href: "/quality/forms", icon: ClipboardList },
+      { label: "IQC & EQAS", href: "/quality/iqc", icon: FlaskConical },
     ],
   },
   {

@@ -95,12 +95,39 @@
       "Bash(git status -u)",
       "Bash(git add -A)",
       "Bash(git remote add origin https://github.com/waseem-rgb/delvionhealth.git)",
-      "Bash(git push -u origin main)"
+      "Bash(git push -u origin main)",
+      "Bash(lsof -i:5432 -P -n)",
+      "Bash(lsof -i:3000 -P -n)",
+      "Bash(find \"apps/web/src/app/\\(dashboard\\)/quality\" -name \"*.tsx\")",
+      "Bash(find \"apps/web/src/app/\\(dashboard\\)/qc\" -name \"*.tsx\")",
+      "Bash(ls /Users/waseemafsar/Desktop/live_project/devlon/apps/web/src/app/\\\\\\(dashboard\\\\\\)/qc/audit-logs/)",
+      "Bash(docker compose -f docker/docker-compose.yml up -d postgres)",
+      "Bash(docker compose -f docker/docker-compose.yml up -d redis)",
+      "Bash(pkill -f \"node dist/apps/api/src/main\")",
+      "Bash(docker compose -f docker/docker-compose.yml up -d postgres redis)",
+      "Bash(__NEW_LINE_69a1e154ddc26596__ echo \"\")",
+      "Bash(curl -s http://localhost:3001/api/v1/quality/capas/summary -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(__NEW_LINE_2ca2e996cd225ec1__ echo \"\")",
+      "Bash(curl -s http://localhost:3001/api/v1/quality/documents/vault-status -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(__NEW_LINE_e2191983525767e2__ echo \"\")",
+      "Bash(curl -s \"http://localhost:3001/api/v1/quality/audit-log?limit=5\" -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(__NEW_LINE_c29abe8aaeb40724__ echo \"\")",
+      "Bash(curl -s \"http://localhost:3001/api/v1/quality/qc-runs?limit=5\" -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(__NEW_LINE_f2466d5504d65908__ echo \"\")",
+      "Bash(curl -s \"http://localhost:3001/api/v1/quality/capas?limit=5\" -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(__NEW_LINE_a0c741185b3e5f43__ echo \"\")",
+      "Bash(curl -s \"http://localhost:3001/api/v1/quality/documents?limit=5\" -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(__NEW_LINE_e919b1d331cc3d9f__ echo \"\")",
+      "Bash(curl -s \"http://localhost:3001/api/v1/quality/qc-runs/levey-jennings?department=Biochemistry&parameter=Glucose&level=L1\" -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(curl -s http://localhost:3001/api/v1/quality/forms/seed -X POST -H \"Content-Type: application/json\")",
+      "Bash(curl -s http://localhost:3001/api/v1/quality/forms/seed -X POST -H \"Content-Type: application/json\" -w \"\\\\nHTTP_CODE:%{http_code}\")",
+      "Bash(npm run dev --filter=api)"
     ],
     "additionalDirectories": [
       "/Users/waseemafsar/Desktop/live_project/devlon/apps/web/src/app/(dashboard)/organisations",
       "/Users/waseemafsar/Desktop/live_project/devlon",
-      "/Users/waseemafsar/Desktop/live_project/devlon/apps/web/src/app/(dashboard)/settings/test-catalog/[id]"
+      "/Users/waseemafsar/Desktop/live_project/devlon/apps/web/src/app/(dashboard)/settings/test-catalog/[id]",
+      "/Users/waseemafsar/Desktop/live_project/devlon/apps/web/src/app/(dashboard)/qc/audit-logs"
     ]
   }
 }

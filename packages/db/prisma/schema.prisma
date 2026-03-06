@@ -551,6 +551,13 @@ model Tenant {
   corporateCamps              CorporateCamp[]
   wellnessDashboards          WellnessDashboard[]
   qualityDocuments            QualityDocument[]
+  qualityAuditEntries         QualityAuditEntry[]
+  nonConformances             NonConformance[]
+  instrumentMaintenanceLogs   InstrumentMaintenanceLog[]
+  eqasRounds                  EQASRound[]
+  complianceCerts             ComplianceCert[]
+  qualityForms                QualityForm[]
+  qualityCapas                QualityCapa[]
   reportParameters            ReportParameter[]
   reportSettings              ReportSetting[]
 
@@ -1085,6 +1092,15 @@ model QCRun {
   westgardFlag String?
   runById      String
   runAt        DateTime @default(now())
+  department   String?
+  parameter    String?
+  lotNo        String?
+  expiryDate   DateTime?
+  observedValue Decimal? @db.Decimal(10, 4)
+  zScore       Decimal? @db.Decimal(6, 3)
+  isAccepted   Boolean  @default(true)
+  capaId       String?
+  updatedAt    DateTime? @updatedAt
 
   tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   branch     TenantBranch @relation(fields: [branchId], references: [id])
@@ -1094,6 +1110,7 @@ model QCRun {
 
   @@index([tenantId])
   @@index([tenantId, instrumentId])
+  @@index([tenantId, department, runAt])
   @@index([runAt])
   @@map("qc_runs")
 }
@@ -1131,8 +1148,9 @@ model Instrument {
   tenant      Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   branch      TenantBranch          @relation(fields: [branchId], references: [id])
   qcRuns      QCRun[]
-  connections InstrumentConnection[]
-  testResults TestResult[]
+  connections     InstrumentConnection[]
+  testResults     TestResult[]
+  maintenanceLogs InstrumentMaintenanceLog[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -2928,11 +2946,21 @@ model QualityDocument {
   createdById String?
   approvedById String?
   approvedAt  DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  docNumber       String?
+  nextReviewDate  DateTime?
+  issuedDate      DateTime?
+  expiryDate      DateTime?
+  reminderSent30  Boolean   @default(false)
+  reminderSent60  Boolean   @default(false)
+  reminderSent90  Boolean   @default(false)
+  certType        String?
+  issuerName      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  @@unique([tenantId, docNumber])
   @@index([tenantId])
   @@index([type])
   @@map("quality_documents")
@@ -3216,4 +3244,258 @@ model WellnessDashboard {
   @@index([tenantId])
   @@index([shareToken])
   @@map("wellness_dashboards")
+}
+
+// ─────────────────────────────────────────────
+// QUALITY & COMPLIANCE EXTENSIONS
+// ─────────────────────────────────────────────
+
+model QualityAuditEntry {
+  id          String   @id @default(cuid())
+  tenantId    String
+  action      String   // QC_RUN_RECORDED, CAPA_CREATED, CAPA_CLOSED, DOCUMENT_APPROVED, etc.
+  entityType  String?  // QCEntry, CAPA, QualityDocument, etc.
+  entityId    String?
+  description String?  @db.Text
+  metadata    Json?
+  performedById String?
+  performedAt DateTime @default(now())
+  entity      String?
+  actorId     String?
+  actorName   String?
+  details     Json?
+  createdAt   DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, action])
+  @@index([performedAt])
+  @@map("quality_audit_entries")
+}
+
+model NonConformance {
+  id              String   @id @default(cuid())
+  tenantId        String
+  ncNumber        String?
+  title           String
+  description     String?  @db.Text
+  category        String?  // SAMPLE, EQUIPMENT, PROCESS, DOCUMENTATION, OTHER
+  severity        String?  @default("MINOR") // MINOR, MAJOR, CRITICAL
+  source          String?  // INTERNAL_AUDIT, EXTERNAL_AUDIT, QC_FAILURE, COMPLAINT, OBSERVATION
+  status          String   @default("OPEN") // OPEN, UNDER_INVESTIGATION, RESOLVED, CLOSED
+  rootCause       String?  @db.Text
+  resolution      String?  @db.Text
+  capaId          String?
+  assignedToId    String?
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+  createdById     String?
+  type            String?  // OBSERVATION, MINOR_NC, MAJOR_NC
+  detectedBy      String?
+  detectedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("non_conformances")
+}
+
+// ─────────────────────────────────────────────
+// QUALITY CAPA (Corrective & Preventive Actions)
+// ─────────────────────────────────────────────
+
+model QualityCapa {
+  id              String    @id @default(cuid())
+  tenantId        String
+  capaNumber      String?
+  title           String
+  description     String?   @db.Text
+  type            String?   @default("CORRECTIVE") // CORRECTIVE, PREVENTIVE
+  source          String?   // QC_FAILURE, NC, AUDIT, EQAS, COMPLAINT, OTHER
+  sourceId        String?   // Reference to originating entity
+  priority        String?   @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  status          String    @default("OPEN") // OPEN, IN_PROGRESS, COMPLETED, VERIFIED, CLOSED
+  rootCause       String?   @db.Text
+  proposedAction  String?   @db.Text
+  actualAction    String?   @db.Text
+  dueDate         DateTime?
+  completedAt     DateTime?
+  verifiedAt      DateTime?
+  verifiedById    String?
+  assignedToId    String?
+  createdById     String?
+  department      String?
+  effectivenessCheck String? @db.Text
+  effectivenessDate  DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, capaNumber])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("quality_capas")
+}
+
+model InstrumentMaintenanceLog {
+  id              String   @id @default(cuid())
+  tenantId        String
+  instrumentId    String
+  type            String   @default("PREVENTIVE") // PREVENTIVE, CORRECTIVE, CALIBRATION
+  description     String?  @db.Text
+  performedAt     DateTime @default(now())
+  nextDueAt       DateTime?
+  performedById   String?
+  notes           String?  @db.Text
+  status          String   @default("COMPLETED") // SCHEDULED, IN_PROGRESS, COMPLETED, OVERDUE
+  instrumentName  String?
+  maintenanceType String?
+  checklistData   Json?
+  completedById   String?
+  completedAt     DateTime?
+  remarks         String?  @db.Text
+  createdAt       DateTime @default(now())
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  instrument Instrument @relation(fields: [instrumentId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, instrumentId])
+  @@map("instrument_maintenance_logs")
+}
+
+model EQASRound {
+  id           String   @id @default(cuid())
+  tenantId     String
+  programName  String   // e.g. "RIQAS", "CAP", "EQAS-Bio-Rad"
+  roundNumber  String
+  year         Int
+  startDate    DateTime?
+  endDate      DateTime?
+  status       String   @default("PENDING") // PENDING, IN_PROGRESS, SUBMITTED, EVALUATED
+  overallScore Float?
+  notes        String?  @db.Text
+  createdById  String?
+  scheme       String?
+  department   String?
+  submittedAt  DateTime?
+  dueDate      DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant  Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  results EQASResult[]
+
+  @@index([tenantId])
+  @@index([tenantId, year])
+  @@map("eqas_rounds")
+}
+
+model EQASResult {
+  id              String  @id @default(cuid())
+  roundId         String
+  analyte         String
+  assignedValue   Float?
+  reportedValue   Float?
+  sdi             Float?  // Standard Deviation Index
+  acceptableRange String?
+  evaluation      String? // ACCEPTABLE, UNACCEPTABLE, NEEDS_REVIEW
+  notes           String?
+  parameter       String?
+  yourValue       Decimal? @db.Decimal(10, 4)
+  peerMean        Decimal? @db.Decimal(10, 4)
+  peerSD          Decimal? @db.Decimal(10, 4)
+  sdiScore        Decimal? @db.Decimal(6, 3)
+  performanceScore String?
+  capaRequired    Boolean  @default(false)
+
+  round EQASRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  @@index([roundId])
+  @@map("eqas_results")
+}
+
+// ─────────────────────────────────────────────
+// DOCUMENT VAULT & COMPLIANCE CERTIFICATES
+// ─────────────────────────────────────────────
+
+model ComplianceCert {
+  id              String    @id @default(cuid())
+  tenantId        String
+  name            String    // e.g. "NABL Accreditation", "Trade License"
+  category        String?   @default("REGULATORY") // REGULATORY, LICENSE, AGREEMENT, INSURANCE, OTHER
+  priority        String?   @default("HIGH") // CRITICAL, HIGH, MEDIUM, LOW
+  certNumber      String?
+  issuingAuthority String?
+  issueDate       DateTime?
+  expiryDate      DateTime?
+  renewalCycle    String?   @default("Annual") // Lifetime, Annual, 2 Years, 3 Years, 5 Years
+  status          String    @default("VALID") // VALID, EXPIRING_SOON, EXPIRED, PENDING_RENEWAL
+  fileUrl         String?
+  fileSize        Int?
+  notes           String?   @db.Text
+  alertSentAt     DateTime? // Track when last expiry alert was sent
+  uploadedById    String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([expiryDate])
+  @@map("compliance_certs")
+}
+
+model QualityForm {
+  id          String    @id @default(cuid())
+  tenantId    String
+  formCode    String    // e.g. "MGT-01", "TECH-23"
+  name        String
+  category    String?   // Audit, NCR, Training, Maintenance, IQC, EQUAS, Safety, etc.
+  type        String    @default("TECHNICAL") // MANAGEMENT, TECHNICAL
+  frequency   String?   // Daily, Weekly, Monthly, Annual, Per Event, Per Batch
+  automation  String?   @default("High") // Auto, Auto/IoT, Auto-compile, Auto-remind, High, Medium, Low
+  description String?   @db.Text
+  fields      Json?     // JSON schema for form fields
+  isActive    Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  tenant  Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  entries QualityFormEntry[]
+
+  @@unique([tenantId, formCode])
+  @@index([tenantId])
+  @@index([tenantId, type])
+  @@map("quality_forms")
+}
+
+model QualityFormEntry {
+  id          String   @id @default(cuid())
+  formId      String
+  tenantId    String
+  data        Json     // The actual form data as JSON
+  status      String   @default("DRAFT") // DRAFT, SUBMITTED, REVIEWED, APPROVED
+  submittedAt DateTime?
+  reviewedById String?
+  reviewedAt  DateTime?
+  notes       String?  @db.Text
+  enteredById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  form   QualityForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@index([formId])
+  @@index([tenantId])
+  @@index([tenantId, formId, createdAt])
+  @@map("quality_form_entries")
 }
