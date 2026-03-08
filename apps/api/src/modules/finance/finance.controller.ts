@@ -1,6 +1,9 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, UseInterceptors, UploadedFile } from "@nestjs/common";
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from "@nestjs/swagger";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { FinanceService } from "./finance.service";
+import { AccountingService } from "./accounting.service";
+import { NarrationEngineService } from "./narration-engine.service";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { TenantGuard } from "../../common/guards/tenant.guard";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
@@ -11,7 +14,11 @@ import type { JwtPayload } from "@delvion/types";
 @Controller("finance")
 @UseGuards(JwtAuthGuard, TenantGuard)
 export class FinanceController {
-  constructor(private readonly financeService: FinanceService) {}
+  constructor(
+    private readonly financeService: FinanceService,
+    private readonly accountingService: AccountingService,
+    private readonly narrationEngine: NarrationEngineService,
+  ) {}
 
   // GL Accounts
   @Get("accounts")
@@ -158,5 +165,139 @@ export class FinanceController {
   @ApiOperation({ summary: "List GL accounts (alias)" })
   findAll(@CurrentUser() user: JwtPayload) {
     return this.financeService.findAll(user.tenantId);
+  }
+
+  // ── Accounting — Statement Upload ─────────────────────────────────────
+
+  @Post("statements/upload")
+  @ApiOperation({ summary: "Upload bank statement (CSV/Excel)" })
+  @UseInterceptors(FileInterceptor("file", { limits: { fileSize: 10 * 1024 * 1024 } }))
+  uploadStatement(
+    @CurrentUser() user: JwtPayload,
+    @UploadedFile() file: Express.Multer.File,
+    @Body("bankAccountId") bankAccountId: string,
+  ) {
+    return this.accountingService.uploadStatement(user.tenantId, bankAccountId, file, user.sub);
+  }
+
+  @Get("statements")
+  @ApiOperation({ summary: "List uploaded statements" })
+  getUploadedStatements(@CurrentUser() user: JwtPayload) {
+    return this.accountingService.getUploadedStatements(user.tenantId);
+  }
+
+  // ── Accounting — Transactions ─────────────────────────────────────────
+
+  @Get("transactions")
+  @ApiOperation({ summary: "List bank transactions with filters" })
+  @ApiQuery({ name: "bankAccountId", required: false })
+  @ApiQuery({ name: "category", required: false })
+  @ApiQuery({ name: "matchType", required: false })
+  @ApiQuery({ name: "type", required: false })
+  @ApiQuery({ name: "month", required: false })
+  @ApiQuery({ name: "search", required: false })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  getTransactions(
+    @CurrentUser() user: JwtPayload,
+    @Query("bankAccountId") bankAccountId?: string,
+    @Query("category") category?: string,
+    @Query("matchType") matchType?: string,
+    @Query("type") type?: string,
+    @Query("month") month?: string,
+    @Query("search") search?: string,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
+  ) {
+    return this.accountingService.getTransactions(user.tenantId, {
+      bankAccountId, category, matchType, type, month, search,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+  }
+
+  @Patch("transactions/:id/categorize")
+  @ApiOperation({ summary: "Categorize a transaction (resolve suspense)" })
+  categorizeTransaction(
+    @CurrentUser() user: JwtPayload,
+    @Param("id") id: string,
+    @Body() dto: { category: string; subCategory?: string; description?: string; saveAsRule?: boolean },
+  ) {
+    return this.accountingService.categorizeTransaction(user.tenantId, id, dto);
+  }
+
+  @Patch("transactions/:id/mark-duplicate")
+  @ApiOperation({ summary: "Mark transaction as duplicate" })
+  markDuplicate(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.accountingService.markDuplicate(user.tenantId, id);
+  }
+
+  @Post("statements/:id/post")
+  @ApiOperation({ summary: "Post all transactions from a statement" })
+  postTransactions(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.accountingService.postTransactions(user.tenantId, id);
+  }
+
+  // ── Accounting — Cash Book ────────────────────────────────────────────
+
+  @Get("cashbook")
+  @ApiOperation({ summary: "Get cash book entries" })
+  @ApiQuery({ name: "month", required: false })
+  getCashBook(@CurrentUser() user: JwtPayload, @Query("month") month?: string) {
+    return this.accountingService.getCashBookEntries(user.tenantId, month);
+  }
+
+  @Post("cashbook")
+  @ApiOperation({ summary: "Add cash book entry" })
+  addCashBookEntry(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: { entryDate: string; type: string; category?: string; description: string; amount: number; paidTo?: string; receivedFrom?: string; orderId?: string },
+  ) {
+    return this.accountingService.addCashBookEntry(user.tenantId, dto, user.sub);
+  }
+
+  @Delete("cashbook/:id")
+  @ApiOperation({ summary: "Delete cash book entry" })
+  deleteCashBookEntry(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.accountingService.deleteCashBookEntry(user.tenantId, id);
+  }
+
+  // ── Accounting — Narration Rules ──────────────────────────────────────
+
+  @Get("narration-rules")
+  @ApiOperation({ summary: "List narration rules" })
+  getNarrationRules(@CurrentUser() user: JwtPayload) {
+    return this.narrationEngine.getRules(user.tenantId);
+  }
+
+  @Post("narration-rules")
+  @ApiOperation({ summary: "Add narration rule" })
+  addNarrationRule(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: { pattern: string; matchType?: string; category: string; subCategory?: string; description?: string },
+  ) {
+    return this.narrationEngine.addRule(user.tenantId, dto);
+  }
+
+  @Delete("narration-rules/:id")
+  @ApiOperation({ summary: "Delete narration rule" })
+  deleteNarrationRule(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.narrationEngine.deleteRule(user.tenantId, id);
+  }
+
+  // ── Accounting — Combined Ledger ──────────────────────────────────────
+
+  @Get("ledger")
+  @ApiOperation({ summary: "Combined ledger (bank + cash)" })
+  @ApiQuery({ name: "month", required: false })
+  @ApiQuery({ name: "category", required: false })
+  @ApiQuery({ name: "source", required: false })
+  getLedger(
+    @CurrentUser() user: JwtPayload,
+    @Query("month") month?: string,
+    @Query("category") category?: string,
+    @Query("source") source?: string,
+  ) {
+    return this.accountingService.getLedger(user.tenantId, { month, category, source });
   }
 }

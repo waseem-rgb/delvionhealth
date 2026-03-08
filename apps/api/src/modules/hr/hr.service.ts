@@ -79,7 +79,12 @@ export class HrService {
   }
 
   async getWeekGrid(tenantId: string, weekStart: string, branchId?: string) {
-    const start = new Date(weekStart);
+    const start = weekStart ? new Date(weekStart) : new Date();
+    if (isNaN(start.getTime())) { start.setTime(Date.now()); }
+    // Normalize to Monday of the week
+    const dayOfWeek = start.getDay();
+    start.setDate(start.getDate() - ((dayOfWeek + 6) % 7));
+    start.setHours(0, 0, 0, 0);
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
 

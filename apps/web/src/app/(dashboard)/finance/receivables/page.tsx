@@ -98,7 +98,33 @@ export default function ReceivablesPage() {
     queryKey: ["billing", "receivables"],
     queryFn: async () => {
       const res = await api.get("/billing/receivables");
-      return res.data?.data ?? res.data;
+      const raw = res.data?.data ?? res.data ?? {};
+      const rb = raw.buckets ?? {};
+
+      // Backend returns buckets as object { current, days_1_30, ... }
+      // Transform to ARBucket[] array expected by this page
+      let buckets: ARBucket[];
+      if (Array.isArray(rb)) {
+        buckets = rb;
+      } else {
+        buckets = [
+          { range: "0-30", amount: (rb.current?.total ?? 0) + (rb.days_1_30?.total ?? 0), count: (rb.current?.count ?? 0) + (rb.days_1_30?.count ?? 0) },
+          { range: "31-60", amount: rb.days_31_60?.total ?? 0, count: rb.days_31_60?.count ?? 0 },
+          { range: "61-90", amount: rb.days_61_90?.total ?? 0, count: rb.days_61_90?.count ?? 0 },
+          { range: "90+", amount: rb.days_90_plus?.total ?? 0, count: rb.days_90_plus?.count ?? 0 },
+        ];
+      }
+
+      const totalOutstanding = raw.totalOutstanding ?? buckets.reduce((s, b) => s + b.amount, 0);
+
+      const topOverdue: OverdueEntry[] = (raw.topOverdue ?? []).map((e: Record<string, unknown>) => ({
+        name: (e.patient ?? e.name ?? "Unknown") as string,
+        amount: Number(e.balance ?? e.amount ?? 0),
+        daysPending: Number(e.daysOverdue ?? e.daysPending ?? 0),
+        type: (e.type as "ORGANIZATION" | "PATIENT") ?? "PATIENT",
+      }));
+
+      return { totalOutstanding, buckets, topOverdue };
     },
   });
 
@@ -171,7 +197,7 @@ export default function ReceivablesPage() {
     );
   }
 
-  const { totalOutstanding, buckets, topOverdue } = receivables;
+  const { totalOutstanding = 0, buckets = [], topOverdue = [] } = receivables ?? {};
   const maxBucketAmount = Math.max(...buckets.map((b) => b.amount), 1);
 
   // ── KPI Icons per bucket ────────────────────────────────────────────────

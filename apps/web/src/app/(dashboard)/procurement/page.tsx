@@ -862,7 +862,7 @@ function VendorsTab() {
         data={data?.data ?? []}
         isLoading={isLoading}
         page={page}
-        total={data?.meta.total}
+        total={data?.meta?.total}
         pageSize={20}
         onPageChange={setPage}
       />
@@ -982,7 +982,7 @@ function GRNTab() {
         data={data?.data ?? []}
         isLoading={isLoading}
         page={page}
-        total={data?.meta.total}
+        total={data?.meta?.total}
         pageSize={20}
         onPageChange={setPage}
       />
@@ -1238,7 +1238,7 @@ function PurchaseOrdersTab() {
         data={data?.data ?? []}
         isLoading={isLoading}
         page={page}
-        total={data?.meta.total}
+        total={data?.meta?.total}
         pageSize={20}
         onPageChange={setPage}
       />

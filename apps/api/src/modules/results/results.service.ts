@@ -250,10 +250,54 @@ export class ResultsService {
       data: {
         validatedById: userId,
         validatedAt: now,
+        signedById: userId,
+        signedAt: now,
         pathologistNotes: dto.pathologistNotes,
         isDraft: false,
       },
     });
+
+    // Transition affected orders to PENDING_APPROVAL if all results validated
+    const affectedResults = await this.prisma.testResult.findMany({
+      where: { id: { in: dto.ids }, tenantId },
+      select: { orderId: true },
+    });
+    const orderIds = [...new Set(affectedResults.map((r) => r.orderId))];
+
+    for (const orderId of orderIds) {
+      const order = await this.prisma.order.findFirst({
+        where: { id: orderId, tenantId },
+        include: {
+          items: {
+            include: {
+              testResults: { select: { validatedById: true } },
+            },
+          },
+        },
+      });
+      if (!order) continue;
+
+      const allValidated = order.items.every((item) =>
+        item.testResults.length > 0 &&
+        item.testResults.every((r) => r.validatedById !== null),
+      );
+
+      if (allValidated) {
+        await this.prisma.order.update({
+          where: { id: orderId },
+          data: {
+            status: OrderStatus.PENDING_APPROVAL,
+            resultSubmittedAt: now,
+          },
+        });
+
+        this.realtime.emitOrderUpdate(tenantId, {
+          orderId,
+          orderNumber: order.orderNumber,
+          status: OrderStatus.PENDING_APPROVAL,
+        });
+      }
+    }
 
     // SMS for any CRITICAL results being validated
     this.prisma.testResult.findMany({
@@ -330,6 +374,7 @@ export class ResultsService {
         },
         order: {
           select: {
+            id: true,
             orderNumber: true,
             priority: true,
             patient: { select: { firstName: true, lastName: true, mrn: true } },
@@ -355,10 +400,48 @@ export class ResultsService {
   async getResultsByOrder(orderId: string, tenantId: string) {
     const order = await this.prisma.order.findFirst({
       where: { id: orderId, tenantId },
+      include: {
+        items: {
+          include: {
+            testCatalog: {
+              select: {
+                id: true,
+                name: true,
+                code: true,
+                loincCode: true,
+                reportParameters: {
+                  where: { isActive: true },
+                  orderBy: { sortOrder: "asc" },
+                  select: {
+                    id: true,
+                    name: true,
+                    fieldType: true,
+                    unit: true,
+                    sortOrder: true,
+                    options: true,
+                    referenceRanges: {
+                      select: {
+                        lowNormal: true,
+                        highNormal: true,
+                        lowCritical: true,
+                        highCritical: true,
+                        unit: true,
+                        genderFilter: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        samples: { select: { id: true, barcodeId: true }, take: 1 },
+      },
     });
     if (!order) throw new NotFoundException("Order not found");
 
-    return this.prisma.testResult.findMany({
+    // Fetch existing results
+    const existingResults = await this.prisma.testResult.findMany({
       where: { orderId, tenantId },
       include: {
         orderItem: {
@@ -372,6 +455,79 @@ export class ResultsService {
         validatedBy: { select: { firstName: true, lastName: true } },
       },
       orderBy: { createdAt: "asc" },
+    });
+
+    // For each order item with reportParameters, ensure we have one TestResult per parameter
+    const sampleId = order.samples[0]?.id;
+    if (!sampleId) return existingResults;
+
+    const resultsByItemId = new Map<string, typeof existingResults>();
+    for (const r of existingResults) {
+      const arr = resultsByItemId.get(r.orderItemId) ?? [];
+      arr.push(r);
+      resultsByItemId.set(r.orderItemId, arr);
+    }
+
+    let needsRefetch = false;
+
+    for (const item of order.items) {
+      const params = item.testCatalog.reportParameters;
+      if (params.length === 0) continue;
+
+      const itemResults = resultsByItemId.get(item.id) ?? [];
+      if (itemResults.length >= params.length) continue;
+
+      // Create missing TestResult records for parameters not yet entered
+      const existingFlags = new Set(itemResults.map((r) => r.flags ?? r.value));
+      for (const param of params) {
+        // Check if a result for this parameter already exists (by matching flags field)
+        const alreadyExists = itemResults.some((r) => r.flags === param.name);
+        if (alreadyExists) continue;
+        // Also skip if we already have enough results
+        if (itemResults.length >= params.length) break;
+
+        // Build reference range string from the parameter's first reference range
+        const rr = param.referenceRanges[0];
+        const refRangeStr = rr
+          ? `${rr.lowNormal ?? ""} - ${rr.highNormal ?? ""} ${rr.unit ?? param.unit ?? ""}`.trim()
+          : undefined;
+
+        await this.prisma.testResult.create({
+          data: {
+            tenantId,
+            orderId,
+            orderItemId: item.id,
+            sampleId,
+            value: "",
+            unit: param.unit ?? rr?.unit ?? undefined,
+            referenceRange: refRangeStr || undefined,
+            interpretation: "NORMAL" as never,
+            isDraft: true,
+            flags: param.name,
+            enteredById: null,
+          },
+        });
+        needsRefetch = true;
+      }
+    }
+
+    if (!needsRefetch) return existingResults;
+
+    // Refetch to include newly created results
+    return this.prisma.testResult.findMany({
+      where: { orderId, tenantId },
+      include: {
+        orderItem: {
+          include: {
+            testCatalog: { select: { id: true, name: true, code: true, loincCode: true } },
+          },
+        },
+        sample: { select: { barcodeId: true, type: true } },
+        enteredBy: { select: { firstName: true, lastName: true } },
+        verifiedBy: { select: { firstName: true, lastName: true } },
+        validatedBy: { select: { firstName: true, lastName: true } },
+      },
+      orderBy: [{ orderItemId: "asc" }, { createdAt: "asc" }],
     });
   }
 
@@ -400,6 +556,35 @@ export class ResultsService {
         order: { select: { orderNumber: true } },
       },
     });
+  }
+
+  async saveDraftValues(
+    updates: Array<{ id: string; value: string; numericValue: number | null }>,
+    tenantId: string,
+    userId: string,
+  ) {
+    let saved = 0;
+    for (const u of updates) {
+      const existing = await this.prisma.testResult.findFirst({
+        where: { id: u.id, tenantId },
+        select: { id: true, verifiedById: true, autoVerified: true },
+      });
+      if (!existing) continue;
+      // Don't overwrite verified results
+      if (existing.verifiedById || existing.autoVerified) continue;
+
+      await this.prisma.testResult.update({
+        where: { id: u.id },
+        data: {
+          value: u.value,
+          numericValue: u.numericValue,
+          isDraft: true,
+          enteredById: userId,
+        },
+      });
+      saved++;
+    }
+    return { saved };
   }
 
   async findOne(tenantId: string, id: string) {

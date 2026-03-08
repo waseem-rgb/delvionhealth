@@ -326,8 +326,8 @@ export default function PayrollPage() {
     },
   });
 
-  const runs = data?.data ?? [];
-  const total = data?.meta.total ?? 0;
+  const runs = Array.isArray(data) ? data : (data?.data ?? []);
+  const total = data?.meta?.total ?? 0;
 
   // Summary across all displayed runs
   const totalGross = runs.reduce((s, r) => s + r.totalGross, 0);

@@ -121,7 +121,15 @@
       "Bash(curl -s \"http://localhost:3001/api/v1/quality/qc-runs/levey-jennings?department=Biochemistry&parameter=Glucose&level=L1\" -H \"Authorization: Bearer $TOKEN\")",
       "Bash(curl -s http://localhost:3001/api/v1/quality/forms/seed -X POST -H \"Content-Type: application/json\")",
       "Bash(curl -s http://localhost:3001/api/v1/quality/forms/seed -X POST -H \"Content-Type: application/json\" -w \"\\\\nHTTP_CODE:%{http_code}\")",
-      "Bash(npm run dev --filter=api)"
+      "Bash(npm run dev --filter=api)",
+      "Bash(ls apps/api/.env*)",
+      "Bash(DATABASE_URL=\"postgresql://delvion:delvion123@localhost:5432/delvion_dev\" npx prisma db push --schema packages/db/prisma/schema.prisma --accept-data-loss)",
+      "Bash(npx tsc --noEmit --project apps/api/tsconfig.build.json)",
+      "Bash(ls -d /Users/waseemafsar/Desktop/live_project*/devlon)",
+      "Bash(ls \"/Users/waseemafsar/Desktop/live_project 2/devlon/apps/web/src/app/\\(dashboard\\)/\")",
+      "Bash(ls \"/Users/waseemafsar/Desktop/live_project 2/devlon/apps/web/src/app/\\(dashboard\\)/settings/\")",
+      "Bash(ls \"/Users/waseemafsar/Desktop/live_project 2/devlon/apps/web/src/app/\\(dashboard\\)/settings/test-catalog/\")",
+      "Bash(ls -R \"/Users/waseemafsar/Desktop/live_project 2/devlon/apps/web/src/app/\\(dashboard\\)/settings/test-catalog/\")"
     ],
     "additionalDirectories": [
       "/Users/waseemafsar/Desktop/live_project/devlon/apps/web/src/app/(dashboard)/organisations",

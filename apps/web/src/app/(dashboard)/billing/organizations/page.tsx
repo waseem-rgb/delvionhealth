@@ -395,9 +395,9 @@ export default function OrganizationsPage() {
       const res = await api.get<{ data: { data: Organization[]; meta: { total: number } } }>(
         "/organizations?limit=1000"
       );
-      const list = res.data.data.data ?? [];
+      const list = res.data?.data?.data ?? [];
       return {
-        total: res.data.data.meta.total,
+        total: res.data?.data?.meta?.total ?? 0,
         active: list.filter((o) => o.isActive).length,
         totalOutstanding: list.reduce((sum, o) => sum + Number(o.outstanding ?? 0), 0),
       } as OrgStats;

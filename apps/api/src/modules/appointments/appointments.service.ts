@@ -68,6 +68,6 @@ export class AppointmentsService {
       data: { reminderSent: true },
     });
 
-    return { success: true, message: `Reminder sent to ${appointment.patient.firstName}` };
+    return { success: true, message: `Reminder sent to ${appointment.patient?.firstName ?? appointment.patientName ?? 'patient'}` };
   }
 }

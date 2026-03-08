@@ -41,6 +41,15 @@ export interface ReportTemplateData {
     interpretation: string;
     deltaFlagged: boolean;
     pathologistNotes?: string | null;
+    clinicalNote?: string | null;
+    abnormalityNote?: string | null;
+    footerNote?: string | null;
+  }>;
+  testSections?: Array<{
+    testCode: string;
+    reportTitle?: string | null;
+    reportIntro?: string | null;
+    reportConclusion?: string | null;
   }>;
   branding?: ReportBranding | null;
   signingDoctors?: DoctorSignature[];
@@ -152,22 +161,75 @@ function buildSignatureBlock(data: ReportTemplateData): string {
   </div>`;
 }
 
+function buildAbnormalityHtml(result: ReportTemplateData["results"][0]): string {
+  if (!result.abnormalityNote || result.interpretation === "NORMAL") return "";
+
+  try {
+    const notes = JSON.parse(result.abnormalityNote) as { direction: string; reasons: string[] }[];
+    let isLow = false;
+    if (result.interpretation === "ABNORMAL" && result.numericValue != null && result.referenceRange) {
+      const parts = result.referenceRange.split("–").map(Number);
+      if (parts.length === 2 && !isNaN(parts[0]!) && result.numericValue < parts[0]!) isLow = true;
+    }
+    const direction = isLow ? "LOW" : "HIGH";
+    const matching = notes.find((n) => n.direction === direction);
+    if (!matching || matching.reasons.length === 0) return "";
+
+    return `<div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:6px 10px;margin:4px 0 8px 0;font-size:10px;color:#92400e;">
+      <strong>Possible reasons for ${direction.toLowerCase()} ${result.testName}:</strong>
+      <ul style="margin:2px 0 0 16px;padding:0;">${matching.reasons.slice(0, 5).map((r) => `<li>${r}</li>`).join("")}</ul>
+      <em style="font-size:9px;color:#b45309;">These are general possibilities — please consult your physician for interpretation.</em>
+    </div>`;
+  } catch {
+    return "";
+  }
+}
+
 export function buildReportHtml(data: ReportTemplateData): string {
   const age = calcAge(data.patient.dob);
+  const sections = data.testSections ?? [];
 
-  const resultRows = data.results
-    .map(
-      (r) => `
+  // Group results by test code and add section headers
+  const testCodes = [...new Set(data.results.map((r) => r.testCode))];
+  let resultRows = "";
+
+  for (const code of testCodes) {
+    const section = sections.find((s) => s.testCode === code);
+    const codeResults = data.results.filter((r) => r.testCode === code);
+
+    // Section header with reportTitle
+    if (section?.reportTitle) {
+      resultRows += `<tr><td colspan="5" style="background:#f0f9ff;padding:8px;font-weight:700;font-size:12px;color:#0e7490;border-bottom:2px solid #0e7490;">${section.reportTitle}</td></tr>`;
+    }
+
+    // Report intro
+    if (section?.reportIntro) {
+      resultRows += `<tr><td colspan="5" style="padding:6px 8px;font-size:10px;color:#475569;font-style:italic;background:#f8fafc;border-bottom:1px solid #e2e8f0;">${section.reportIntro}</td></tr>`;
+    }
+
+    // Result rows
+    for (const r of codeResults) {
+      resultRows += `
       <tr>
         <td>${r.testName}</td>
         <td>${r.testCode}</td>
         <td style="font-weight:600">${r.value}${r.unit ? " " + r.unit : ""}</td>
         <td>${r.referenceRange ?? "—"}</td>
         <td style="color:${interpretColor(r.interpretation)};font-weight:700">${r.interpretation}${r.deltaFlagged ? " ▲" : ""}</td>
-      </tr>
-    `
-    )
-    .join("");
+      </tr>`;
+
+      // Abnormality reasons for out-of-range values
+      const abnormalHtml = buildAbnormalityHtml(r);
+      if (abnormalHtml) {
+        resultRows += `<tr><td colspan="5" style="padding:0 8px;">${abnormalHtml}</td></tr>`;
+      }
+    }
+
+    // Report conclusion
+    if (section?.reportConclusion) {
+      resultRows += `<tr><td colspan="5" style="padding:6px 8px;font-size:10px;color:#475569;background:#f8fafc;border-bottom:1px solid #cbd5e1;"><strong>Note:</strong> ${section.reportConclusion}</td></tr>`;
+    }
+  }
 
   const watermark = data.isSigned ? "" : `
     <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-45deg);

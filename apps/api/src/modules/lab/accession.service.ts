@@ -486,19 +486,21 @@ export class AccessionService {
         const existing = await tx.sample.findUnique({ where: { barcodeId: barcode } });
 
         if (existing) {
-          await tx.sample.update({
+          const updated = await tx.sample.update({
             where: { id: existing.id },
             data: {
               orderId,
               tube: tube.tubeKey,
               type: tube.tubeKey,
-              status: "PENDING_COLLECTION",
+              status: "COLLECTED",
+              collectedAt: new Date(),
+              collectedById: staffId,
               accessionedAt: new Date(),
               accessionedById: staffId,
               testIds: tube.testIds,
             },
           });
-          createdSamples.push(existing);
+          createdSamples.push(updated);
         } else {
           const sample = await tx.sample.create({
             data: {
@@ -508,7 +510,9 @@ export class AccessionService {
               barcodeId: barcode,
               tube: tube.tubeKey,
               type: tube.tubeKey,
-              status: "PENDING_COLLECTION",
+              status: "COLLECTED",
+              collectedAt: new Date(),
+              collectedById: staffId,
               accessionedAt: new Date(),
               accessionedById: staffId,
               testIds: tube.testIds,
@@ -546,7 +550,7 @@ export class AccessionService {
       return {
         success: true,
         samples: createdSamples.length,
-        message: `${createdSamples.length} tubes accessioned. Order → RECEIVED`,
+        message: `${createdSamples.length} tubes accessioned and collected. Order → RECEIVED`,
       };
     });
   }

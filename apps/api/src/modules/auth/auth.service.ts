@@ -37,6 +37,31 @@ export class AuthService {
     @Inject(REDIS_CLIENT) private readonly redis: Redis
   ) {}
 
+  private async redisSet(key: string, value: string, ttl?: number): Promise<void> {
+    try {
+      if (ttl) await this.redis.set(key, value, "EX", ttl);
+      else await this.redis.set(key, value);
+    } catch {
+      // Redis unavailable — fall back to DB refreshToken field
+    }
+  }
+
+  private async redisGet(key: string): Promise<string | null> {
+    try {
+      return await this.redis.get(key);
+    } catch {
+      return null;
+    }
+  }
+
+  private async redisDel(key: string): Promise<void> {
+    try {
+      await this.redis.del(key);
+    } catch {
+      // Redis unavailable — ignore
+    }
+  }
+
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.prisma.user.findFirst({
       where: { email: dto.email, isActive: true },
@@ -67,18 +92,13 @@ export class AuthService {
 
     const { accessToken, refreshToken } = await this.generateTokens(payload);
 
-    // Store hashed refresh token in Redis (7-day TTL)
+    // Store hashed refresh token in Redis (7-day TTL) + DB fallback
     const hashedRefresh = await bcrypt.hash(refreshToken, 10);
-    await this.redis.set(
-      `refresh:${user.id}`,
-      hashedRefresh,
-      "EX",
-      REFRESH_TTL_SECONDS
-    );
+    await this.redisSet(`refresh:${user.id}`, hashedRefresh, REFRESH_TTL_SECONDS);
 
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { lastLoginAt: new Date() },
+      data: { lastLoginAt: new Date(), refreshToken: hashedRefresh },
     });
 
     return {
@@ -124,7 +144,15 @@ export class AuthService {
       throw new UnauthorizedException("Invalid refresh token");
     }
 
-    const storedHash = await this.redis.get(`refresh:${user.id}`);
+    let storedHash = await this.redisGet(`refresh:${user.id}`);
+    // Fallback to DB if Redis unavailable
+    if (!storedHash) {
+      const dbUser = await this.prisma.user.findUnique({
+        where: { id: user.id },
+        select: { refreshToken: true },
+      });
+      storedHash = dbUser?.refreshToken ?? null;
+    }
     if (!storedHash) {
       throw new UnauthorizedException("Refresh token expired or revoked");
     }
@@ -132,7 +160,7 @@ export class AuthService {
     const isValid = await bcrypt.compare(dto.refreshToken, storedHash);
     if (!isValid) {
       // Potential token reuse — revoke
-      await this.redis.del(`refresh:${user.id}`);
+      await this.redisDel(`refresh:${user.id}`);
       throw new UnauthorizedException("Refresh token reuse detected");
     }
 
@@ -147,12 +175,11 @@ export class AuthService {
       await this.generateTokens(newPayload);
 
     const hashedRefresh = await bcrypt.hash(newRefreshToken, 10);
-    await this.redis.set(
-      `refresh:${user.id}`,
-      hashedRefresh,
-      "EX",
-      REFRESH_TTL_SECONDS
-    );
+    await this.redisSet(`refresh:${user.id}`, hashedRefresh, REFRESH_TTL_SECONDS);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken: hashedRefresh },
+    });
 
     return {
       accessToken,
@@ -170,7 +197,11 @@ export class AuthService {
   }
 
   async logout(userId: string): Promise<void> {
-    await this.redis.del(`refresh:${userId}`);
+    await this.redisDel(`refresh:${userId}`);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: null },
+    });
   }
 
   async getProfile(userId: string): Promise<AuthResponseDto["user"]> {
@@ -222,7 +253,11 @@ export class AuthService {
     });
 
     // Revoke all refresh tokens on password change
-    await this.redis.del(`refresh:${userId}`);
+    await this.redisDel(`refresh:${userId}`);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: null },
+    });
   }
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<void> {
@@ -235,18 +270,13 @@ export class AuthService {
     if (!user) return;
 
     const token = nanoid(64);
-    await this.redis.set(
-      `pwd_reset:${token}`,
-      user.id,
-      "EX",
-      RESET_TTL_SECONDS
-    );
+    await this.redisSet(`pwd_reset:${token}`, user.id, RESET_TTL_SECONDS);
 
     await this.email.sendPasswordResetEmail(user.email, token);
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<void> {
-    const userId = await this.redis.get(`pwd_reset:${dto.token}`);
+    const userId = await this.redisGet(`pwd_reset:${dto.token}`);
     if (!userId) {
       throw new BadRequestException("Invalid or expired reset token");
     }
@@ -254,13 +284,13 @@ export class AuthService {
     const newHash = await bcrypt.hash(dto.newPassword, 10);
     await this.prisma.user.update({
       where: { id: userId },
-      data: { passwordHash: newHash },
+      data: { passwordHash: newHash, refreshToken: null },
     });
 
     // Consume the reset token and revoke refresh tokens
     await Promise.all([
-      this.redis.del(`pwd_reset:${dto.token}`),
-      this.redis.del(`refresh:${userId}`),
+      this.redisDel(`pwd_reset:${dto.token}`),
+      this.redisDel(`refresh:${userId}`),
     ]);
   }
 

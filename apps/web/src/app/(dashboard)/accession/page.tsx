@@ -458,7 +458,7 @@ export default function AccessionPage() {
         testIds: tube.tests.map((t: any) => t.id),
       }));
       await api.post("/lab/accession/submit", { orderId: accessioningOrder.id, tubes });
-      toast.success("Accession complete! Samples sent to lab queue.");
+      toast.success("Accession complete! Samples collected and sent to lab queue.");
       setAccessioningOrder(null);
       setTubeData(null);
       setBarcodes({});

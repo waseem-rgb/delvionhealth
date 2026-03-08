@@ -14,12 +14,20 @@ export const REDIS_CLIENT = "REDIS_CLIENT";
         const url = config.get<string>("REDIS_URL", "redis://localhost:6379");
         const client = new Redis(url, {
           maxRetriesPerRequest: 3,
-          enableReadyCheck: true,
-          lazyConnect: false,
+          enableReadyCheck: false,
+          lazyConnect: true,
+          retryStrategy: (times: number) => {
+            if (times > 3) return null; // stop retrying
+            return Math.min(times * 1000, 5000);
+          },
         });
 
+        let errorLogged = false;
         client.on("error", (err: Error) => {
-          console.error("[Redis] Connection error:", err.message);
+          if (!errorLogged) {
+            console.warn("[Redis] Not available — caching disabled:", err.message);
+            errorLogged = true;
+          }
         });
 
         client.on("connect", () => {

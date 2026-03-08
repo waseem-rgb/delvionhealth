@@ -469,7 +469,7 @@ function InvoicesTab() {
         data={data?.data ?? []}
         isLoading={isLoading}
         page={page}
-        total={data?.meta.total}
+        total={data?.meta?.total}
         pageSize={20}
         onPageChange={setPage}
       />
@@ -766,7 +766,7 @@ function ClaimsTab() {
         data={data?.data ?? []}
         isLoading={isLoading}
         page={page}
-        total={data?.meta.total}
+        total={data?.meta?.total}
         pageSize={20}
         onPageChange={setPage}
       />
@@ -826,7 +826,7 @@ function ARAgingTab() {
       </div>
 
       {/* Top Overdue */}
-      {(data?.topOverdue.length ?? 0) > 0 && (
+      {(data?.topOverdue?.length ?? 0) > 0 && (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           <div className="px-5 py-3 border-b border-slate-100 bg-slate-50">
             <h3 className="text-sm font-bold text-slate-700">Top Overdue Invoices</h3>
@@ -1045,7 +1045,7 @@ function DenialManagementTab() {
         data={data?.data ?? []}
         isLoading={isLoading}
         page={page}
-        total={data?.meta.total}
+        total={data?.meta?.total}
         pageSize={20}
         onPageChange={setPage}
       />
@@ -1407,7 +1407,7 @@ function PaymentPlansTab() {
   });
 
   const plans = data?.data ?? [];
-  const total = data?.meta.total ?? 0;
+  const total = data?.meta?.total ?? 0;
 
   return (
     <div className="space-y-4">

@@ -84,7 +84,7 @@ export default function DiscountsPage() {
   });
 
   // Compute stats from the full list
-  const pendingCount = discounts?.meta.total ?? 0;
+  const pendingCount = discounts?.meta?.total ?? 0;
   const rows = discounts?.data ?? [];
 
   // ── Mutations ──
@@ -300,7 +300,7 @@ export default function DiscountsPage() {
           <DataTable
             columns={columns}
             data={rows}
-            total={discounts?.meta.total}
+            total={discounts?.meta?.total}
             page={page}
             pageSize={20}
             onPageChange={setPage}

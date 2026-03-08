@@ -1,5 +1,6 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { ResultsModule } from "../results/results.module";
+import { ReportsModule } from "../reports/reports.module";
 import { NotificationsModule } from "../notifications/notifications.module";
 import { AccessionService } from "./accession.service";
 import { AccessionController } from "./accession.controller";
@@ -14,6 +15,7 @@ import { VacutainerService } from "./vacutainer.service";
 @Module({
   imports: [
     forwardRef(() => ResultsModule),
+    ReportsModule,
     NotificationsModule,
   ],
   providers: [

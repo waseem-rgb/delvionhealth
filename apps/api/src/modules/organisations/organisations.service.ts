@@ -97,6 +97,8 @@ export class OrganisationsService {
       reportAccess?: string;
       rateListId?: string;
       parentOrgId?: string;
+      defaultReferringDoctorId?: string;
+      defaultReferringDoctorName?: string;
     },
   ) {
     // Auto-generate code if not provided
@@ -114,42 +116,60 @@ export class OrganisationsService {
       hashedPassword = await bcrypt.hash(data.loginPassword, 10);
     }
 
-    const org = await this.prisma.organization.create({
-      data: {
-        tenantId,
-        name: data.name,
-        code,
-        contactPerson: data.contactPerson,
-        email: data.email,
-        phone: data.phone,
-        address: data.address,
-        city: data.city,
-        state: data.state,
-        pincode: data.pincode,
-        gstNumber: data.gstNumber,
-        panNumber: data.panNumber,
-        paymentType: data.paymentType || "WALKIN",
-        creditDays: data.creditDays ?? 30,
-        creditLimit: data.creditLimit,
-        startingAdvance: data.startingAdvance,
-        currentBalance: data.startingAdvance ?? 0,
-        loginType: data.loginType || "NO_LOGIN",
-        loginEmail: data.loginEmail,
-        loginPassword: hashedPassword,
-        showHeaderFooter: data.showHeaderFooter ?? false,
-        autoReportEmail: data.autoReportEmail ?? false,
-        autoReportWhatsapp: data.autoReportWhatsapp ?? false,
-        patientCommMode: data.patientCommMode || "REPORTS_ONLY",
-        alwaysShowMRP: data.alwaysShowMRP ?? false,
-        showOnlyPaidReports: data.showOnlyPaidReports ?? true,
-        showSecondaryUnits: data.showSecondaryUnits ?? false,
-        reportAccess: data.reportAccess || "SIGNED",
-        rateListId: data.rateListId || null,
-        parentOrgId: data.parentOrgId || null,
-      },
-    });
+    // Ensure loginEmail uniqueness
+    if (data.loginEmail) {
+      const emailExists = await this.prisma.organization.findFirst({
+        where: { loginEmail: data.loginEmail },
+      });
+      if (emailExists) throw new ConflictException(`Login email "${data.loginEmail}" is already in use`);
+    }
 
-    return org;
+    try {
+      const org = await this.prisma.organization.create({
+        data: {
+          tenantId,
+          name: data.name,
+          code,
+          contactPerson: data.contactPerson,
+          email: data.email,
+          phone: data.phone,
+          address: data.address,
+          city: data.city,
+          state: data.state,
+          pincode: data.pincode,
+          gstNumber: data.gstNumber,
+          panNumber: data.panNumber,
+          paymentType: data.paymentType || "WALKIN",
+          creditDays: Number(data.creditDays) || 30,
+          creditLimit: data.creditLimit != null ? Number(data.creditLimit) : null,
+          startingAdvance: data.startingAdvance != null ? Number(data.startingAdvance) : null,
+          currentBalance: data.startingAdvance != null ? Number(data.startingAdvance) : 0,
+          loginType: data.loginType || "NO_LOGIN",
+          loginEmail: data.loginEmail || null,
+          loginPassword: hashedPassword,
+          showHeaderFooter: data.showHeaderFooter ?? false,
+          autoReportEmail: data.autoReportEmail ?? false,
+          autoReportWhatsapp: data.autoReportWhatsapp ?? false,
+          patientCommMode: data.patientCommMode || "REPORTS_ONLY",
+          alwaysShowMRP: data.alwaysShowMRP ?? false,
+          showOnlyPaidReports: data.showOnlyPaidReports ?? true,
+          showSecondaryUnits: data.showSecondaryUnits ?? false,
+          reportAccess: data.reportAccess || "SIGNED",
+          rateListId: data.rateListId || null,
+          parentOrgId: data.parentOrgId || null,
+          defaultReferringDoctorId: data.defaultReferringDoctorId || null,
+          defaultReferringDoctorName: data.defaultReferringDoctorName || null,
+        },
+      });
+
+      return org;
+    } catch (err) {
+      this.logger.error(`Failed to create organisation: ${err instanceof Error ? err.message : err}`);
+      if (err instanceof Error && err.message.includes("Unique constraint")) {
+        throw new ConflictException("An organisation with that code or login email already exists");
+      }
+      throw new BadRequestException("Failed to create organisation. Please check your input.");
+    }
   }
 
   // ─── Update ───────────────────────────────────────────────────────────
@@ -163,13 +183,43 @@ export class OrganisationsService {
       data.loginPassword = await bcrypt.hash(data.loginPassword, 10);
     }
 
-    return this.prisma.organization.update({
-      where: { id },
-      data: data as Prisma.OrganizationUpdateInput,
-      include: {
-        rateList: { select: { id: true, name: true } },
-      },
-    });
+    // Only allow known Organization fields to prevent Prisma errors
+    const allowedFields = new Set([
+      "name", "code", "contactPerson", "email", "phone",
+      "address", "city", "state", "pincode", "gstNumber", "panNumber",
+      "defaultReferringDoctorId", "defaultReferringDoctorName",
+      "paymentType", "creditDays", "creditLimit", "startingAdvance", "currentBalance",
+      "discountPct", "currentOutstanding",
+      "loginType", "loginEmail", "loginPassword",
+      "showHeaderFooter", "headerImageUrl", "footerImageUrl",
+      "reportHeaderHtml", "reportFooterHtml",
+      "autoReportEmail", "autoReportWhatsapp", "patientCommMode",
+      "alwaysShowMRP", "showOnlyPaidReports", "showSecondaryUnits", "reportAccess",
+      "rateListId", "parentOrgId", "isActive",
+    ]);
+
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (allowedFields.has(key)) {
+        sanitized[key] = value;
+      }
+    }
+
+    try {
+      return await this.prisma.organization.update({
+        where: { id },
+        data: sanitized as Prisma.OrganizationUpdateInput,
+        include: {
+          rateList: { select: { id: true, name: true } },
+        },
+      });
+    } catch (err) {
+      this.logger.error(`Failed to update organisation ${id}: ${err instanceof Error ? err.message : err}`);
+      if (err instanceof Error && err.message.includes("Unique constraint")) {
+        throw new ConflictException("A field with that value already exists (e.g. login email or code)");
+      }
+      throw new BadRequestException("Failed to update organisation. Please check your input.");
+    }
   }
 
   // ─── Soft Delete ──────────────────────────────────────────────────────

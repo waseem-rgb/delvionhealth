@@ -24,6 +24,7 @@ import {
   Package,
   Hospital,
   FileText,
+  Database,
 } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
@@ -51,6 +52,7 @@ interface TestCatalogItem {
   isActive: boolean;
   turnaroundHours: number;
   type?: string | null;
+  _count?: { reportParameters: number };
 }
 
 interface ProfileComponent {
@@ -485,6 +487,57 @@ function TestsTab() {
     });
   }
 
+  const [seeding, setSeeding] = useState(false);
+  const [seedingTemplates, setSeedingTemplates] = useState(false);
+
+  const handleSeedParameters = async () => {
+    setSeeding(true);
+    try {
+      const res = await api.post<{ data: { code: string; name?: string; status: string; count?: number }[] }>("/test-catalog/seed-parameters");
+      const data = Array.isArray(res.data.data) ? res.data.data : (res.data as unknown as { code: string; name?: string; status: string; count?: number }[]);
+      const seeded = data.filter((r) => r.status === "SEEDED");
+      const skipped = data.filter((r) => r.status === "SKIPPED_HAS_PARAMS");
+      const notFound = data.filter((r) => r.status === "NOT_FOUND");
+      toast.success(
+        `Parameters seeded: ${seeded.length} tests updated, ${skipped.length} already had params, ${notFound.length} not found`,
+        { duration: 8000 },
+      );
+      void qc.invalidateQueries({ queryKey: ["test-catalog"] });
+    } catch {
+      toast.error("Failed to seed parameters");
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  const handleSeedTemplates = async () => {
+    setSeedingTemplates(true);
+    try {
+      const res = await api.post("/test-catalog/seed-templates");
+      const data = res.data?.data ?? res.data;
+      toast.success(
+        `Templates seeded: ${data.updated?.length ?? 0} tests updated, ${data.notFound?.length ?? 0} not found`,
+        { duration: 6000 },
+      );
+      void qc.invalidateQueries({ queryKey: ["test-catalog"] });
+      void qc.invalidateQueries({ queryKey: ["template-status"] });
+    } catch {
+      toast.error("Failed to seed templates");
+    } finally {
+      setSeedingTemplates(false);
+    }
+  };
+
+  const { data: templateStatus } = useQuery<{
+    totalWithParams: number;
+    complete: number;
+    incomplete: number;
+    tests: { code: string; name: string; paramCount: number; score: number; isComplete: boolean; missing: string[] }[];
+  }>({
+    queryKey: ["template-status"],
+    queryFn: () => api.get("/test-catalog/template-status").then((r) => r.data?.data ?? r.data),
+  });
+
   return (
     <div className="space-y-4">
       {/* Header bar */}
@@ -499,6 +552,22 @@ function TestsTab() {
         <div className="flex items-center gap-3">
           <span className="text-xs text-slate-400">{tests.length} tests</span>
           <button
+            onClick={handleSeedParameters}
+            disabled={seeding}
+            className="inline-flex items-center gap-2 px-3 py-2 border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 disabled:opacity-50 transition-colors"
+          >
+            {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
+            Seed Parameters
+          </button>
+          <button
+            onClick={handleSeedTemplates}
+            disabled={seedingTemplates}
+            className="inline-flex items-center gap-2 px-3 py-2 border border-teal-200 text-teal-700 rounded-lg text-sm font-medium hover:bg-teal-50 disabled:opacity-50 transition-colors"
+          >
+            {seedingTemplates ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+            Seed Templates
+          </button>
+          <button
             onClick={() => setProfileOpen(true)}
             className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors"
           >
@@ -506,6 +575,46 @@ function TestsTab() {
           </button>
         </div>
       </div>
+
+      {/* Template Status Dashboard */}
+      {templateStatus && templateStatus.totalWithParams > 0 && (
+        <div className="bg-white rounded-xl border border-slate-100 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h4 className="text-sm font-semibold text-slate-700">Template Status</h4>
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 rounded-full px-2.5 py-0.5">
+                <CheckCircle className="w-3 h-3" /> {templateStatus.complete} complete
+              </span>
+              {templateStatus.incomplete > 0 && (
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 rounded-full px-2.5 py-0.5">
+                  {templateStatus.incomplete} incomplete
+                </span>
+              )}
+            </div>
+            <div className="w-48 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-teal-500 rounded-full transition-all"
+                style={{ width: `${templateStatus.totalWithParams > 0 ? (templateStatus.complete / templateStatus.totalWithParams) * 100 : 0}%` }}
+              />
+            </div>
+          </div>
+          {templateStatus.incomplete > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {templateStatus.tests
+                .filter((t) => !t.isComplete)
+                .slice(0, 5)
+                .map((t) => (
+                  <span key={t.code} className="text-xs text-slate-500 bg-slate-50 rounded px-2 py-1">
+                    {t.code} — {t.missing[0]}
+                  </span>
+                ))}
+              {templateStatus.incomplete > 5 && (
+                <span className="text-xs text-slate-400">+{templateStatus.incomplete - 5} more</span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Tests Table */}
       <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
@@ -518,6 +627,7 @@ function TestsTab() {
               <th className="text-left px-4 py-3 font-medium text-slate-500">Category</th>
               <th className="text-right px-4 py-3 font-medium text-slate-500">Price</th>
               <th className="text-right px-4 py-3 font-medium text-slate-500">TAT (hrs)</th>
+              <th className="text-left px-4 py-3 font-medium text-slate-500">Params</th>
               <th className="text-left px-4 py-3 font-medium text-slate-500">Status</th>
               <th className="text-right px-4 py-3 font-medium text-slate-500">Actions</th>
             </tr>
@@ -526,7 +636,7 @@ function TestsTab() {
             {isLoading ? (
               [...Array(8)].map((_, i) => (
                 <tr key={i} className="border-b border-slate-50">
-                  {[...Array(8)].map((__, j) => (
+                  {[...Array(9)].map((__, j) => (
                     <td key={j} className="px-4 py-3">
                       <div className="h-4 bg-slate-100 rounded animate-pulse" />
                     </td>
@@ -535,7 +645,7 @@ function TestsTab() {
               ))
             ) : tests.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-slate-400 text-sm">
+                <td colSpan={9} className="px-4 py-8 text-center text-slate-400 text-sm">
                   No tests found
                 </td>
               </tr>
@@ -564,6 +674,17 @@ function TestsTab() {
                     ₹{Number(t.price).toLocaleString("en-IN")}
                   </td>
                   <td className="px-4 py-3 text-right text-slate-500">{t.turnaroundHours}</td>
+                  <td className="px-4 py-3">
+                    {(t._count?.reportParameters ?? 0) > 0 ? (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                        {t._count?.reportParameters} params
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-500 border border-red-200">
+                        No params
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs font-medium ${

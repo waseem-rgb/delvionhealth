@@ -1,6 +1,11 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import type { PaginationMeta } from "@delvion/types";
+import {
+  STANDARD_TEST_PARAMETERS,
+  NAME_KEYWORD_MATCHES,
+  type SeedTestConfig,
+} from "./seed-report-parameters";
 
 export interface CreateProfileDto {
   name: string;
@@ -92,6 +97,7 @@ export class TestCatalogService {
           cogs: true,
           b2bPrice: true,
           isActive: true,
+          _count: { select: { reportParameters: true } },
         },
       }),
       this.prisma.testCatalog.count({ where }),
@@ -180,6 +186,31 @@ export class TestCatalogService {
       category,
       tests,
     }));
+  }
+
+  // ───────────────────────────────────────────
+  // Get report parameters for a test
+  // ───────────────────────────────────────────
+
+  async getParameters(tenantId: string, testId: string) {
+    const params = await this.prisma.reportParameter.findMany({
+      where: { testCatalogId: testId, tenantId, isActive: true },
+      orderBy: { sortOrder: "asc" },
+      select: {
+        id: true,
+        name: true,
+        fieldType: true,
+        unit: true,
+        method: true,
+        sortOrder: true,
+        isMandatory: true,
+        referenceRanges: {
+          select: { lowNormal: true, highNormal: true, unit: true, genderFilter: true },
+          take: 5,
+        },
+      },
+    });
+    return { data: params, total: params.length };
   }
 
   // ───────────────────────────────────────────
@@ -668,5 +699,473 @@ export class TestCatalogService {
     });
 
     return this.findOneProfile(tenantId, id);
+  }
+
+  // ───────────────────────────────────────────
+  // Seed standard report parameters
+  // ───────────────────────────────────────────
+
+  async seedReportParameters(tenantId: string) {
+    const results: { code: string; name?: string; status: string; count?: number }[] = [];
+
+    // Pass 1: Match by test code
+    for (const [testCode, config] of Object.entries(STANDARD_TEST_PARAMETERS)) {
+      const test = await this.prisma.testCatalog.findFirst({
+        where: {
+          tenantId,
+          isActive: true,
+          OR: [
+            { code: testCode },
+            { code: { contains: testCode.replace("PT_", ""), mode: "insensitive" } },
+          ],
+        },
+        include: { _count: { select: { reportParameters: true } } },
+      });
+
+      if (!test) {
+        results.push({ code: testCode, status: "NOT_FOUND" });
+        continue;
+      }
+
+      if (test._count.reportParameters > 0) {
+        results.push({ code: testCode, name: test.name, status: "SKIPPED_HAS_PARAMS", count: test._count.reportParameters });
+        continue;
+      }
+
+      await this.seedParametersForTest(tenantId, test.id, config);
+      results.push({ code: testCode, name: test.name, status: "SEEDED", count: config.parameters.length });
+    }
+
+    // Pass 2: Name-keyword matching for tests with 0 parameters
+    const allTests = await this.prisma.testCatalog.findMany({
+      where: { tenantId, isActive: true },
+      include: { _count: { select: { reportParameters: true } } },
+    });
+
+    const seededTestIds = new Set(
+      results.filter((r) => r.status === "SEEDED" || r.status === "SKIPPED_HAS_PARAMS").map((r) => r.code),
+    );
+
+    for (const test of allTests.filter((t) => t._count.reportParameters === 0)) {
+      const nameLower = test.name.toLowerCase();
+      const match = NAME_KEYWORD_MATCHES.find(
+        (k) => !seededTestIds.has(k.configKey) && k.keywords.some((kw) => nameLower.includes(kw)),
+      );
+
+      if (match) {
+        const config = STANDARD_TEST_PARAMETERS[match.configKey];
+        if (!config) continue;
+
+        await this.seedParametersForTest(tenantId, test.id, config);
+        results.push({
+          code: test.code,
+          name: test.name,
+          status: "SEEDED",
+          count: config.parameters.length,
+        });
+      }
+    }
+
+    return results;
+  }
+
+  private async seedParametersForTest(
+    tenantId: string,
+    testCatalogId: string,
+    config: SeedTestConfig,
+  ) {
+    for (const p of config.parameters) {
+      const param = await this.prisma.reportParameter.upsert({
+        where: {
+          testCatalogId_name: { testCatalogId, name: p.name },
+        },
+        update: {
+          fieldType: p.fieldType,
+          unit: p.unit ?? null,
+          sortOrder: p.sortOrder,
+          isMandatory: p.isMandatory ?? true,
+          options: p.options ? JSON.stringify(p.options) : null,
+        },
+        create: {
+          tenantId,
+          testCatalogId,
+          name: p.name,
+          fieldType: p.fieldType,
+          unit: p.unit ?? null,
+          sortOrder: p.sortOrder,
+          isMandatory: p.isMandatory ?? true,
+          options: p.options ? JSON.stringify(p.options) : null,
+        },
+      });
+
+      if (p.refLow != null || p.refHigh != null || p.critLow != null || p.critHigh != null) {
+        const existingRange = await this.prisma.referenceRange.findFirst({
+          where: { reportParameterId: param.id },
+        });
+
+        if (existingRange) {
+          await this.prisma.referenceRange.update({
+            where: { id: existingRange.id },
+            data: {
+              lowNormal: p.refLow ?? null,
+              highNormal: p.refHigh ?? null,
+              lowCritical: p.critLow ?? null,
+              highCritical: p.critHigh ?? null,
+              unit: p.unit ?? null,
+            },
+          });
+        } else {
+          await this.prisma.referenceRange.create({
+            data: {
+              tenantId,
+              testCatalogId,
+              reportParameterId: param.id,
+              genderFilter: null,
+              lowNormal: p.refLow ?? null,
+              highNormal: p.refHigh ?? null,
+              lowCritical: p.critLow ?? null,
+              highCritical: p.critHigh ?? null,
+              unit: p.unit ?? null,
+            },
+          });
+        }
+      }
+    }
+  }
+
+  // ───────────────────────────────────────────
+  // Template management methods
+  // ───────────────────────────────────────────
+
+  async getTemplate(tenantId: string, testId: string) {
+    const test = await this.prisma.testCatalog.findFirst({
+      where: { id: testId, tenantId },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        reportTitle: true,
+        reportIntro: true,
+        reportConclusion: true,
+        clinicalSignificance: true,
+        preparationNote: true,
+        collectionNote: true,
+        isTemplateComplete: true,
+        templateLastEditedById: true,
+        templateLastEditedAt: true,
+        reportParameters: {
+          where: { isActive: true },
+          orderBy: { sortOrder: "asc" },
+          select: {
+            id: true,
+            name: true,
+            fieldType: true,
+            unit: true,
+            sortOrder: true,
+            isMandatory: true,
+            clinicalNote: true,
+            abnormalityNote: true,
+            footerNote: true,
+            methodology: true,
+            specimenNote: true,
+            isEditable: true,
+            displayOnReport: true,
+            printOrder: true,
+            options: true,
+            referenceRanges: {
+              select: {
+                id: true,
+                genderFilter: true,
+                ageMinYears: true,
+                ageMaxYears: true,
+                lowNormal: true,
+                highNormal: true,
+                lowCritical: true,
+                highCritical: true,
+                unit: true,
+                notes: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!test) throw new NotFoundException(`Test ${testId} not found`);
+    return test;
+  }
+
+  async updateTemplate(
+    tenantId: string,
+    testId: string,
+    dto: {
+      reportTitle?: string;
+      reportIntro?: string;
+      reportConclusion?: string;
+      clinicalSignificance?: string;
+      preparationNote?: string;
+      collectionNote?: string;
+      isTemplateComplete?: boolean;
+    },
+    userId?: string,
+  ) {
+    await this.findOne(tenantId, testId);
+    return this.prisma.testCatalog.update({
+      where: { id: testId },
+      data: {
+        ...(dto.reportTitle !== undefined ? { reportTitle: dto.reportTitle } : {}),
+        ...(dto.reportIntro !== undefined ? { reportIntro: dto.reportIntro } : {}),
+        ...(dto.reportConclusion !== undefined ? { reportConclusion: dto.reportConclusion } : {}),
+        ...(dto.clinicalSignificance !== undefined ? { clinicalSignificance: dto.clinicalSignificance } : {}),
+        ...(dto.preparationNote !== undefined ? { preparationNote: dto.preparationNote } : {}),
+        ...(dto.collectionNote !== undefined ? { collectionNote: dto.collectionNote } : {}),
+        ...(dto.isTemplateComplete !== undefined ? { isTemplateComplete: dto.isTemplateComplete } : {}),
+        templateLastEditedById: userId ?? null,
+        templateLastEditedAt: new Date(),
+      },
+      select: {
+        id: true,
+        reportTitle: true,
+        reportIntro: true,
+        reportConclusion: true,
+        clinicalSignificance: true,
+        preparationNote: true,
+        collectionNote: true,
+        isTemplateComplete: true,
+      },
+    });
+  }
+
+  async addParameter(
+    tenantId: string,
+    testId: string,
+    dto: {
+      name: string;
+      fieldType?: string;
+      unit?: string;
+      sortOrder?: number;
+      isMandatory?: boolean;
+      clinicalNote?: string;
+      abnormalityNote?: string;
+      footerNote?: string;
+      methodology?: string;
+      specimenNote?: string;
+      displayOnReport?: boolean;
+      options?: string;
+    },
+    userId?: string,
+  ) {
+    await this.findOne(tenantId, testId);
+    return this.prisma.reportParameter.create({
+      data: {
+        tenantId,
+        testCatalogId: testId,
+        name: dto.name,
+        fieldType: dto.fieldType ?? "NUMERIC",
+        unit: dto.unit ?? null,
+        sortOrder: dto.sortOrder ?? 0,
+        isMandatory: dto.isMandatory ?? true,
+        clinicalNote: dto.clinicalNote ?? null,
+        abnormalityNote: dto.abnormalityNote ?? null,
+        footerNote: dto.footerNote ?? null,
+        methodology: dto.methodology ?? null,
+        specimenNote: dto.specimenNote ?? null,
+        displayOnReport: dto.displayOnReport ?? true,
+        options: dto.options ?? null,
+        lastEditedById: userId ?? null,
+        lastEditedAt: new Date(),
+      },
+    });
+  }
+
+  async updateParameter(
+    tenantId: string,
+    paramId: string,
+    dto: Record<string, unknown>,
+    userId?: string,
+  ) {
+    const param = await this.prisma.reportParameter.findFirst({
+      where: { id: paramId, tenantId },
+    });
+    if (!param) throw new NotFoundException(`Parameter ${paramId} not found`);
+
+    const allowedFields = [
+      "name", "fieldType", "unit", "sortOrder", "isMandatory",
+      "clinicalNote", "abnormalityNote", "footerNote", "methodology",
+      "specimenNote", "isEditable", "displayOnReport", "printOrder",
+      "options", "isActive", "defaultValue", "formula", "method",
+    ];
+
+    const data: Record<string, unknown> = {};
+    for (const key of allowedFields) {
+      if (dto[key] !== undefined) data[key] = dto[key];
+    }
+    data.lastEditedById = userId ?? null;
+    data.lastEditedAt = new Date();
+
+    return this.prisma.reportParameter.update({
+      where: { id: paramId },
+      data,
+    });
+  }
+
+  async deleteParameter(tenantId: string, paramId: string) {
+    const param = await this.prisma.reportParameter.findFirst({
+      where: { id: paramId, tenantId },
+    });
+    if (!param) throw new NotFoundException(`Parameter ${paramId} not found`);
+
+    await this.prisma.referenceRange.deleteMany({
+      where: { reportParameterId: paramId },
+    });
+    await this.prisma.reportParameter.delete({ where: { id: paramId } });
+    return { deleted: true };
+  }
+
+  async addReferenceRange(
+    tenantId: string,
+    paramId: string,
+    dto: {
+      genderFilter?: string;
+      ageMinYears?: number;
+      ageMaxYears?: number;
+      lowNormal?: number;
+      highNormal?: number;
+      lowCritical?: number;
+      highCritical?: number;
+      unit?: string;
+      notes?: string;
+    },
+  ) {
+    const param = await this.prisma.reportParameter.findFirst({
+      where: { id: paramId, tenantId },
+      select: { id: true, testCatalogId: true, unit: true },
+    });
+    if (!param) throw new NotFoundException(`Parameter ${paramId} not found`);
+
+    return this.prisma.referenceRange.create({
+      data: {
+        tenantId,
+        testCatalogId: param.testCatalogId,
+        reportParameterId: paramId,
+        genderFilter: dto.genderFilter ?? null,
+        ageMinYears: dto.ageMinYears ?? null,
+        ageMaxYears: dto.ageMaxYears ?? null,
+        lowNormal: dto.lowNormal ?? null,
+        highNormal: dto.highNormal ?? null,
+        lowCritical: dto.lowCritical ?? null,
+        highCritical: dto.highCritical ?? null,
+        unit: dto.unit ?? param.unit ?? null,
+        notes: dto.notes ?? null,
+      },
+    });
+  }
+
+  async updateReferenceRange(
+    tenantId: string,
+    rangeId: string,
+    dto: Record<string, unknown>,
+  ) {
+    const range = await this.prisma.referenceRange.findFirst({
+      where: { id: rangeId, tenantId },
+    });
+    if (!range) throw new NotFoundException(`Reference range ${rangeId} not found`);
+
+    const allowedFields = [
+      "genderFilter", "ageMinYears", "ageMaxYears",
+      "lowNormal", "highNormal", "lowCritical", "highCritical",
+      "unit", "notes",
+    ];
+
+    const data: Record<string, unknown> = {};
+    for (const key of allowedFields) {
+      if (dto[key] !== undefined) data[key] = dto[key];
+    }
+
+    return this.prisma.referenceRange.update({
+      where: { id: rangeId },
+      data,
+    });
+  }
+
+  async deleteReferenceRange(tenantId: string, rangeId: string) {
+    const range = await this.prisma.referenceRange.findFirst({
+      where: { id: rangeId, tenantId },
+    });
+    if (!range) throw new NotFoundException(`Reference range ${rangeId} not found`);
+
+    await this.prisma.referenceRange.delete({ where: { id: rangeId } });
+    return { deleted: true };
+  }
+
+  async getTemplateStatus(tenantId: string) {
+    const tests = await this.prisma.testCatalog.findMany({
+      where: { tenantId, isActive: true },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        reportTitle: true,
+        reportIntro: true,
+        reportConclusion: true,
+        isTemplateComplete: true,
+        reportParameters: {
+          where: { isActive: true },
+          select: {
+            id: true,
+            name: true,
+            clinicalNote: true,
+            abnormalityNote: true,
+            _count: { select: { referenceRanges: true } },
+          },
+        },
+      },
+      orderBy: { name: "asc" },
+    });
+
+    // Only score tests that have parameters
+    const testsWithParams = tests.filter((t) => t.reportParameters.length > 0);
+
+    const scored = testsWithParams.map((t) => {
+      let score = 0;
+      if (t.reportIntro) score += 20;
+      if (t.reportConclusion) score += 10;
+      const totalParams = t.reportParameters.length;
+      if (totalParams > 0) {
+        const withNotes = t.reportParameters.filter((p) => p.clinicalNote).length;
+        score += Math.round((withNotes / totalParams) * 30);
+        const withAbnormality = t.reportParameters.filter((p) => p.abnormalityNote).length;
+        score += Math.round((withAbnormality / totalParams) * 25);
+        const withRanges = t.reportParameters.filter((p) => p._count.referenceRanges > 0).length;
+        score += Math.round((withRanges / totalParams) * 15);
+      }
+
+      const missing: string[] = [];
+      if (!t.reportIntro) missing.push("reportIntro");
+      if (!t.reportConclusion) missing.push("reportConclusion");
+      const paramsWithoutNotes = t.reportParameters.filter((p) => !p.clinicalNote).map((p) => p.name);
+      if (paramsWithoutNotes.length > 0) missing.push(`clinicalNote on ${paramsWithoutNotes.length} params`);
+      const paramsWithoutAbnormality = t.reportParameters.filter((p) => !p.abnormalityNote).map((p) => p.name);
+      if (paramsWithoutAbnormality.length > 0) missing.push(`abnormalityNote on ${paramsWithoutAbnormality.length} params`);
+
+      return {
+        id: t.id,
+        code: t.code,
+        name: t.name,
+        paramCount: totalParams,
+        score,
+        isComplete: score >= 80,
+        missing,
+      };
+    });
+
+    const complete = scored.filter((s) => s.isComplete);
+    const incomplete = scored.filter((s) => !s.isComplete);
+
+    return {
+      totalWithParams: testsWithParams.length,
+      complete: complete.length,
+      incomplete: incomplete.length,
+      tests: scored,
+    };
   }
 }

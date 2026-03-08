@@ -68,12 +68,12 @@ interface ApprovalItem {
   submittedBy: ApprovalSubmittedBy;
   submittedAt: string;
   priority: string; // ROUTINE | URGENT | STAT
-  flagSummary: {
+  flagSummary?: {
     total: number;
     normal: number;
     abnormal: number;
     critical: number;
-  };
+  } | null;
   results: ApprovalTestResult[];
   referringDoctor: ApprovalDoctor | null;
   interpretation: string;
@@ -217,17 +217,23 @@ function buildMockApprovals(): ApprovalItem[] {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatWaitingTime(isoDate: string): string {
-  const diffMs = Date.now() - new Date(isoDate).getTime();
+function formatWaitingTime(isoDate: string | null | undefined): string {
+  if (!isoDate) return "—";
+  const date = new Date(isoDate);
+  if (isNaN(date.getTime())) return "—";
+  const diffMs = Date.now() - date.getTime();
+  if (diffMs < 0) return "just now";
   const totalMinutes = Math.floor(diffMs / (1000 * 60));
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
+  if (totalMinutes < 1) return "just now";
   if (hours === 0) return `${minutes}m ago`;
-  return `${hours}h ${minutes}m ago`;
+  if (hours < 24) return `${hours}h ${minutes}m ago`;
+  return `${Math.floor(hours / 24)}d ago`;
 }
 
 function hasCriticalFlag(item: ApprovalItem): boolean {
-  return item.flagSummary.critical > 0;
+  return (item.flagSummary?.critical ?? 0) > 0;
 }
 
 // ── Stat Card ────────────────────────────────────────────────────────────────
@@ -311,18 +317,18 @@ export default function ApprovalsPage() {
   const filteredItems = useMemo(() => {
     let filtered = [...items];
     if (activeFilter === "NORMAL") {
-      filtered = filtered.filter((i) => i.flagSummary.abnormal === 0 && i.flagSummary.critical === 0);
+      filtered = filtered.filter((i) => (i.flagSummary?.abnormal ?? 0) === 0 && (i.flagSummary?.critical ?? 0) === 0);
     } else if (activeFilter === "ABNORMAL") {
-      filtered = filtered.filter((i) => i.flagSummary.abnormal > 0 && i.flagSummary.critical === 0);
+      filtered = filtered.filter((i) => (i.flagSummary?.abnormal ?? 0) > 0 && (i.flagSummary?.critical ?? 0) === 0);
     } else if (activeFilter === "CRITICAL") {
-      filtered = filtered.filter((i) => i.flagSummary.critical > 0);
+      filtered = filtered.filter((i) => (i.flagSummary?.critical ?? 0) > 0);
     } else if (activeFilter === "STAT") {
       filtered = filtered.filter((i) => i.priority === "STAT");
     }
     // Sort critical to top
     filtered.sort((a, b) => {
-      const aCrit = a.flagSummary.critical > 0 ? 1 : 0;
-      const bCrit = b.flagSummary.critical > 0 ? 1 : 0;
+      const aCrit = (a.flagSummary?.critical ?? 0) > 0 ? 1 : 0;
+      const bCrit = (b.flagSummary?.critical ?? 0) > 0 ? 1 : 0;
       return bCrit - aCrit;
     });
     return filtered;
@@ -425,17 +431,17 @@ export default function ApprovalsPage() {
   // ── Flag column renderer ─────────────────────────────────────────────────
 
   const renderFlags = (item: ApprovalItem) => {
-    if (item.flagSummary.critical > 0) {
+    if ((item.flagSummary?.critical ?? 0) > 0) {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
           <ShieldAlert size={12} /> CRITICAL
         </span>
       );
     }
-    if (item.flagSummary.abnormal > 0) {
+    if ((item.flagSummary?.abnormal ?? 0) > 0) {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
-          <AlertTriangle size={12} /> {item.flagSummary.abnormal} Abnormal
+          <AlertTriangle size={12} /> {item.flagSummary?.abnormal ?? 0} Abnormal
         </span>
       );
     }
@@ -605,20 +611,20 @@ export default function ApprovalsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium text-slate-800 text-sm">
-                          {item.patient.firstName} {item.patient.lastName}
+                          {item.patient?.firstName ?? "—"} {item.patient?.lastName ?? ""}
                         </p>
                         <p className="text-xs text-slate-400">
-                          {item.patient.age ?? "—"}y / {item.patient.gender}
+                          {item.patient?.age ?? "—"}y / {item.patient?.gender ?? "—"}
                         </p>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-xs text-slate-600" title={item.tests.join(", ")}>
-                          {truncate(item.tests.join(", "), 35)}
+                        <span className="text-xs text-slate-600" title={(item.tests ?? []).join(", ")}>
+                          {truncate((item.tests ?? []).join(", "), 35) || "—"}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-sm text-slate-700">
-                          {item.submittedBy.firstName} {item.submittedBy.lastName}
+                          {item.submittedBy?.firstName ?? "—"} {item.submittedBy?.lastName ?? ""}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -692,18 +698,18 @@ export default function ApprovalsPage() {
                 <div>
                   <p className="text-xs text-slate-400 mb-0.5">Patient Name</p>
                   <p className="font-semibold text-slate-800">
-                    {previewItem.patient.firstName} {previewItem.patient.lastName}
+                    {previewItem.patient?.firstName ?? "—"} {previewItem.patient?.lastName ?? ""}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-400 mb-0.5">Age / Gender</p>
                   <p className="font-medium text-slate-700">
-                    {previewItem.patient.age ?? "—"} yrs / {previewItem.patient.gender}
+                    {previewItem.patient?.age ?? "—"} yrs / {previewItem.patient?.gender ?? "—"}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-400 mb-0.5">MRN</p>
-                  <p className="font-mono text-xs font-semibold text-slate-700">{previewItem.patient.mrn}</p>
+                  <p className="font-mono text-xs font-semibold text-slate-700">{previewItem.patient?.mrn ?? "—"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-400 mb-0.5">Order #</p>
@@ -746,55 +752,63 @@ export default function ApprovalsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {previewItem.results.map((r) => {
-                        const isCrit = r.interpretation === "CRITICAL";
-                        const isAbn = r.interpretation === "ABNORMAL";
-                        return (
-                          <tr
-                            key={r.id}
-                            className={cn(
-                              "transition-colors",
-                              isCrit && "bg-red-50",
-                              isAbn && !isCrit && "bg-orange-50/50"
-                            )}
-                          >
-                            <td className="px-4 py-2.5">
-                              <p className="text-xs text-slate-400">{r.testName}</p>
-                              <p className="font-medium text-slate-800">{r.parameter}</p>
-                            </td>
-                            <td className={cn(
-                              "px-4 py-2.5 font-bold",
-                              isCrit ? "text-red-700" : isAbn ? "text-orange-700" : "text-slate-800"
-                            )}>
-                              {r.value}
-                              {r.isDelta && r.previousValue && (
-                                <span className="block text-[10px] font-normal text-slate-400 mt-0.5">
-                                  prev: {r.previousValue}
-                                </span>
+                      {(previewItem.results ?? []).length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="text-center py-8 text-slate-400 text-sm">
+                            No results entered yet
+                          </td>
+                        </tr>
+                      ) : (
+                        (previewItem.results ?? []).map((r) => {
+                          const isCrit = r.interpretation === "CRITICAL";
+                          const isAbn = r.interpretation === "ABNORMAL";
+                          return (
+                            <tr
+                              key={r.id}
+                              className={cn(
+                                "transition-colors",
+                                isCrit && "bg-red-50",
+                                isAbn && !isCrit && "bg-orange-50/50"
                               )}
-                            </td>
-                            <td className="px-4 py-2.5 text-slate-500">{r.unit}</td>
-                            <td className="px-4 py-2.5 text-slate-500">{r.referenceRange}</td>
-                            <td className="px-4 py-2.5">
-                              {isCrit && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                                  <ShieldAlert size={10} /> CRITICAL
-                                </span>
-                              )}
-                              {isAbn && !isCrit && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
-                                  <AlertTriangle size={10} /> ABNORMAL
-                                </span>
-                              )}
-                              {r.interpretation === "NORMAL" && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                  Normal
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                            >
+                              <td className="px-4 py-2.5">
+                                <p className="text-xs text-slate-400">{r.testName}</p>
+                                <p className="font-medium text-slate-800">{r.parameter}</p>
+                              </td>
+                              <td className={cn(
+                                "px-4 py-2.5 font-bold",
+                                isCrit ? "text-red-700" : isAbn ? "text-orange-700" : "text-slate-800"
+                              )}>
+                                {r.value}
+                                {r.isDelta && r.previousValue && (
+                                  <span className="block text-[10px] font-normal text-slate-400 mt-0.5">
+                                    prev: {r.previousValue}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-4 py-2.5 text-slate-500">{r.unit}</td>
+                              <td className="px-4 py-2.5 text-slate-500">{r.referenceRange}</td>
+                              <td className="px-4 py-2.5">
+                                {isCrit && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                    <ShieldAlert size={10} /> CRITICAL
+                                  </span>
+                                )}
+                                {isAbn && !isCrit && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
+                                    <AlertTriangle size={10} /> ABNORMAL
+                                  </span>
+                                )}
+                                {r.interpretation === "NORMAL" && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                    Normal
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -862,7 +876,7 @@ export default function ApprovalsPage() {
               <div className="flex justify-between">
                 <span className="text-slate-500">Patient</span>
                 <span className="font-medium">
-                  {rejectTarget.patient.firstName} {rejectTarget.patient.lastName}
+                  {rejectTarget.patient?.firstName ?? "—"} {rejectTarget.patient?.lastName ?? ""}
                 </span>
               </div>
             </div>

@@ -11,8 +11,13 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   CONFIRMED: { label: "Confirmed", className: "bg-blue-50 text-blue-700 ring-blue-200" },
   SAMPLE_COLLECTED: { label: "Collected", className: "bg-purple-50 text-purple-700 ring-purple-200" },
   IN_PROCESSING: { label: "Processing", className: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
+  PENDING_APPROVAL: { label: "Pending Approval", className: "bg-purple-50 text-purple-700 ring-purple-200" },
   RESULTED: { label: "Resulted", className: "bg-teal-50 text-teal-700 ring-teal-200" },
+  APPROVED: { label: "Approved", className: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
   REPORTED: { label: "Reported", className: "bg-green-50 text-green-700 ring-green-200" },
+  DISPATCHED: { label: "Dispatched", className: "bg-sky-50 text-sky-700 ring-sky-200" },
+  DELIVERED: { label: "Delivered", className: "bg-green-50 text-green-700 ring-green-200" },
+  COMPLETED: { label: "Completed", className: "bg-green-50 text-green-700 ring-green-200" },
   CANCELLED: { label: "Cancelled", className: "bg-red-50 text-red-700 ring-red-200" },
   // Sample statuses
   PENDING_COLLECTION: { label: "Pending", className: "bg-yellow-50 text-yellow-700 ring-yellow-200" },

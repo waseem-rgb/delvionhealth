@@ -67,6 +67,29 @@ import {
   Truck,
   GraduationCap,
   Bot,
+  UserPlus,
+  Gift,
+  Repeat,
+  Sparkles,
+  Package,
+  Home,
+  Hash,
+  FileOutput,
+  Syringe,
+  Search,
+  Monitor,
+  PieChart,
+  Ticket,
+  UsersRound,
+  Hospital,
+  Briefcase,
+  Landmark,
+  Smartphone,
+  GitBranch,
+  BadgeDollarSign,
+  BarChart,
+  Wrench,
+  IndianRupee,
 } from "lucide-react";
 
 interface NavItem {
@@ -82,6 +105,24 @@ interface NavGroup {
   items: NavItem[];
 }
 
+const SECTION_COLORS: Record<string, string> = {
+  Overview: "text-slate-400/80",
+  "Front Desk": "text-teal-400/90",
+  "Lab Operations": "text-blue-400/90",
+  "Reports & Billing": "text-violet-400/90",
+  "Revenue CRM": "text-emerald-400/90",
+  B2C: "text-slate-400/70",
+  B2B: "text-slate-400/70",
+  Finance: "text-orange-400/90",
+  "HR & Admin": "text-pink-400/90",
+  "Quality & Compliance": "text-cyan-400/90",
+  "Corporate & Wellness": "text-emerald-400/90",
+  Marketing: "text-rose-400/90",
+  Settings: "text-slate-400/80",
+};
+
+const SUB_SECTIONS = new Set(["B2C", "B2B"]);
+
 const NAV_GROUPS: NavGroup[] = [
   {
     label: "Overview",
@@ -94,10 +135,16 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Front Desk",
     roles: [Role.FRONT_DESK, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
     items: [
+      { label: "Dashboard", href: "/front-desk", icon: Monitor },
       { label: "Registration & Billing", href: "/registration", icon: ClipboardPlus },
       { label: "Patients", href: "/patients", icon: Users },
       { label: "Appointments", href: "/appointments", icon: Calendar },
+      { label: "Home Collection", href: "/front-desk/home-collection", icon: Home },
+      { label: "Queue & Tokens", href: "/front-desk/queue", icon: Hash },
       { label: "Orders", href: "/orders", icon: ShoppingCart },
+      { label: "Reports Delivery", href: "/front-desk/reports", icon: FileOutput },
+      { label: "Phleb Schedule", href: "/front-desk/phleb-schedule", icon: Syringe },
+      { label: "Price Enquiry & Package", href: "/front-desk/price-enquiry", icon: Search },
     ],
   },
   {
@@ -127,13 +174,33 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Revenue CRM",
     roles: [Role.FIELD_SALES_REP, Role.LAB_MANAGER, Role.FINANCE_EXECUTIVE, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
     items: [
-      { label: "B2B Organisations", href: "/organisations", icon: Building2 },
-      { label: "Revenue Dashboard", href: "/crm/revenue", icon: DollarSign },
-      { label: "Clinics & Doctors", href: "/crm/doctors", icon: Stethoscope },
-      { label: "Leads", href: "/crm/leads", icon: Handshake },
-      { label: "Campaigns", href: "/crm/campaigns", icon: Megaphone },
-      { label: "Targets", href: "/crm/targets", icon: Target },
-      { label: "Commissions", href: "/crm/commissions", icon: Percent },
+      { label: "Command Center", href: "/revenue-crm", icon: PieChart },
+    ],
+  },
+  {
+    label: "B2C",
+    roles: [Role.FIELD_SALES_REP, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
+    items: [
+      { label: "Digital Campaigns", href: "/revenue-crm/campaigns", icon: Megaphone },
+      { label: "Health Camps", href: "/revenue-crm/camps", icon: Tent },
+      { label: "Coupons & Offers", href: "/revenue-crm/coupons", icon: Ticket },
+      { label: "Patient Segments", href: "/revenue-crm/segments", icon: UsersRound },
+      { label: "B2C ROI", href: "/revenue-crm/b2c-roi", icon: TrendingUp },
+    ],
+  },
+  {
+    label: "B2B",
+    roles: [Role.FIELD_SALES_REP, Role.LAB_MANAGER, Role.FINANCE_EXECUTIVE, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
+    items: [
+      { label: "Sales Team", href: "/revenue-crm/sales-team", icon: Users },
+      { label: "Doctors & Clinics", href: "/revenue-crm/doctors", icon: Stethoscope },
+      { label: "Hospitals & Labs", href: "/revenue-crm/b2b-accounts", icon: Hospital },
+      { label: "Corporates & AHC", href: "/revenue-crm/contracts", icon: Briefcase },
+      { label: "TPA & Insurance", href: "/revenue-crm/tpa", icon: Landmark },
+      { label: "Aggregators", href: "/revenue-crm/aggregators", icon: Smartphone },
+      { label: "Sales Pipeline", href: "/revenue-crm/pipeline", icon: GitBranch },
+      { label: "Rev Share", href: "/revenue-crm/revshare", icon: BadgeDollarSign },
+      { label: "B2B Revenue", href: "/revenue-crm/b2b-roi", icon: BarChart },
     ],
   },
   {
@@ -142,6 +209,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: "Finance Overview", href: "/finance", icon: Wallet },
       { label: "Receivables", href: "/finance/receivables", icon: Coins },
+      { label: "Accounting", href: "/finance/accounting", icon: BookOpenCheck },
       { label: "GST Reports", href: "/finance/gst", icon: Scale },
       { label: "Procurement", href: "/procurement", icon: Truck },
     ],
@@ -181,6 +249,16 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: "Marketing",
+    roles: [Role.FIELD_SALES_REP, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
+    items: [
+      { label: "Overview", href: "/marketing", icon: TrendingUp },
+      { label: "Packages & Offers", href: "/marketing/packages", icon: Package },
+      { label: "Patient Recall", href: "/marketing/recall", icon: Repeat },
+      { label: "Content Studio", href: "/marketing/content", icon: Sparkles },
+    ],
+  },
+  {
     label: "Settings",
     roles: [Role.TENANT_ADMIN, Role.SUPER_ADMIN, Role.IT_ADMIN],
     items: [
@@ -193,6 +271,8 @@ const NAV_GROUPS: NavGroup[] = [
       { label: "API Keys", href: "/integrations/api-keys", icon: Key },
       { label: "FHIR Explorer", href: "/integrations/fhir", icon: HeartPulse },
       { label: "Voice Agent", href: "/settings/voice-agent", icon: Bot },
+      { label: "Instruments & CPT", href: "/settings/instruments", icon: Wrench },
+      { label: "Margin Dashboard", href: "/settings/margin-dashboard", icon: IndianRupee },
     ],
   },
 ];
@@ -256,13 +336,32 @@ export function Sidebar() {
       </button>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4">
-        {visibleGroups.map((group) => (
+      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
+        {visibleGroups.map((group, idx) => (
           <div key={group.label}>
             {!collapsed && (
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 px-3 mb-1">
-                {group.label}
-              </p>
+              <>
+                {/* Separator before every section except the first */}
+                {idx > 0 && !SUB_SECTIONS.has(group.label) && (
+                  <div className="mx-3 mb-3 mt-1 border-t border-white/[0.08]" />
+                )}
+                {SUB_SECTIONS.has(group.label) ? (
+                  /* Sub-section pill label (B2C / B2B) */
+                  <div className="px-4 mt-3 mb-1">
+                    <span className="text-[9px] font-semibold tracking-[0.2em] uppercase text-slate-500 bg-slate-700/50 px-2 py-0.5 rounded">
+                      {group.label}
+                    </span>
+                  </div>
+                ) : (
+                  /* Section heading with colored label */
+                  <div className="px-4 mb-2 flex items-center gap-2">
+                    <span className={`text-[10px] font-bold tracking-[0.15em] uppercase ${SECTION_COLORS[group.label] ?? "text-slate-400/80"}`}>
+                      {group.label}
+                    </span>
+                    <div className="flex-1 h-px bg-white/[0.06]" />
+                  </div>
+                )}
+              </>
             )}
             <div className="space-y-0.5">
               {group.items.map((item) => {

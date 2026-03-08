@@ -57,6 +57,7 @@ interface WaitingListItem {
   accessionedAt: string | null;
   patient: WaitingListPatient;
   tests: string[];
+  testDetails?: { id: string; name: string }[];
   totalTests: number;
   completedTests: number;
   incompleteTests: number;
@@ -445,7 +446,24 @@ function RightPanel({
   const router = useRouter();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"pending" | "history" | "overview" | "trends">("pending");
+  const [expandedTests, setExpandedTests] = useState<Set<string>>(new Set());
+  const [testParamsCache, setTestParamsCache] = useState<Record<string, any[]>>({});
   const age = item.patient.dob ? computeAge(item.patient.dob) : null;
+
+  const toggleTestExpand = useCallback(async (testId: string) => {
+    if (expandedTests.has(testId)) {
+      setExpandedTests((prev) => { const next = new Set(prev); next.delete(testId); return next; });
+      return;
+    }
+    if (!testParamsCache[testId]) {
+      try {
+        const res = await api.get(`/test-catalog/${testId}/parameters`);
+        const params = res.data?.data?.data ?? res.data?.data ?? [];
+        setTestParamsCache((prev) => ({ ...prev, [testId]: params }));
+      } catch { /* ignore */ }
+    }
+    setExpandedTests((prev) => new Set(prev).add(testId));
+  }, [expandedTests, testParamsCache]);
 
   const startMutation = useMutation({
     mutationFn: async (orderId: string) => {
@@ -675,7 +693,19 @@ function RightPanel({
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-slate-800 truncate">{test}</p>
+                      {item.testDetails?.[idx] ? (
+                        <button
+                          onClick={() => toggleTestExpand(item.testDetails![idx].id)}
+                          className="flex items-center gap-1 text-xs font-medium text-slate-800 hover:text-blue-600 transition-colors"
+                        >
+                          {expandedTests.has(item.testDetails![idx].id)
+                            ? <ChevronDown size={12} />
+                            : <ChevronRight size={12} />}
+                          {test}
+                        </button>
+                      ) : (
+                        <p className="text-xs font-medium text-slate-800 truncate">{test}</p>
+                      )}
                       <div className="flex items-center gap-2 mt-1">
                         {item.accessionNumbers[0] && (
                           <span className="text-[10px] text-slate-400 font-mono">
@@ -737,6 +767,41 @@ function RightPanel({
                       </span>
                     )}
                   </div>
+                  {/* Expanded parameters */}
+                  {item.testDetails?.[idx] && expandedTests.has(item.testDetails[idx].id) && (
+                    <div className="ml-5 mt-2 border-l-2 border-slate-200 pl-3 pb-1">
+                      {testParamsCache[item.testDetails[idx].id] ? (
+                        testParamsCache[item.testDetails[idx].id].length > 0 ? (
+                          <table className="w-full text-[10px]">
+                            <thead>
+                              <tr className="text-slate-400">
+                                <th className="text-left py-0.5 font-medium">Parameter</th>
+                                <th className="text-left py-0.5 font-medium">Unit</th>
+                                <th className="text-left py-0.5 font-medium">Reference Range</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {testParamsCache[item.testDetails[idx].id].map((param: any, pi: number) => (
+                                <tr key={pi} className="border-t border-slate-50">
+                                  <td className="py-1 text-slate-700">{param.name}</td>
+                                  <td className="py-1 text-slate-500">{param.unit || "—"}</td>
+                                  <td className="py-1 text-slate-500">
+                                    {param.referenceRanges?.[0]
+                                      ? `${param.referenceRanges[0].lowNormal ?? ""} – ${param.referenceRanges[0].highNormal ?? ""}`
+                                      : "—"}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        ) : (
+                          <p className="text-[10px] text-slate-400 py-1">No parameters defined</p>
+                        )
+                      ) : (
+                        <p className="text-[10px] text-slate-400 py-1">Loading parameters...</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}

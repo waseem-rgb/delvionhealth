@@ -39,6 +39,8 @@ interface Organisation {
   footerImageUrl: string | null;
   reportHeaderHtml: string | null;
   reportFooterHtml: string | null;
+  defaultReferringDoctorId: string | null;
+  defaultReferringDoctorName: string | null;
   autoReportEmail: boolean;
   autoReportWhatsapp: boolean;
   patientCommMode: string;
@@ -97,6 +99,7 @@ const labelCls = "block text-xs font-semibold text-slate-600 mb-1.5";
 
 const INITIAL_FORM = {
   name: "", code: "", contactPerson: "", email: "", phone: "",
+  defaultReferringDoctorId: "", defaultReferringDoctorName: "",
   address: "", city: "", state: "", pincode: "", gstNumber: "", panNumber: "",
   paymentType: "WALKIN" as string,
   creditDays: 30, creditLimit: "", startingAdvance: "",
@@ -468,6 +471,8 @@ function CreateOrgModal({
       return {
         name: editingOrg.name, code: editingOrg.code,
         contactPerson: editingOrg.contactPerson || "",
+        defaultReferringDoctorId: editingOrg.defaultReferringDoctorId || "",
+        defaultReferringDoctorName: editingOrg.defaultReferringDoctorName || "",
         email: editingOrg.email || "", phone: editingOrg.phone || "",
         address: editingOrg.address || "", city: editingOrg.city || "",
         state: editingOrg.state || "", pincode: editingOrg.pincode || "",
@@ -536,6 +541,8 @@ function CreateOrgModal({
         name: form.name.trim(),
         code: form.code.trim() || undefined,
         contactPerson: form.contactPerson || undefined,
+        defaultReferringDoctorId: form.defaultReferringDoctorId || undefined,
+        defaultReferringDoctorName: form.defaultReferringDoctorName || undefined,
         email: form.email || undefined,
         phone: form.phone || undefined,
         address: form.address || undefined,
@@ -628,6 +635,11 @@ function CreateOrgModal({
                     <label className={labelCls}>Contact Person</label>
                     <input value={form.contactPerson} onChange={(e) => updateField("contactPerson", e.target.value)} className={inputCls} />
                   </div>
+                </div>
+                <div>
+                  <label className={labelCls}>Default Referring Doctor</label>
+                  <input value={form.defaultReferringDoctorName} onChange={(e) => { updateField("defaultReferringDoctorName", e.target.value); updateField("defaultReferringDoctorId", ""); }} className={inputCls} placeholder="Search doctor name..." />
+                  <p className="text-xs text-slate-400 mt-1">Will be pre-selected when registering patients from this organisation</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>

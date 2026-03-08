@@ -119,7 +119,12 @@ export class ReportsService {
         branch: true,
         items: {
           include: {
-            testCatalog: { select: { id: true, name: true, code: true, loincCode: true } },
+            testCatalog: {
+              select: {
+                id: true, name: true, code: true, loincCode: true,
+                reportTitle: true, reportIntro: true, reportConclusion: true,
+              },
+            },
             testResults: {
               where: { tenantId },
               orderBy: { createdAt: "desc" },
@@ -150,8 +155,17 @@ export class ReportsService {
 
     const reportNumber = await this.generateReportNumber(tenantId);
 
+    // Fetch parameter-level clinical notes for abnormality display
+    const testCatalogIds = [...new Set(order.items.map((i) => i.testCatalogId))];
+    const paramNotes = await this.prisma.reportParameter.findMany({
+      where: { testCatalogId: { in: testCatalogIds }, isActive: true },
+      select: { testCatalogId: true, name: true, clinicalNote: true, abnormalityNote: true, footerNote: true },
+    });
+    const paramNotesMap = new Map(paramNotes.map((p) => [`${p.testCatalogId}:${p.name}`, p]));
+
     const results: ReportTemplateData["results"] = order.items.map((item) => {
       const r = item.testResults[0]!;
+      const pNote = paramNotesMap.get(`${item.testCatalogId}:${r.flags ?? r.value}`);
       return {
         testName: item.testCatalog.name,
         testCode: item.testCatalog.code,
@@ -163,6 +177,19 @@ export class ReportsService {
         interpretation: r.interpretation,
         deltaFlagged: r.deltaFlagged,
         pathologistNotes: r.pathologistNotes,
+        clinicalNote: pNote?.clinicalNote ?? null,
+        abnormalityNote: pNote?.abnormalityNote ?? null,
+        footerNote: pNote?.footerNote ?? null,
+      };
+    });
+
+    const testSections: ReportTemplateData["testSections"] = [...new Set(order.items.map((i) => i.testCatalog.code))].map((code) => {
+      const item = order.items.find((i) => i.testCatalog.code === code)!;
+      return {
+        testCode: code,
+        reportTitle: item.testCatalog.reportTitle ?? null,
+        reportIntro: item.testCatalog.reportIntro ?? null,
+        reportConclusion: item.testCatalog.reportConclusion ?? null,
       };
     });
 
@@ -193,6 +220,7 @@ export class ReportsService {
         priority: order.priority,
       },
       results,
+      testSections,
       branding: await this.resolveBranding(tenantId, order.organizationId),
       signingDoctors: await this.resolveSigningDoctors(tenantId),
     };
@@ -313,7 +341,12 @@ export class ReportsService {
             branch: true,
             items: {
               include: {
-                testCatalog: { select: { id: true, name: true, code: true, loincCode: true } },
+                testCatalog: {
+                  select: {
+                    id: true, name: true, code: true, loincCode: true,
+                    reportTitle: true, reportIntro: true, reportConclusion: true,
+                  },
+                },
                 testResults: {
                   where: { tenantId },
                   orderBy: { createdAt: "desc" },
@@ -357,6 +390,16 @@ export class ReportsService {
       };
     });
 
+    const signTestSections: ReportTemplateData["testSections"] = [...new Set(report.order.items.map((i) => i.testCatalog.code))].map((code) => {
+      const item = report.order.items.find((i) => i.testCatalog.code === code)!;
+      return {
+        testCode: code,
+        reportTitle: item.testCatalog.reportTitle ?? null,
+        reportIntro: item.testCatalog.reportIntro ?? null,
+        reportConclusion: item.testCatalog.reportConclusion ?? null,
+      };
+    });
+
     const html = buildReportHtml({
       reportNumber: report.reportNumber,
       generatedAt: report.createdAt,
@@ -386,6 +429,7 @@ export class ReportsService {
         priority: report.order.priority,
       },
       results,
+      testSections: signTestSections,
       branding: await this.resolveBranding(tenantId, report.order.organizationId),
       signingDoctors: await this.resolveSigningDoctors(tenantId),
     });

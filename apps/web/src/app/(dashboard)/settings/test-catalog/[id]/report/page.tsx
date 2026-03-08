@@ -50,6 +50,13 @@ interface ReportParameter {
   isMandatory: boolean;
   sortOrder: number;
   isActive: boolean;
+  clinicalNote: string | null;
+  abnormalityNote: string | null;
+  footerNote: string | null;
+  methodology: string | null;
+  specimenNote: string | null;
+  isEditable: boolean;
+  displayOnReport: boolean;
   referenceRanges: ReferenceRange[];
 }
 
@@ -75,6 +82,13 @@ interface TestInfo {
   name: string;
   category: string;
   department: string;
+  reportTitle: string | null;
+  reportIntro: string | null;
+  reportConclusion: string | null;
+  clinicalSignificance: string | null;
+  preparationNote: string | null;
+  collectionNote: string | null;
+  isTemplateComplete: boolean;
 }
 
 interface AutoFillParam {
@@ -107,6 +121,7 @@ const ORIENTATIONS = ["PORTRAIT", "LANDSCAPE"];
 const FONTS = ["Arial", "Times New Roman", "Helvetica", "Courier New", "Georgia"];
 const TABS = [
   { id: "parameters", label: "Report Parameters", icon: ListOrdered },
+  { id: "template", label: "Report Template", icon: FileText },
   { id: "settings", label: "Report Settings", icon: Settings2 },
   { id: "supplementary", label: "Supplementary", icon: FileText },
 ];
@@ -366,6 +381,10 @@ export default function ReportBuilderPage() {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           />
+        )}
+
+        {activeTab === "template" && testInfo && (
+          <TemplateTab testId={testId} testInfo={testInfo} />
         )}
 
         {activeTab === "settings" && settings && (
@@ -714,7 +733,7 @@ function ParameterEditor({
         )}
 
         {/* Toggles */}
-        <div className="flex gap-6 pt-2">
+        <div className="flex flex-wrap gap-4 pt-2">
           <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
             <input
               type="checkbox"
@@ -733,6 +752,51 @@ function ParameterEditor({
             />
             Mandatory
           </label>
+          <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={param.displayOnReport}
+              onChange={(e) => onUpdateField("displayOnReport", e.target.checked)}
+              className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+            />
+            Display on Report
+          </label>
+        </div>
+
+        {/* Clinical Note */}
+        <div className="pt-2">
+          <label className="text-xs font-medium text-slate-500 mb-1 block">Clinical Note</label>
+          <textarea
+            defaultValue={param.clinicalNote ?? ""}
+            onBlur={(e) => onUpdateField("clinicalNote", e.target.value || null)}
+            placeholder="What this parameter measures (shown in patient report)..."
+            rows={3}
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg resize-y"
+          />
+        </div>
+
+        {/* Abnormality Reasons */}
+        <div>
+          <label className="text-xs font-medium text-slate-500 mb-1 block">Abnormality Reasons (JSON)</label>
+          <textarea
+            defaultValue={param.abnormalityNote ?? ""}
+            onBlur={(e) => onUpdateField("abnormalityNote", e.target.value || null)}
+            placeholder='[{"direction":"LOW","reasons":["Reason 1"]},{"direction":"HIGH","reasons":["Reason 1"]}]'
+            rows={3}
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg resize-y font-mono text-xs"
+          />
+        </div>
+
+        {/* Footer Note */}
+        <div>
+          <label className="text-xs font-medium text-slate-500 mb-1 block">Footer Note</label>
+          <textarea
+            defaultValue={param.footerNote ?? ""}
+            onBlur={(e) => onUpdateField("footerNote", e.target.value || null)}
+            placeholder="Printed at the bottom of this parameter section..."
+            rows={2}
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg resize-y"
+          />
         </div>
 
         {/* Reference Ranges */}
@@ -1178,6 +1242,132 @@ function AutoFillModal({
               {isApplying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               Add Selected
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Template Tab ──────────────────────────────
+
+function TemplateTab({ testId, testInfo }: { testId: string; testInfo: TestInfo }) {
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState({
+    reportTitle: testInfo.reportTitle ?? "",
+    reportIntro: testInfo.reportIntro ?? "",
+    reportConclusion: testInfo.reportConclusion ?? "",
+    clinicalSignificance: testInfo.clinicalSignificance ?? "",
+    preparationNote: testInfo.preparationNote ?? "",
+    collectionNote: testInfo.collectionNote ?? "",
+    isTemplateComplete: testInfo.isTemplateComplete,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: (dto: typeof form) =>
+      api.put(`/test-catalog/${testId}/template`, dto).then((r) => r.data?.data ?? r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["test-catalog", testId] });
+      toast.success("Template saved");
+    },
+    onError: () => toast.error("Failed to save template"),
+  });
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">Report Template</h3>
+          <p className="text-sm text-slate-500 mt-0.5">
+            Configure how this test appears on the printed patient report
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.isTemplateComplete}
+              onChange={(e) => setForm({ ...form, isTemplateComplete: e.target.checked })}
+              className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+            />
+            Mark as Complete
+          </label>
+          <button
+            onClick={() => saveMutation.mutate(form)}
+            disabled={saveMutation.isPending}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50"
+          >
+            {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Save Template
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-5">
+        <div>
+          <label className="text-xs font-medium text-slate-500 mb-1 block">Report Title</label>
+          <input
+            value={form.reportTitle}
+            onChange={(e) => setForm({ ...form, reportTitle: e.target.value })}
+            placeholder="e.g. COMPLETE BLOOD COUNT (CBC)"
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none"
+          />
+          <p className="text-xs text-slate-400 mt-1">How the test name appears on the printed report header</p>
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-slate-500 mb-1 block">Report Introduction</label>
+          <textarea
+            value={form.reportIntro}
+            onChange={(e) => setForm({ ...form, reportIntro: e.target.value })}
+            placeholder="Paragraph shown at the top of this test's section in the report..."
+            rows={4}
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg resize-y focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-slate-500 mb-1 block">Report Conclusion</label>
+          <textarea
+            value={form.reportConclusion}
+            onChange={(e) => setForm({ ...form, reportConclusion: e.target.value })}
+            placeholder="Text shown at the bottom of the test section..."
+            rows={3}
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg resize-y focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-slate-500 mb-1 block">Clinical Significance</label>
+          <textarea
+            value={form.clinicalSignificance}
+            onChange={(e) => setForm({ ...form, clinicalSignificance: e.target.value })}
+            placeholder="What this test is used to diagnose/monitor (for lab staff education)..."
+            rows={3}
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg resize-y focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-medium text-slate-500 mb-1 block">Preparation Note</label>
+            <textarea
+              value={form.preparationNote}
+              onChange={(e) => setForm({ ...form, preparationNote: e.target.value })}
+              placeholder="Fasting/preparation instructions..."
+              rows={2}
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg resize-y"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-500 mb-1 block">Collection Note</label>
+            <textarea
+              value={form.collectionNote}
+              onChange={(e) => setForm({ ...form, collectionNote: e.target.value })}
+              placeholder="Sample collection instructions for phlebotomist..."
+              rows={2}
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg resize-y"
+            />
           </div>
         </div>
       </div>

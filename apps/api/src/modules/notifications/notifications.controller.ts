@@ -96,4 +96,38 @@ export class NotificationsController {
   deactivatePushToken(@Body() dto: DeactivatePushTokenDto) {
     return this.pushService.deactivateToken(dto.token);
   }
+
+  @Post("send")
+  @ApiOperation({ summary: "Send a notification via WhatsApp/SMS/Email" })
+  async sendNotification(
+    @Body() dto: {
+      channel: string;
+      templateType: string;
+      to: string;
+      patientId?: string;
+      orderId?: string;
+      vars: Record<string, string>;
+    },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const message = Object.entries(dto.vars).reduce(
+      (msg, [key, val]) => msg.replace(`{${key}}`, val),
+      `Hi ${dto.vars.patientName ?? ""},\n\nYour registration is confirmed.\nTests: ${dto.vars.tests ?? ""}\nAmount: ₹${dto.vars.amount ?? ""}\n\nThank you!`,
+    );
+
+    try {
+      if (dto.channel === "WHATSAPP") {
+        await this.notificationsService.sendWhatsApp(dto.to, message);
+      } else if (dto.channel === "EMAIL") {
+        await this.notificationsService.sendEmail(
+          dto.to,
+          `Registration Confirmed | ${dto.vars.patientName ?? ""}`,
+          `<p>${message.replace(/\n/g, "<br>")}</p>`,
+        );
+      }
+      return { success: true, channel: dto.channel };
+    } catch {
+      return { success: false, channel: dto.channel, error: "Send failed" };
+    }
+  }
 }

@@ -56,6 +56,16 @@ export class ResultsController {
     return this.resultsService.validate(dto, user.tenantId, user.sub);
   }
 
+  @Post("save-draft")
+  @Roles(Role.SUPER_ADMIN, Role.LAB_MANAGER, Role.LAB_TECHNICIAN, Role.PATHOLOGIST)
+  @ApiOperation({ summary: "Save draft values for existing results" })
+  saveDraftValues(
+    @CurrentUser() user: JwtPayload,
+    @Body() body: { updates: Array<{ id: string; value: string; numericValue: number | null }> },
+  ) {
+    return this.resultsService.saveDraftValues(body.updates, user.tenantId, user.sub);
+  }
+
   @Get("pending")
   @ApiOperation({ summary: "Get pending results worklist" })
   @ApiQuery({ name: "branchId", required: false })

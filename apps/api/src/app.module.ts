@@ -46,6 +46,11 @@ import { SmartReportModule } from "./modules/smart-report/smart-report.module";
 import { VoiceAgentModule } from "./modules/voice-agent/voice-agent.module";
 import { WellnessModule } from "./modules/wellness/wellness.module";
 import { QualityModule } from "./modules/quality/quality.module";
+import { MarketingModule } from "./modules/marketing/marketing.module";
+import { FrontDeskModule } from "./modules/front-desk/front-desk.module";
+import { CouponsModule } from "./modules/coupons/coupons.module";
+import { RevenueCrmModule } from "./modules/revenue-crm/revenue-crm.module";
+import { LabPackagesModule } from "./modules/lab-packages/lab-packages.module";
 import { TenantMiddleware } from "./common/middleware/tenant.middleware";
 
 @Module({
@@ -111,6 +116,11 @@ import { TenantMiddleware } from "./common/middleware/tenant.middleware";
     VoiceAgentModule,
     WellnessModule,
     QualityModule,
+    MarketingModule,
+    FrontDeskModule,
+    CouponsModule,
+    RevenueCrmModule,
+    LabPackagesModule,
   ],
 })
 export class AppModule {

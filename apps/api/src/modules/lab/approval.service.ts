@@ -7,6 +7,7 @@ import {
 import { PrismaService } from "../../prisma/prisma.service";
 import { AuditService } from "../../common/services/audit.service";
 import { NotificationsService } from "../notifications/notifications.service";
+import { ReportsService } from "../reports/reports.service";
 import {
   OrderStatus,
   ResultInterpretation,
@@ -28,6 +29,7 @@ export class ApprovalService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     private readonly notifications: NotificationsService,
+    private readonly reportsService: ReportsService,
   ) {}
 
   /**
@@ -87,7 +89,7 @@ export class ApprovalService {
       this.prisma.order.count({ where }),
     ]);
 
-    // Enrich with hasCritical flag and compute wait time
+    // Transform into the shape the frontend expects
     const now = Date.now();
     const enriched = orders.map((order) => {
       const allResults = order.items.flatMap((i) => i.testResults);
@@ -100,8 +102,82 @@ export class ApprovalService {
           )
         : 0;
 
+      // Build flat results list for the frontend
+      const results = allResults.map((r) => ({
+        id: r.id,
+        testName:
+          order.items.find((i) =>
+            i.testResults.some((tr) => tr.id === r.id),
+          )?.testCatalog?.name ?? "",
+        parameter: r.flags ?? r.value,
+        value: r.value,
+        numericValue: r.numericValue ?? null,
+        unit: r.unit ?? "",
+        referenceRange: r.referenceRange ?? "",
+        interpretation: r.interpretation,
+        isDelta: r.deltaFlagged,
+        previousValue: r.previousValue != null ? String(r.previousValue) : null,
+      }));
+
+      // Compute flag summary
+      const criticalCount = allResults.filter(
+        (r) => r.interpretation === ResultInterpretation.CRITICAL,
+      ).length;
+      const abnormalCount = allResults.filter(
+        (r) =>
+          r.interpretation === ResultInterpretation.ABNORMAL ||
+          r.interpretation === ("HIGH" as ResultInterpretation) ||
+          r.interpretation === ("LOW" as ResultInterpretation),
+      ).length;
+      const normalCount = allResults.filter(
+        (r) => r.interpretation === ResultInterpretation.NORMAL,
+      ).length;
+
+      // Compute patient age from DOB
+      const patientAge = order.patient?.dob
+        ? Math.floor(
+            (now - new Date(order.patient.dob).getTime()) /
+              (1000 * 60 * 60 * 24 * 365.25),
+          )
+        : null;
+
       return {
-        ...order,
+        id: order.id,
+        orderNumber: order.orderNumber,
+        patient: order.patient
+          ? {
+              id: order.patient.id,
+              mrn: order.patient.mrn,
+              firstName: order.patient.firstName,
+              lastName: order.patient.lastName,
+              age: patientAge,
+              gender: order.patient.gender,
+            }
+          : null,
+        tests: order.items.map((i) => i.testCatalog?.name ?? "Unknown Test"),
+        submittedBy: order.createdBy
+          ? {
+              id: order.createdById,
+              firstName: order.createdBy.firstName,
+              lastName: order.createdBy.lastName,
+            }
+          : null,
+        submittedAt: (order.resultSubmittedAt ?? order.createdAt).toISOString(),
+        priority: order.priority,
+        flagSummary: {
+          total: allResults.length,
+          normal: normalCount,
+          abnormal: abnormalCount,
+          critical: criticalCount,
+        },
+        results,
+        referringDoctor: null,
+        interpretation: allResults
+          .filter((r) => r.pathologistNotes)
+          .map((r) => r.pathologistNotes)
+          .join(" ") || "",
+        tenantName: "",
+        branchName: "",
         hasCritical,
         waitTimeMinutes,
       };
@@ -204,8 +280,8 @@ export class ApprovalService {
     }
 
     return {
-      pending,
-      critical: criticalCount,
+      totalPending: pending,
+      criticalReports: criticalCount,
       approvedToday,
       rejectedToday,
     };
@@ -274,6 +350,26 @@ export class ApprovalService {
         status: { from: OrderStatus.PENDING_APPROVAL, to: OrderStatus.APPROVED },
       },
     });
+
+    // Auto-generate report after approval
+    try {
+      await this.reportsService.generateReport(orderId, tenantId, userId);
+      this.logger.log(`Report auto-generated for order ${order.orderNumber}`);
+    } catch (err) {
+      // Log but don't fail the approval if report generation fails
+      this.logger.error(
+        `Failed to auto-generate report for order ${order.orderNumber}: ${err instanceof Error ? err.message : err}`,
+      );
+    }
+
+    // Sync referring doctor stats (marketing module)
+    try {
+      await this.syncReferringDoctorStats(orderId, tenantId);
+    } catch (err) {
+      this.logger.error(
+        `Failed to sync referring doctor stats for order ${order.orderNumber}: ${err instanceof Error ? err.message : err}`,
+      );
+    }
 
     return updated;
   }
@@ -519,5 +615,79 @@ export class ApprovalService {
       patientAge,
       referringDoctor,
     };
+  }
+
+  /**
+   * After order approval, update the ReferringDoctor's stats if the patient
+   * has a referringDoctorId that matches a marketing ReferringDoctor record.
+   */
+  private async syncReferringDoctorStats(orderId: string, tenantId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      select: {
+        totalAmount: true,
+        patient: { select: { referringDoctorId: true } },
+      },
+    });
+
+    const refDoctorId = order?.patient?.referringDoctorId;
+    if (!refDoctorId) return;
+
+    // Check if this ID corresponds to a marketing ReferringDoctor
+    const refDoctor = await this.prisma.referringDoctor.findFirst({
+      where: { id: refDoctorId, tenantId },
+    });
+    if (!refDoctor) return;
+
+    const now = new Date();
+    const newTotalReferrals = refDoctor.totalReferrals + 1;
+    const newTotalRevenue =
+      Number(refDoctor.totalRevenue) + Number(order.totalAmount);
+
+    // Compute tier
+    const tier = this.computeDoctorTier(
+      newTotalReferrals,
+      newTotalRevenue,
+      refDoctor.createdAt,
+      now,
+    );
+
+    await this.prisma.referringDoctor.update({
+      where: { id: refDoctorId },
+      data: {
+        totalReferrals: newTotalReferrals,
+        totalRevenue: newTotalRevenue,
+        lastReferralDate: now,
+        tier,
+      },
+    });
+
+    this.logger.log(
+      `Updated ReferringDoctor ${refDoctorId}: referrals=${newTotalReferrals}, revenue=${newTotalRevenue}, tier=${tier}`,
+    );
+  }
+
+  /**
+   * Compute doctor tier based on referrals, revenue, and activity.
+   * VIP: >50 referrals OR >1,00,000 revenue
+   * ACTIVE: >10 referrals OR last referral within 30 days
+   * NEW: added within 30 days with <5 referrals
+   * INACTIVE: fallback (no referral in 60+ days)
+   */
+  private computeDoctorTier(
+    totalReferrals: number,
+    totalRevenue: number,
+    createdAt: Date,
+    now: Date,
+  ): string {
+    if (totalReferrals > 50 || totalRevenue > 100000) return "VIP";
+    if (totalReferrals > 10) return "ACTIVE";
+
+    const daysSinceCreated =
+      (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    if (daysSinceCreated <= 30 && totalReferrals < 5) return "NEW";
+
+    if (totalReferrals > 0) return "ACTIVE";
+    return "INACTIVE";
   }
 }

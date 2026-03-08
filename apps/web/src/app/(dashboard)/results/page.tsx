@@ -32,10 +32,12 @@ interface PendingResult {
   verifiedById?: string | null;
   autoVerified: boolean;
   pathologistNotes?: string | null;
+  flags?: string | null;
   orderItem: {
     testCatalog: { id: string; name: string; code: string };
   };
   order: {
+    id: string;
     orderNumber: string;
     priority: string;
     patient: { firstName: string; lastName: string; mrn: string };
@@ -50,6 +52,7 @@ interface OrderResult extends PendingResult {
   validatedAt?: string | null;
   verifiedBy?: { firstName: string; lastName: string } | null;
   validatedBy?: { firstName: string; lastName: string } | null;
+  flags?: string | null;
 }
 
 interface WorklistItem {
@@ -69,10 +72,10 @@ function interpretColor(interp: string) {
 function groupByOrder(results: PendingResult[]): WorklistItem[] {
   const map = new Map<string, WorklistItem>();
   for (const r of results) {
-    const key = r.order.orderNumber;
+    const key = r.order.id;
     if (!map.has(key)) {
       map.set(key, {
-        orderId: r.order.orderNumber,
+        orderId: r.order.id,
         orderNumber: r.order.orderNumber,
         priority: r.order.priority,
         patient: r.order.patient,
@@ -137,8 +140,17 @@ function ResultRow({
         />
       </td>
       <td className="px-3 py-2.5">
-        <p className="text-sm font-medium text-slate-800">{result.orderItem.testCatalog.name}</p>
-        <p className="text-xs text-slate-400 font-mono">{result.orderItem.testCatalog.code}</p>
+        {result.flags ? (
+          <>
+            <p className="text-sm font-medium text-slate-800">{result.flags}</p>
+            <p className="text-xs text-slate-400">{result.orderItem.testCatalog.name}</p>
+          </>
+        ) : (
+          <>
+            <p className="text-sm font-medium text-slate-800">{result.orderItem.testCatalog.name}</p>
+            <p className="text-xs text-slate-400 font-mono">{result.orderItem.testCatalog.code}</p>
+          </>
+        )}
       </td>
       <td className="px-3 py-2.5">
         <span className="font-mono text-xs text-slate-500">{result.sample.barcodeId}</span>
@@ -228,18 +240,15 @@ export default function ResultsPage() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const results = (orderResults ?? [])
-        .filter((r) => !r.verifiedById && !r.autoVerified)
+      const updates = (orderResults ?? [])
+        .filter((r) => !r.verifiedById && !r.autoVerified && localValues[r.id])
         .map((r) => ({
-          orderItemId: r.orderItem.testCatalog.id,
-          sampleId: r.sample.barcodeId,
+          id: r.id,
           value: localValues[r.id]?.value ?? r.value,
-          numericValue: localValues[r.id]?.numericValue ?? r.numericValue,
-          unit: r.unit,
-          isDraft: true,
+          numericValue: localValues[r.id]?.numericValue ?? r.numericValue ?? null,
         }));
-      if (results.length === 0) return;
-      await api.post("/results/bulk", { results });
+      if (updates.length === 0) return;
+      await api.post("/results/save-draft", { updates });
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["order-results", selectedOrderId] });
@@ -394,7 +403,7 @@ export default function ResultsPage() {
                   <thead className="sticky top-0 bg-white border-b border-slate-100 z-10">
                     <tr>
                       <th className="px-3 py-2.5 w-8" />
-                      <th className="px-3 py-2.5 text-xs font-semibold text-slate-600">Test Name</th>
+                      <th className="px-3 py-2.5 text-xs font-semibold text-slate-600">Parameter</th>
                       <th className="px-3 py-2.5 text-xs font-semibold text-slate-600">Barcode</th>
                       <th className="px-3 py-2.5 text-xs font-semibold text-slate-600">Value</th>
                       <th className="px-3 py-2.5 text-xs font-semibold text-slate-600">Ref Range</th>
@@ -408,15 +417,38 @@ export default function ResultsPage() {
                       <tr><td colSpan={8} className="text-center py-8 text-slate-400">
                         <Loader2 size={20} className="animate-spin mx-auto" />
                       </td></tr>
-                    ) : (orderResults ?? []).map((r) => (
-                      <ResultRow
-                        key={r.id}
-                        result={r}
-                        onValueChange={handleValueChange}
-                        selected={selectedResultIds.includes(r.id)}
-                        onToggleSelect={toggleSelect}
-                      />
-                    ))}
+                    ) : (() => {
+                      const sorted = orderResults ?? [];
+                      const rows: React.ReactNode[] = [];
+                      let lastTestName = "";
+                      for (const r of sorted) {
+                        const testName = r.orderItem.testCatalog.name;
+                        const hasParams = r.flags && r.flags !== r.value;
+                        if (hasParams && testName !== lastTestName) {
+                          rows.push(
+                            <tr key={`header-${testName}`} className="bg-slate-50 border-b border-slate-100">
+                              <td colSpan={8} className="px-3 py-2">
+                                <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+                                  {testName}
+                                </span>
+                                <span className="ml-2 text-xs text-slate-400 font-mono">{r.orderItem.testCatalog.code}</span>
+                              </td>
+                            </tr>
+                          );
+                          lastTestName = testName;
+                        }
+                        rows.push(
+                          <ResultRow
+                            key={r.id}
+                            result={r}
+                            onValueChange={handleValueChange}
+                            selected={selectedResultIds.includes(r.id)}
+                            onToggleSelect={toggleSelect}
+                          />
+                        );
+                      }
+                      return rows;
+                    })()}
                   </tbody>
                 </table>
               </div>

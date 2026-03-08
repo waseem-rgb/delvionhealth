@@ -199,7 +199,7 @@ export class OperationsService {
         },
         items: {
           include: {
-            testCatalog: { select: { name: true, department: true } },
+            testCatalog: { select: { id: true, name: true, department: true } },
           },
         },
       },
@@ -493,6 +493,7 @@ export class OperationsService {
         accessionedAt: order.accessionedAt,
         patient: order.patient,
         tests: tests.map((t) => t.name),
+        testDetails: tests.map((t) => ({ id: (t as any).id, name: t.name })),
         totalTests,
         completedTests,
         incompleteTests: totalTests - completedTests,

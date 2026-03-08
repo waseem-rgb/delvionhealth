@@ -437,10 +437,10 @@ export default function LeaveManagementPage() {
         <div className="p-5">
           <DataTable
             columns={columns}
-            data={data?.data ?? []}
+            data={Array.isArray(data) ? data : (data?.data ?? [])}
             isLoading={isLoading}
             page={page}
-            total={data?.meta.total}
+            total={data?.meta?.total}
             pageSize={20}
             onPageChange={(p) => setPage(p)}
           />

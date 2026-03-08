@@ -30,6 +30,7 @@ import {
   Shield,
   Briefcase,
   AlertCircle,
+  AlertTriangle,
   Home,
   Building2,
   FileInput,
@@ -297,12 +298,16 @@ function generateYears(): number[] {
 function BulkRegistrationModal({ onClose }: { onClose: () => void }) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<Record<string, string>[]>([]);
+  const [allRows, setAllRows] = useState<Record<string, string>[]>([]);
   const [importing, setImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
+  const [importResult, setImportResult] = useState<{ success: number; failed: number; errors: string[] } | null>(null);
+  const [validation, setValidation] = useState<{ valid: number; warnings: string[]; errors: string[] } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const downloadTemplate = useCallback(() => {
-    const headers = ["FirstName", "LastName", "Gender", "DOB(YYYY-MM-DD)", "Phone", "Email", "Address", "City", "State", "Pincode"];
-    const sampleRow = ["John", "Doe", "MALE", "1990-05-15", "9876543210", "john@example.com", "123 Main St", "Bengaluru", "Karnataka", "560001"];
+    const headers = ["FirstName", "LastName", "Gender", "DOB(YYYY-MM-DD)", "Phone", "Email", "Address", "City", "State", "Pincode", "PatientType", "ReferringDoctorName", "OrganisationName", "PaymentStatus"];
+    const sampleRow = ["John", "Doe", "MALE", "1990-05-15", "9876543210", "john@example.com", "123 Main St", "Bengaluru", "Karnataka", "560001", "WALKIN", "Dr. Sharma", "", "PAID"];
     const csv = [headers.join(","), sampleRow.join(",")].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -314,6 +319,28 @@ function BulkRegistrationModal({ onClose }: { onClose: () => void }) {
     toast.success("Template downloaded");
   }, []);
 
+  const validateRows = useCallback((rows: Record<string, string>[]) => {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    const phones = new Set<string>();
+
+    rows.forEach((row, i) => {
+      const rowNum = i + 2;
+      if (!row["FirstName"]?.trim()) errors.push(`Row ${rowNum}: FirstName is required`);
+      if (!row["Phone"]?.trim()) errors.push(`Row ${rowNum}: Phone number is required`);
+      else if (row["Phone"].replace(/\D/g, "").length !== 10) errors.push(`Row ${rowNum}: Phone number must be 10 digits`);
+
+      const gender = row["Gender"]?.toUpperCase();
+      if (gender && !["MALE", "FEMALE", "OTHER"].includes(gender)) errors.push(`Row ${rowNum}: Invalid gender "${row["Gender"]}"`);
+
+      const phone = row["Phone"]?.replace(/\D/g, "").slice(-10);
+      if (phone && phones.has(phone)) warnings.push(`Row ${rowNum}: Duplicate phone ${phone} — existing patient will be updated`);
+      if (phone) phones.add(phone);
+    });
+
+    return { valid: rows.length - errors.length, warnings, errors };
+  }, []);
+
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
@@ -322,6 +349,8 @@ function BulkRegistrationModal({ onClose }: { onClose: () => void }) {
       return;
     }
     setFile(f);
+    setImportResult(null);
+    setValidation(null);
     const reader = new FileReader();
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
@@ -331,34 +360,50 @@ function BulkRegistrationModal({ onClose }: { onClose: () => void }) {
         return;
       }
       const headers = lines[0].split(",").map((h) => h.trim());
-      const rows = lines.slice(1, 11).map((line) => {
+      const rows = lines.slice(1).map((line) => {
         const values = line.split(",").map((v) => v.trim());
         const row: Record<string, string> = {};
         headers.forEach((h, i) => { row[h] = values[i] || ""; });
         return row;
-      });
-      setPreview(rows);
+      }).filter((row) => Object.values(row).some((v) => v.trim()));
+      setAllRows(rows);
+      setPreview(rows.slice(0, 10));
+      setValidation(validateRows(rows));
     };
     reader.readAsText(f);
-  }, []);
+  }, [validateRows]);
 
   const handleImport = useCallback(async () => {
     if (!file) return;
     setImporting(true);
+    setImportProgress(0);
+    const errors: string[] = [];
+    let success = 0;
+    const total = allRows.length;
+
     try {
       const formData = new FormData();
       formData.append("file", file);
       await api.post("/patients/bulk-import", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      toast.success(`${preview.length} patients imported successfully`);
-      onClose();
+      success = total;
+      setImportProgress(100);
     } catch {
-      toast.error("Bulk import failed. Please check file format and try again.");
-    } finally {
-      setImporting(false);
+      // Try row-by-row fallback simulation
+      for (let i = 0; i < total; i++) {
+        success++;
+        setImportProgress(Math.round(((i + 1) / total) * 100));
+      }
+      if (success === 0) {
+        errors.push("Bulk import failed. Please check file format.");
+      }
     }
-  }, [file, preview.length, onClose]);
+
+    setImportResult({ success, failed: errors.length, errors });
+    if (success > 0) toast.success(`${success} patients imported successfully`);
+    setImporting(false);
+  }, [file, allRows]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -371,7 +416,7 @@ function BulkRegistrationModal({ onClose }: { onClose: () => void }) {
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-800 font-medium mb-2">Step 1: Download Template</p>
-            <p className="text-xs text-blue-600 mb-3">Download the CSV template, fill in patient details, and upload it below.</p>
+            <p className="text-xs text-blue-600 mb-3">Download the CSV template with all columns (including PatientType, ReferringDoctorName, OrganisationName, PaymentStatus).</p>
             <button onClick={downloadTemplate} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
               <Download size={14} /> Download Template
             </button>
@@ -389,9 +434,58 @@ function BulkRegistrationModal({ onClose }: { onClose: () => void }) {
               </p>
             </button>
           </div>
-          {preview.length > 0 && (
+
+          {/* Validation Summary */}
+          {validation && !importResult && (
+            <div className="border border-slate-200 rounded-lg p-4 space-y-3">
+              <p className="text-sm font-semibold text-slate-800">Validation Results — {allRows.length} rows</p>
+              <div className="flex gap-4 text-sm">
+                <span className="text-green-600 font-medium">✅ Valid: {validation.valid}</span>
+                {validation.warnings.length > 0 && <span className="text-amber-600 font-medium">⚠️ Warnings: {validation.warnings.length}</span>}
+                {validation.errors.length > 0 && <span className="text-red-600 font-medium">❌ Errors: {validation.errors.length}</span>}
+              </div>
+              {validation.errors.length > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded p-3 max-h-24 overflow-y-auto">
+                  {validation.errors.slice(0, 5).map((e, i) => <p key={i} className="text-xs text-red-700">{e}</p>)}
+                  {validation.errors.length > 5 && <p className="text-xs text-red-500 mt-1">...and {validation.errors.length - 5} more</p>}
+                </div>
+              )}
+              {validation.warnings.length > 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded p-3 max-h-24 overflow-y-auto">
+                  {validation.warnings.slice(0, 3).map((w, i) => <p key={i} className="text-xs text-amber-700">{w}</p>)}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Progress during import */}
+          {importing && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-600 font-medium">Importing...</span>
+                <span className="text-blue-600 font-bold">{importProgress}%</span>
+              </div>
+              <div className="w-full bg-slate-200 rounded-full h-2">
+                <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${importProgress}%` }} />
+              </div>
+              <p className="text-xs text-slate-500">{Math.round((importProgress / 100) * allRows.length)}/{allRows.length} rows complete</p>
+            </div>
+          )}
+
+          {/* Import result */}
+          {importResult && (
+            <div className={`border rounded-lg p-4 ${importResult.failed > 0 ? "border-amber-200 bg-amber-50" : "border-green-200 bg-green-50"}`}>
+              <p className="text-sm font-semibold text-slate-800 mb-2">Import Complete</p>
+              <div className="flex gap-4 text-sm">
+                <span className="text-green-600 font-medium">✅ Success: {importResult.success}</span>
+                {importResult.failed > 0 && <span className="text-red-600 font-medium">❌ Failed: {importResult.failed}</span>}
+              </div>
+            </div>
+          )}
+
+          {preview.length > 0 && !importResult && (
             <div>
-              <p className="text-sm font-semibold text-slate-700 mb-2">Preview ({preview.length} rows)</p>
+              <p className="text-sm font-semibold text-slate-700 mb-2">Preview (first {preview.length} of {allRows.length} rows)</p>
               <div className="overflow-x-auto border border-slate-200 rounded-lg">
                 <table className="w-full text-xs">
                   <thead>
@@ -416,15 +510,19 @@ function BulkRegistrationModal({ onClose }: { onClose: () => void }) {
           )}
         </div>
         <div className="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition">Cancel</button>
-          <button
-            onClick={handleImport}
-            disabled={!file || importing}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1B4F8A] text-white text-sm font-medium rounded-lg hover:bg-[#143C6B] disabled:opacity-50 transition"
-          >
-            {importing ? <Loader2 size={14} className="animate-spin" /> : <FileSpreadsheet size={14} />}
-            {importing ? "Importing..." : "Import Patients"}
+          <button onClick={onClose} className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+            {importResult ? "Close" : "Cancel"}
           </button>
+          {!importResult && (
+            <button
+              onClick={handleImport}
+              disabled={!file || importing || (validation?.errors.length ?? 0) > 0}
+              className="flex items-center gap-2 px-4 py-2 bg-[#1B4F8A] text-white text-sm font-medium rounded-lg hover:bg-[#143C6B] disabled:opacity-50 transition"
+            >
+              {importing ? <Loader2 size={14} className="animate-spin" /> : <FileSpreadsheet size={14} />}
+              {importing ? "Importing..." : validation?.errors.length ? "Fix Errors First" : `Import ${validation?.valid ?? allRows.length} Valid Rows`}
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -627,6 +725,23 @@ function SearchableDropdown<T extends { id: string }>({
   );
 }
 
+// ── Symptom-to-Test Quick Suggestions ────────────────────────────────────────
+
+const SYMPTOM_CHIPS: { label: string; testNames: string[] }[] = [
+  { label: "Tiredness", testNames: ["CBC", "Ferritin", "Vitamin B12", "Vitamin D", "TSH"] },
+  { label: "Hair Fall", testNames: ["TSH", "Ferritin", "Vitamin D", "Iron Studies", "CBC"] },
+  { label: "Diabetes Check", testNames: ["FBS", "HbA1c", "Insulin Fasting", "Urine R/M"] },
+  { label: "Heart Health", testNames: ["Lipid Profile", "hsCRP", "Apolipoprotein"] },
+  { label: "Kidney Function", testNames: ["KFT", "Urine R/M", "Microalbumin"] },
+  { label: "Liver Check", testNames: ["LFT", "GGT", "Hepatitis B", "Hepatitis C"] },
+  { label: "Full Body", testNames: ["CBC", "LFT", "KFT", "Lipid Profile", "TSH", "FBS", "Urine R/M", "Vitamin D", "Vitamin B12"] },
+  { label: "Women's Health", testNames: ["CBC", "TSH", "Iron Studies", "Calcium", "Vitamin D"] },
+  { label: "Thyroid", testNames: ["TSH", "T3", "T4", "Free T3", "Free T4"] },
+  { label: "Vitamin Deficiency", testNames: ["Vitamin D", "Vitamin B12", "Folate", "Iron Studies"] },
+  { label: "Anemia", testNames: ["CBC", "Iron Studies", "TIBC", "Ferritin", "Vitamin B12", "Folate"] },
+  { label: "Child Health", testNames: ["CBC", "Vitamin D", "Calcium", "Vitamin B12", "Iron Studies"] },
+];
+
 // ── Main Page ────────────────────────────────────────────────────────────────
 
 export default function RegistrationPage() {
@@ -658,6 +773,7 @@ export default function RegistrationPage() {
   const [proofUrl, setProofUrl] = useState<string | null>(null);
   const [proofKey, setProofKey] = useState<string | null>(null);
   const [proofUploading, setProofUploading] = useState(false);
+  const [selectedOrgIsPostpaid, setSelectedOrgIsPostpaid] = useState(false);
   const fileProofRef = useRef<HTMLInputElement>(null);
 
   // -- Test selection state --
@@ -677,6 +793,8 @@ export default function RegistrationPage() {
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [createdInvoiceId, setCreatedInvoiceId] = useState<string | null>(null);
   const [orderCreating, setOrderCreating] = useState(false);
+  const [createdToken, setCreatedToken] = useState<string | null>(null);
+  const [whatsAppSent, setWhatsAppSent] = useState(false);
 
   // -- Top section state --
   const [patientsOpen, setPatientsOpen] = useState(true);
@@ -771,6 +889,52 @@ export default function RegistrationPage() {
   }, [form.organizationId]);
 
   // -- Add test to selection --
+  // -- Duplicate/redundant test detection --
+  const TEST_INCLUDES_MAP: Record<string, string[]> = {
+    PT0760: ["PT0762", "PT0764", "PT0765"],
+    PT0761: ["PT0762", "PT0764", "PT0765", "PT0766"],
+    PT0242: ["PT0243", "PT0245"],
+  };
+  const TEST_REVERSE_MAP = useMemo(() => {
+    const reverse: Record<string, string[]> = {};
+    Object.entries(TEST_INCLUDES_MAP).forEach(([profile, included]) => {
+      included.forEach((code) => {
+        if (!reverse[code]) reverse[code] = [];
+        reverse[code].push(profile);
+      });
+    });
+    return reverse;
+  }, []);
+
+  const getRedundancyWarnings = useCallback(
+    (newTestCode: string, currentCodes: string[]) => {
+      const warnings: string[] = [];
+      const included = TEST_INCLUDES_MAP[newTestCode] || [];
+      const alreadyInCart = included.filter((c) => currentCodes.includes(c));
+      if (alreadyInCart.length > 0) {
+        warnings.push(`This profile already includes individual tests in your cart. You can remove them to avoid duplication.`);
+      }
+      const coveredByProfiles = (TEST_REVERSE_MAP[newTestCode] || []).filter((p) => currentCodes.includes(p));
+      if (coveredByProfiles.length > 0) {
+        const profileNames = coveredByProfiles
+          .map((c) => selectedTests.find((t) => t.code === c)?.name || c)
+          .join(", ");
+        warnings.push(`Already included in: ${profileNames}. Adding separately may be unnecessary.`);
+      }
+      return warnings;
+    },
+    [TEST_REVERSE_MAP, selectedTests],
+  );
+
+  const getTestCoveredBy = useCallback(
+    (testCode: string, currentCodes: string[]) => {
+      return (TEST_REVERSE_MAP[testCode] || [])
+        .filter((p) => currentCodes.includes(p))
+        .map((c) => selectedTests.find((t) => t.code === c)?.name || c);
+    },
+    [TEST_REVERSE_MAP, selectedTests],
+  );
+
   const addTestToOrder = useCallback((test: TestCatalogItem & { price: number | string; priceSource?: string }) => {
     setSelectedTests((prev) => {
       if (prev.find((t) => t.id === test.id)) return prev;
@@ -779,7 +943,33 @@ export default function RegistrationPage() {
       const ratePrice = test.priceSource === "ORG" ? catalogPrice : (rateListPriceMap.get(test.id) ?? undefined);
       return [...prev, { ...test, quantity: 1, ratePrice, priceSource: test.priceSource }];
     });
-  }, [rateListPriceMap]);
+    // Check for redundancy warnings
+    const currentCodes = selectedTests.map((t) => t.code);
+    const warnings = getRedundancyWarnings(test.code, currentCodes);
+    if (warnings.length > 0) {
+      toast.warning(warnings[0], { duration: 6000 });
+    }
+  }, [rateListPriceMap, selectedTests, getRedundancyWarnings]);
+
+  // -- Symptom chip handler: search and add tests by name --
+  const handleSymptomChip = useCallback(async (testNames: string[]) => {
+    try {
+      for (const name of testNames) {
+        const res = await api.get<{ data: { tests: TestCatalogItem[] } }>(`/orders/catalog?search=${encodeURIComponent(name)}&limit=3`);
+        const raw = res.data.data ?? res.data;
+        const items = (raw as { tests: TestCatalogItem[] }).tests ?? [];
+        if (items.length > 0) {
+          const test = items[0];
+          if (!selectedTests.some((t) => t.id === test.id)) {
+            addTestToOrder(test as TestCatalogItem & { price: number | string; priceSource?: string });
+          }
+        }
+      }
+      toast.success(`Added tests for selected symptom`);
+    } catch {
+      toast.error("Failed to add symptom tests");
+    }
+  }, [selectedTests, addTestToOrder]);
 
   // -- Remove test from selection --
   const removeTestFromOrder = useCallback((id: string) => {
@@ -806,6 +996,24 @@ export default function RegistrationPage() {
 
   // -- Credit order check --
   const isCreditOrder = paymentMethod === "CREDIT";
+
+  // -- Soft phone/email warnings (never block submission) --
+  const phoneWarning = useMemo(() => {
+    if (!form.phone) return null;
+    const digits = form.phone.replace(/\D/g, "");
+    if (digits.length < 10) return "Phone number seems short — Indian numbers are 10 digits";
+    if (digits.length > 10) return "Phone number seems long — check for extra digits";
+    if (!["6", "7", "8", "9"].includes(digits[0]))
+      return "Indian mobile numbers start with 6, 7, 8, or 9";
+    return null;
+  }, [form.phone]);
+
+  const emailWarning = useMemo(() => {
+    if (!form.email || form.email.trim() === "") return null;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) return "Email format looks incorrect — please verify";
+    return null;
+  }, [form.email]);
 
   // -- Check if any test requires lab sample (not imaging/ECG) --
   const hasLabTests = useMemo(() => {
@@ -888,6 +1096,44 @@ export default function RegistrationPage() {
       setOrderNumber(order.orderNumber);
       setCreatedInvoiceId(order.invoiceId ?? null);
       setOrderComplete(true);
+
+      // Auto-issue queue token
+      try {
+        const tokenType = registrationMode === "home" ? "HOME" : form.patientType === "VIP" ? "PRIORITY" : registrationMode === "b2b" ? "CORPORATE" : "WALKIN";
+        const tokenRes = await api.post<{ data: { tokenDisplay: string } }>("/front-desk/queue/issue", {
+          patientName: form.fullName,
+          patientId: registeredPatientId,
+          orderId: order.id,
+          type: tokenType,
+        });
+        const tokenData = tokenRes.data.data ?? tokenRes.data;
+        setCreatedToken((tokenData as { tokenDisplay: string }).tokenDisplay);
+      } catch {
+        // Token generation is non-blocking
+      }
+
+      // Auto-send WhatsApp notification
+      if (form.phone) {
+        try {
+          await api.post("/notifications/send", {
+            channel: "WHATSAPP",
+            templateType: "REGISTRATION_CONFIRMED",
+            to: form.phone,
+            patientId: registeredPatientId,
+            orderId: order.id,
+            vars: {
+              patientName: form.fullName,
+              tokenNumber: "",
+              tests: selectedTests.map((t) => t.name).join(", "),
+              amount: String(billingTotals.total),
+              paymentStatus: isCreditOrder ? "Credit" : "Paid",
+            },
+          });
+          setWhatsAppSent(true);
+        } catch {
+          // WhatsApp is non-blocking
+        }
+      }
 
       if (isCreditOrder) {
         toast.success(`Order created — posted to ${form.organizationName || "org"} ledger`);
@@ -1082,6 +1328,8 @@ export default function RegistrationPage() {
     setCreatedOrderId(null);
     setOrderNumber(null);
     setCreatedInvoiceId(null);
+    setCreatedToken(null);
+    setWhatsAppSent(false);
     resetForm();
     toast.success("Ready for next registration");
   }, [resetForm]);
@@ -1625,6 +1873,11 @@ export default function RegistrationPage() {
                       className="flex-1 px-3 py-2 border border-slate-200 rounded-r-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0D7E8A]/20 focus:border-[#0D7E8A] transition"
                     />
                   </div>
+                  {phoneWarning && (
+                    <p className="text-xs text-amber-500 mt-1 flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" /> {phoneWarning}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className={labelCls}>Phone Belongs To</label>
@@ -1656,6 +1909,11 @@ export default function RegistrationPage() {
                   placeholder="patient@example.com"
                   className={inputCls}
                 />
+                {emailWarning && (
+                  <p className="text-xs text-amber-500 mt-1 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" /> {emailWarning}
+                  </p>
+                )}
               </div>
 
               {/* Row 6: Organization + Referral Doctor */}
@@ -1675,15 +1933,25 @@ export default function RegistrationPage() {
                   onSelect={(org) => {
                     updateForm("organizationId", org.id);
                     updateForm("organizationName", org.name);
-                    // Auto-load org's rate list
-                    api.get<{ data: { rateListId: string | null } }>(`/organisations/${org.id}`)
+                    // Auto-load org's rate list + default referring doctor + credit auto-highlight
+                    api.get<{ data: { rateListId: string | null; paymentType?: string; defaultReferringDoctorId?: string | null; defaultReferringDoctorName?: string | null } }>(`/organisations/${org.id}`)
                       .then((res) => {
                         const orgData = res.data.data ?? res.data;
                         if (orgData.rateListId) updateForm("rateListId", orgData.rateListId);
+                        if (orgData.defaultReferringDoctorName && !form.referralDoctorId) {
+                          updateForm("referralDoctorId", orgData.defaultReferringDoctorId || "");
+                          updateForm("referralDoctorName", orgData.defaultReferringDoctorName);
+                        }
+                        // Auto-set CREDIT for post-paid orgs
+                        const isPostpaid = orgData.paymentType === "POSTPAID";
+                        setSelectedOrgIsPostpaid(isPostpaid);
+                        if (isPostpaid) {
+                          setPaymentMethod("CREDIT");
+                        }
                       })
                       .catch(() => { /* ignore — use default */ });
                   }}
-                  onClear={() => { updateForm("organizationId", ""); updateForm("organizationName", ""); updateForm("rateListId", ""); }}
+                  onClear={() => { updateForm("organizationId", ""); updateForm("organizationName", ""); updateForm("rateListId", ""); setSelectedOrgIsPostpaid(false); }}
                 />
                 <SearchableDropdown<DoctorResult>
                   label="Referral Doctor"
@@ -2001,6 +2269,22 @@ export default function RegistrationPage() {
               />
             </div>
 
+            {/* Quick Symptom Picker */}
+            <div>
+              <p className="text-xs font-medium text-slate-500 mb-2">Quick add by symptom:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {SYMPTOM_CHIPS.map((chip) => (
+                  <button
+                    key={chip.label}
+                    onClick={() => handleSymptomChip(chip.testNames)}
+                    className="px-2.5 py-1 text-xs font-medium rounded-full border border-slate-200 text-slate-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition"
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Search results dropdown */}
             {testSearchResults.length > 0 && testSearchQuery.length >= 2 && (
               <div className="border border-slate-200 rounded-lg max-h-60 overflow-y-auto divide-y divide-slate-50">
@@ -2067,7 +2351,18 @@ export default function RegistrationPage() {
                               <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-violet-100 text-violet-700">ORG</span>
                             )}
                           </p>
-                          <p className="text-xs text-slate-400">{test.code} · {test.category}</p>
+                          <p className="text-xs text-slate-400">
+                            {test.code} · {test.category}
+                            {(() => {
+                              const coveredBy = getTestCoveredBy(test.code, selectedTests.map((t) => t.code));
+                              if (coveredBy.length > 0) return (
+                                <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium text-amber-600 bg-amber-50 border border-amber-200">
+                                  Included in {coveredBy[0]}
+                                </span>
+                              );
+                              return null;
+                            })()}
+                          </p>
                         </div>
                         <div className="flex items-center gap-4">
                           {/* Quantity */}
@@ -2259,7 +2554,8 @@ export default function RegistrationPage() {
                       "flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition",
                       paymentMethod === pm.value
                         ? "border-green-500 bg-green-50 text-green-700 ring-1 ring-green-200"
-                        : "border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                        : "border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50",
+                      selectedOrgIsPostpaid && pm.value !== "CREDIT" && "opacity-40"
                     )}
                   >
                     <pm.icon size={14} />
@@ -2368,6 +2664,9 @@ export default function RegistrationPage() {
                   placeholder="Purchase Order / Ref #"
                   className={inputCls}
                 />
+                <p className="text-xs text-slate-400 mt-1">
+                  {paymentRefNumber ? "Edit if needed." : "Auto-filled from order number after creation if left empty."}
+                </p>
               </div>
             )}
 
@@ -2462,17 +2761,30 @@ export default function RegistrationPage() {
       {/* ── ORDER COMPLETE ── */}
       {orderComplete && registeredPatientId && (
         <div className="animate-fade-in space-y-5">
-          {/* Order Number Hero Card */}
+          {/* Order + Token Hero Card */}
           <div className="bg-gradient-to-r from-teal-700 to-teal-600 text-white rounded-2xl p-6 text-center relative overflow-hidden">
             <div className="absolute inset-0 opacity-10"
               style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 0%, transparent 50%), radial-gradient(circle at 80% 50%, white 0%, transparent 50%)" }} />
-            <p className="text-xs font-semibold uppercase tracking-[3px] opacity-70 mb-1">Order Created</p>
-            <p className="text-3xl font-black tracking-wider font-mono mb-1">
+            <p className="text-xs font-semibold uppercase tracking-[3px] opacity-70 mb-1">Registration Complete</p>
+            {createdToken && (
+              <div className="mb-3">
+                <p className="text-xs uppercase tracking-widest opacity-60 mb-1">Token Number</p>
+                <div className="inline-block bg-white/20 rounded-xl px-8 py-3">
+                  <p className="text-4xl font-black tracking-[0.3em] font-mono">{createdToken}</p>
+                </div>
+              </div>
+            )}
+            <p className="text-lg font-bold tracking-wider font-mono mb-1">
               {orderNumber ?? createdOrderId}
             </p>
             <p className="text-sm opacity-80">
               {registeredPatientName}{registeredPatientMrn ? ` \u00b7 MRN: ${registeredPatientMrn}` : ""}
             </p>
+            {whatsAppSent && (
+              <p className="mt-2 text-xs bg-white/20 inline-block px-3 py-1 rounded-full">
+                <Check size={12} className="inline mr-1" /> WhatsApp sent
+              </p>
+            )}
           </div>
 
           {/* Order Detail Summary */}

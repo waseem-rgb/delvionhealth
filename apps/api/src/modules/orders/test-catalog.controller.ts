@@ -9,9 +9,14 @@ import { TestCatalogService } from "./test-catalog.service";
 import { PdfParserService } from "./pdf-parser.service";
 import { AiService } from "../ai/ai.service";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
+import { RolesGuard } from "../../common/guards/roles.guard";
 import { TenantGuard } from "../../common/guards/tenant.guard";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { Roles } from "../../common/decorators/roles.decorator";
+import { Role } from "@delvion/types";
 import type { JwtPayload } from "@delvion/types";
+import { PrismaService } from "../../prisma/prisma.service";
+import { seedTestTemplates } from "./seed-test-templates";
 
 const UPLOAD_DIR = path.join(os.tmpdir(), "delvion-uploads");
 try { fs.mkdirSync(UPLOAD_DIR, { recursive: true }); } catch { /* ignore */ }
@@ -25,6 +30,7 @@ export class TestCatalogController {
     private readonly testCatalogService: TestCatalogService,
     private readonly aiService: AiService,
     private readonly pdfParserService: PdfParserService,
+    private readonly prisma: PrismaService,
   ) {}
 
   // GET /test-catalog
@@ -206,6 +212,15 @@ export class TestCatalogController {
     return { tests };
   }
 
+  // POST /test-catalog/seed-parameters
+  @Post("seed-parameters")
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.LAB_MANAGER)
+  @ApiOperation({ summary: "Seed standard report parameters for common tests" })
+  seedParameters(@CurrentUser() user: JwtPayload) {
+    return this.testCatalogService.seedReportParameters(user.tenantId);
+  }
+
   // ─── Profile / Panel Endpoints ──────────────────────────────────
 
   // POST /test-catalog/profiles
@@ -256,6 +271,127 @@ export class TestCatalogController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.testCatalogService.updateProfile(id, user.tenantId, dto);
+  }
+
+  // ─── Template Management Endpoints ───────────────────────────
+
+  // GET /test-catalog/template-status
+  @Get("template-status")
+  @ApiOperation({ summary: "Get template completeness summary for all tests" })
+  getTemplateStatus(@CurrentUser() user: JwtPayload) {
+    return this.testCatalogService.getTemplateStatus(user.tenantId);
+  }
+
+  // POST /test-catalog/seed-templates
+  @Post("seed-templates")
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.LAB_MANAGER)
+  @ApiOperation({ summary: "Seed report templates for common tests (idempotent)" })
+  async seedTemplates(@CurrentUser() user: JwtPayload) {
+    return seedTestTemplates(this.prisma, user.tenantId);
+  }
+
+  // GET /test-catalog/:id/template
+  @Get(":id/template")
+  @ApiOperation({ summary: "Get full template data for a test" })
+  getTemplate(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.testCatalogService.getTemplate(user.tenantId, id);
+  }
+
+  // PUT /test-catalog/:id/template
+  @Put(":id/template")
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.LAB_MANAGER)
+  @ApiOperation({ summary: "Update report template metadata for a test" })
+  updateTemplate(
+    @Param("id") id: string,
+    @Body() dto: { reportTitle?: string; reportIntro?: string; reportConclusion?: string; clinicalSignificance?: string; preparationNote?: string; collectionNote?: string; isTemplateComplete?: boolean },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.testCatalogService.updateTemplate(user.tenantId, id, dto, user.sub);
+  }
+
+  // GET /test-catalog/:id/parameters
+  @Get(":id/parameters")
+  @ApiOperation({ summary: "Get report parameters for a test" })
+  getParameters(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.testCatalogService.getParameters(user.tenantId, id);
+  }
+
+  // POST /test-catalog/:id/parameters
+  @Post(":id/parameters")
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.LAB_MANAGER)
+  @ApiOperation({ summary: "Add a parameter to a test" })
+  addParameter(
+    @Param("id") id: string,
+    @Body() dto: { name: string; fieldType?: string; unit?: string; sortOrder?: number; isMandatory?: boolean; clinicalNote?: string; abnormalityNote?: string; footerNote?: string; methodology?: string; specimenNote?: string; displayOnReport?: boolean; options?: string },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.testCatalogService.addParameter(user.tenantId, id, dto, user.sub);
+  }
+
+  // PUT /test-catalog/parameters/:paramId
+  @Put("parameters/:paramId")
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.LAB_MANAGER)
+  @ApiOperation({ summary: "Update a report parameter" })
+  updateParameter(
+    @Param("paramId") paramId: string,
+    @Body() dto: Record<string, unknown>,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.testCatalogService.updateParameter(user.tenantId, paramId, dto, user.sub);
+  }
+
+  // DELETE /test-catalog/parameters/:paramId
+  @Delete("parameters/:paramId")
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.LAB_MANAGER)
+  @ApiOperation({ summary: "Delete a report parameter" })
+  deleteParameter(
+    @Param("paramId") paramId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.testCatalogService.deleteParameter(user.tenantId, paramId);
+  }
+
+  // POST /test-catalog/parameters/:paramId/reference-ranges
+  @Post("parameters/:paramId/reference-ranges")
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.LAB_MANAGER)
+  @ApiOperation({ summary: "Add a reference range to a parameter" })
+  addReferenceRange(
+    @Param("paramId") paramId: string,
+    @Body() dto: { genderFilter?: string; ageMinYears?: number; ageMaxYears?: number; lowNormal?: number; highNormal?: number; lowCritical?: number; highCritical?: number; unit?: string; notes?: string },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.testCatalogService.addReferenceRange(user.tenantId, paramId, dto);
+  }
+
+  // PUT /test-catalog/reference-ranges/:rangeId
+  @Put("reference-ranges/:rangeId")
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.LAB_MANAGER)
+  @ApiOperation({ summary: "Update a reference range" })
+  updateReferenceRange(
+    @Param("rangeId") rangeId: string,
+    @Body() dto: Record<string, unknown>,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.testCatalogService.updateReferenceRange(user.tenantId, rangeId, dto);
+  }
+
+  // DELETE /test-catalog/reference-ranges/:rangeId
+  @Delete("reference-ranges/:rangeId")
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.LAB_MANAGER)
+  @ApiOperation({ summary: "Delete a reference range" })
+  deleteReferenceRange(
+    @Param("rangeId") rangeId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.testCatalogService.deleteReferenceRange(user.tenantId, rangeId);
   }
 
   // ─── Single Test Endpoints ────────────────────────────────────
