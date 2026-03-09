@@ -41,6 +41,11 @@ export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
   const isAuthenticated = request.cookies.has(AUTH_COOKIE);
 
+  // Root redirect to dashboard
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
   const isProtected = PROTECTED_PREFIXES.some((prefix) =>
     pathname.startsWith(prefix)
   );
