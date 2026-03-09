@@ -657,7 +657,7 @@ function SearchableDropdown<T extends { id: string }>({
   const [results, setResults] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -783,7 +783,7 @@ export default function RegistrationPage() {
   const [testSearching, setTestSearching] = useState(false);
   const [orderDiscount, setOrderDiscount] = useState(0);
   const [discountType, setDiscountType] = useState<"FLAT" | "PERCENT">("FLAT");
-  const testSearchTimer = useRef<ReturnType<typeof setTimeout>>();
+  const testSearchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // -- Rate list price map --
   const [rateListPriceMap, setRateListPriceMap] = useState<Map<string, number>>(new Map());
@@ -815,7 +815,7 @@ export default function RegistrationPage() {
   const [dobChanging, setDobChanging] = useState(false);
   const [ageChanging, setAgeChanging] = useState(false);
   const patientSearchRef = useRef<HTMLDivElement>(null);
-  const patientTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const patientTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // -- Patients Table Query --
   const tableParams = new URLSearchParams({

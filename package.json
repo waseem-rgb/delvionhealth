@@ -33,6 +33,11 @@
   },
   "packageManager": "npm@10.5.0",
   "dependencies": {
-    "next": "^14.2.29"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "overrides": {
+    "react": "$react",
+    "react-dom": "$react-dom"
   }
 }

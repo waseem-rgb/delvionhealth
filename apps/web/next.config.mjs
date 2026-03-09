@@ -20,13 +20,11 @@ const nextConfig = {
       },
     ];
   },
-  experimental: {
-    outputFileTracingExcludes: {
-      "*": [
-        "node_modules/@swc/**",
-        "node_modules/@esbuild/**",
-      ],
-    },
+  outputFileTracingExcludes: {
+    "*": [
+      "node_modules/@swc/**",
+      "node_modules/@esbuild/**",
+    ],
   },
 };
 
