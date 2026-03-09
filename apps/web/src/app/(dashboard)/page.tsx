@@ -1,5 +1,8 @@
-import { redirect } from "next/navigation";
+"use client";
 
-export default function DashboardRootPage() {
-  redirect("/dashboard");
+export default function DashboardPage() {
+  if (typeof window !== "undefined") {
+    window.location.href = "/dashboard";
+  }
+  return null;
 }
