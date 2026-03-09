@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { DashboardHydration } from "@/components/layout/DashboardHydration";
 import { HydrationGuard } from "@/components/HydrationGuard";
+
+export const metadata: Metadata = { title: "Dashboard" };
 
 export default function DashboardLayout({
   children,

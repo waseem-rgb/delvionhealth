@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+"use client";
+
 import React from "react";
 import { KPICard } from "@/components/charts/KPICard";
 import { RevenueChart } from "@/components/charts/RevenueChart";
@@ -12,8 +13,6 @@ import {
   CheckCircle,
   Clock,
 } from "lucide-react";
-
-export const metadata: Metadata = { title: "Dashboard" };
 
 const kpis: Array<{ title: string; value: string; change: string; trend: "up" | "down"; icon: React.ElementType; color: "blue" | "teal" | "orange" | "green" }> = [
   {

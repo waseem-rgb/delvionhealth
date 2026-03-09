@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   transpilePackages: ["@delvion/ui", "@delvion/types"],
   images: {
     remotePatterns: [
