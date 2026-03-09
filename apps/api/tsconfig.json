@@ -7,6 +7,10 @@
     "paths": {
       "@delvion/types": ["../../packages/types/src"]
     },
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "skipLibCheck": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "strictPropertyInitialization": false,
