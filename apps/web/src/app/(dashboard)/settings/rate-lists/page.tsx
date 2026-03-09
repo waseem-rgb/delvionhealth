@@ -186,15 +186,15 @@ export default function RateListsPage() {
   const createMutation = useMutation({
     mutationFn: async (data: { name: string; listType: string; startDate?: string; endDate?: string; copiedFromId?: string; excelFile?: File }) => {
       const { excelFile, ...payload } = data;
-      const res = await api.post<{ data: { id: string } }>("/rate-lists", payload);
-      const created = res.data.data ?? res.data;
+      const res = await api.post("/rate-lists", payload);
+      const created = (res.data?.data ?? res.data) as { id: string };
       if (excelFile && created.id) {
         const formData = new FormData();
         formData.append("file", excelFile);
-        const upRes = await api.post<{ data: { updated: number; skipped: number } }>(`/rate-lists/${created.id}/upload`, formData, {
+        const upRes = await api.post(`/rate-lists/${created.id}/upload`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        const upData = upRes.data.data ?? upRes.data;
+        const upData = (upRes.data?.data ?? upRes.data) as { updated: number; skipped: number };
         toast.success(`Rate list created — ${upData.updated} prices imported`);
         return;
       }
@@ -240,10 +240,10 @@ export default function RateListsPage() {
     mutationFn: async ({ id, file }: { id: string; file: File }) => {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await api.post<{ data: { updated: number; skipped: number; auditEntries: number } }>(`/rate-lists/${id}/upload`, formData, {
+      const res = await api.post(`/rate-lists/${id}/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      return res.data.data ?? res.data;
+      return (res.data?.data ?? res.data) as { updated: number; skipped: number; auditEntries: number };
     },
     onSuccess: (data) => {
       toast.success(`${data.updated} prices updated, ${data.skipped} skipped`);

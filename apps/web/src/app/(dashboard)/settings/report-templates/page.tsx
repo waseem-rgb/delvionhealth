@@ -205,7 +205,7 @@ export default function ReportTemplatesPage() {
         existingHeader: isRebuild ? form.headerHtml : undefined,
         existingFooter: isRebuild ? form.footerHtml : undefined,
       });
-      const d = res.data.data ?? res.data;
+      const d = (res.data?.data ?? res.data) as { headerHtml: string; footerHtml: string; summary: string };
       setForm((f) => ({ ...f, headerHtml: d.headerHtml, footerHtml: d.footerHtml }));
       setAiSummary(d.summary);
       toast.success("Template generated successfully");

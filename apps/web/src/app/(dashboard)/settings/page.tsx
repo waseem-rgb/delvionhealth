@@ -413,7 +413,7 @@ function TestsTab() {
     compSearchRef.current = setTimeout(async () => {
       try {
         const res = await api.get(`/test-catalog/search?q=${encodeURIComponent(compSearch)}`);
-        const items = (res.data.data ?? res.data ?? []) as TestCatalogItem[];
+        const items = (res.data?.data ?? res.data ?? []) as TestCatalogItem[];
         // Exclude profiles and already-selected tests
         const selectedIds = new Set(selectedComponents.map((c) => c.testId));
         setCompResults(items.filter((t) => t.type !== "PROFILE" && !selectedIds.has(t.id)));

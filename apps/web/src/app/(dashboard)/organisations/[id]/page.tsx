@@ -334,14 +334,9 @@ function LedgerTab({ orgId }: { orgId: string }) {
       const params = new URLSearchParams({ page: String(page), limit: "20" });
       if (from) params.set("from", from);
       if (to) params.set("to", to);
-      const res = await api.get<{
-        data: {
-          data: LedgerEntry[];
-          meta: PaginatedMeta;
-          summary: { totalBilled: number; totalPaid: number; outstanding: number };
-        };
-      }>(`/organisations/${orgId}/ledger-entries?${params}`);
-      return res.data.data ?? res.data;
+      const res = await api.get(`/organisations/${orgId}/ledger-entries?${params}`);
+      const raw = res.data?.data ?? res.data;
+      return raw as { data: LedgerEntry[]; meta: PaginatedMeta; summary: { totalBilled: number; totalPaid: number; outstanding: number } };
     },
   });
 
@@ -441,10 +436,9 @@ function InvoicesTab({ orgId }: { orgId: string }) {
     queryFn: async () => {
       const params = new URLSearchParams({ page: String(page), limit: "20" });
       if (statusFilter) params.set("status", statusFilter);
-      const res = await api.get<{
-        data: { data: InvoiceRow[]; meta: PaginatedMeta };
-      }>(`/organisations/${orgId}/invoices?${params}`);
-      return res.data.data ?? res.data;
+      const res = await api.get(`/organisations/${orgId}/invoices?${params}`);
+      const raw = res.data?.data ?? res.data;
+      return raw as { data: InvoiceRow[]; meta: PaginatedMeta };
     },
   });
 
@@ -523,10 +517,9 @@ function AiInsightsTab({ orgId }: { orgId: string }) {
 
   const generateMutation = useMutation({
     mutationFn: async () => {
-      const res = await api.get<{
-        data: { insights: string; generatedAt: string; provider: string | null };
-      }>(`/organisations/${orgId}/ai-insights`);
-      return res.data.data ?? res.data;
+      const res = await api.get(`/organisations/${orgId}/ai-insights`);
+      const raw = res.data?.data ?? res.data;
+      return raw as { insights: string; generatedAt: string; provider: string | null };
     },
     onSuccess: (data) => {
       setInsights({ text: data.insights, generatedAt: data.generatedAt, provider: data.provider });

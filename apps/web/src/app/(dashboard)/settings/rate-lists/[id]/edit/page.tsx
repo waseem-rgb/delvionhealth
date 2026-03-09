@@ -73,16 +73,17 @@ export default function RateListEditorPage() {
   const { data: rateList, isLoading } = useQuery({
     queryKey: ["rate-list-detail", rateListId],
     queryFn: async () => {
-      const res = await api.get<{ data: RateListDetail }>(`/rate-lists/${rateListId}`);
-      return res.data.data ?? res.data;
+      const res = await api.get(`/rate-lists/${rateListId}`);
+      return (res.data?.data ?? res.data) as RateListDetail;
     },
   });
 
   const { data: auditLog } = useQuery({
     queryKey: ["rate-list-audit", rateListId],
     queryFn: async () => {
-      const res = await api.get<{ data: AuditEntry[] }>(`/rate-lists/${rateListId}/audit`);
-      return Array.isArray(res.data) ? res.data : (res.data.data ?? []);
+      const res = await api.get(`/rate-lists/${rateListId}/audit`);
+      const raw = res.data?.data ?? res.data;
+      return (Array.isArray(raw) ? raw : []) as AuditEntry[];
     },
     enabled: tab === "audit",
   });

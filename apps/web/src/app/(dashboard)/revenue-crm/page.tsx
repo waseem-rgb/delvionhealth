@@ -140,7 +140,7 @@ export default function RevenueCRMPage() {
     queryKey: ["revenue-crm", "overview"],
     queryFn: async () => {
       const res = await api.get("/revenue-crm/overview");
-      return res.data.data ?? res.data;
+      return (res.data?.data ?? res.data) as OverviewData;
     },
   });
 
@@ -153,7 +153,7 @@ export default function RevenueCRMPage() {
     queryKey: ["revenue-crm", "ai-alerts"],
     queryFn: async () => {
       const res = await api.get("/revenue-crm/ai/alerts");
-      return res.data.data ?? res.data;
+      return (res.data?.data ?? res.data) as AIAlert[];
     },
   });
 

@@ -144,22 +144,22 @@ export default function ReportBuilderPage() {
 
   const { data: testInfo } = useQuery<TestInfo>({
     queryKey: ["test-catalog", testId],
-    queryFn: () => api.get(`/test-catalog/${testId}`).then((r) => r.data.data ?? r.data),
+    queryFn: () => api.get(`/test-catalog/${testId}`).then((r) => (r.data?.data ?? r.data) as TestInfo),
   });
 
   const { data: parameters = [], isLoading: paramsLoading } = useQuery<ReportParameter[]>({
     queryKey: ["report-parameters", testId],
-    queryFn: () => api.get(`/report-builder/${testId}/parameters`).then((r) => r.data.data ?? r.data),
+    queryFn: () => api.get(`/report-builder/${testId}/parameters`).then((r) => (r.data?.data ?? r.data) as ReportParameter[]),
   });
 
   const { data: settings } = useQuery<ReportSettings>({
     queryKey: ["report-settings", testId],
-    queryFn: () => api.get(`/report-builder/${testId}/settings`).then((r) => r.data.data ?? r.data),
+    queryFn: () => api.get(`/report-builder/${testId}/settings`).then((r) => (r.data?.data ?? r.data) as ReportSettings),
   });
 
   const { data: previewHtml } = useQuery<string>({
     queryKey: ["report-preview", testId],
-    queryFn: () => api.get(`/report-builder/${testId}/preview`).then((r) => r.data.data ?? r.data),
+    queryFn: () => api.get(`/report-builder/${testId}/preview`).then((r) => (r.data?.data ?? r.data) as string),
     enabled: showPreview,
   });
 
@@ -223,7 +223,7 @@ export default function ReportBuilderPage() {
   });
 
   const autoFillMutation = useMutation({
-    mutationFn: () => api.post(`/report-builder/${testId}/auto-fill`).then((r) => (r.data.data ?? r.data) as AutoFillParam[]),
+    mutationFn: () => api.post(`/report-builder/${testId}/auto-fill`).then((r) => (r.data?.data ?? r.data) as AutoFillParam[]),
     onSuccess: () => setShowAutoFill(true),
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Auto-fill unavailable";

@@ -285,7 +285,7 @@ export default function ApprovalsPage() {
     queryFn: () =>
       api
         .get("/lab/approvals/stats")
-        .then((r) => r.data.data ?? r.data)
+        .then((r) => (r.data?.data ?? r.data))
         .catch(() => buildMockStats()),
     refetchInterval: 30000,
   });
@@ -301,7 +301,7 @@ export default function ApprovalsPage() {
       if (activeFilter !== "ALL") params.set("filter", activeFilter);
       return api
         .get(`/lab/approvals?${params.toString()}`)
-        .then((r) => r.data.data ?? r.data)
+        .then((r) => (r.data?.data ?? r.data) as ApprovalsResponse)
         .catch(() => ({
           data: buildMockApprovals(),
           meta: { total: 5, page: 1, limit: 20 },

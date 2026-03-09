@@ -321,8 +321,11 @@ function ActionModal({
   useEffect(() => {
     if (modalType === "custody") {
       void api
-        .get<{ data: unknown[] }>(`/samples/${sample.id}/custody`)
-        .then((r) => setCustodyData(r.data.data ?? r.data));
+        .get(`/samples/${sample.id}/custody`)
+        .then((r) => {
+          const raw = r.data?.data ?? r.data;
+          setCustodyData(Array.isArray(raw) ? raw : []);
+        });
     }
   }, [modalType, sample.id]);
 

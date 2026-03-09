@@ -523,8 +523,8 @@ function CreateOrgModal({
 
       // If creating a new rate list, do it first
       if (rateListMode === "create" && newRateListName.trim()) {
-        const rlRes = await api.post<{ data: { id: string } }>("/rate-lists", { name: newRateListName.trim(), listType: "PRICE_LIST" });
-        const created = rlRes.data.data ?? rlRes.data;
+        const rlRes = await api.post("/rate-lists", { name: newRateListName.trim(), listType: "PRICE_LIST" });
+        const created = (rlRes.data?.data ?? rlRes.data) as { id: string };
         resolvedRateListId = created.id;
 
         if (newRateListFile && created.id) {

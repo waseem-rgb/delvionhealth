@@ -838,8 +838,8 @@ export default function RegistrationPage() {
     queryKey: ["rate-lists"],
     queryFn: async () => {
       try {
-        const res = await api.get<{ data: { data: { id: string; name: string; isDefault: boolean }[] } }>("/rate-lists");
-        return res.data.data.data ?? res.data.data ?? [];
+        const res = await api.get("/rate-lists");
+        return (res.data?.data?.data ?? res.data?.data ?? []) as { id: string; name: string; isDefault: boolean }[];
       } catch {
         return [];
       }
@@ -853,9 +853,9 @@ export default function RegistrationPage() {
       setRateListPriceMap(new Map());
       return;
     }
-    api.get<{ data: { data?: { testCatalogId: string; price: number | string; isActive: boolean }[] } }>(`/rate-lists/${form.rateListId}/items`)
+    api.get(`/rate-lists/${form.rateListId}/items`)
       .then((res) => {
-        const items = res.data.data?.data ?? res.data.data ?? [];
+        const items = (res.data?.data?.data ?? res.data?.data ?? []) as { testCatalogId: string; price: number | string; isActive: boolean }[];
         const arr = Array.isArray(items) ? items : [];
         const map = new Map<string, number>();
         arr.forEach((item: { testCatalogId: string; price: number | string; isActive: boolean }) => {
@@ -876,8 +876,8 @@ export default function RegistrationPage() {
       try {
         const params = new URLSearchParams({ search: q });
         if (form.organizationId) params.set("orgId", form.organizationId);
-        const res = await api.get<{ data: { tests: (TestCatalogItem & { mrp: number; price: number; priceSource: string })[] } }>(`/orders/catalog?${params}`);
-        const raw = res.data.data ?? res.data;
+        const res = await api.get(`/orders/catalog?${params}`);
+        const raw = (res.data?.data ?? res.data) as { tests: (TestCatalogItem & { mrp: number; price: number; priceSource: string })[] };
         const items = (raw as { tests: TestCatalogItem[] }).tests ?? [];
         setTestSearchResults(Array.isArray(items) ? items : []);
       } catch {
@@ -955,8 +955,8 @@ export default function RegistrationPage() {
   const handleSymptomChip = useCallback(async (testNames: string[]) => {
     try {
       for (const name of testNames) {
-        const res = await api.get<{ data: { tests: TestCatalogItem[] } }>(`/orders/catalog?search=${encodeURIComponent(name)}&limit=3`);
-        const raw = res.data.data ?? res.data;
+        const res = await api.get(`/orders/catalog?search=${encodeURIComponent(name)}&limit=3`);
+        const raw = (res.data?.data ?? res.data) as { tests: TestCatalogItem[] };
         const items = (raw as { tests: TestCatalogItem[] }).tests ?? [];
         if (items.length > 0) {
           const test = items[0];
@@ -1380,8 +1380,9 @@ export default function RegistrationPage() {
   // -- Organization search fn --
   const searchOrganizations = useCallback(async (q: string): Promise<Organization[]> => {
     try {
-      const res = await api.get<{ data: { data: Organization[] } }>(`/organizations?search=${encodeURIComponent(q)}&limit=20`);
-      return res.data.data.data ?? res.data.data ?? [];
+      const res = await api.get(`/organizations?search=${encodeURIComponent(q)}&limit=20`);
+      const raw = res.data?.data?.data ?? res.data?.data ?? [];
+      return Array.isArray(raw) ? raw : [];
     } catch {
       return [];
     }
@@ -1390,8 +1391,9 @@ export default function RegistrationPage() {
   // -- Doctor search fn --
   const searchDoctors = useCallback(async (q: string): Promise<DoctorResult[]> => {
     try {
-      const res = await api.get<{ data: { data: DoctorResult[] } }>(`/crm/doctors?search=${encodeURIComponent(q)}&limit=20`);
-      return res.data.data.data ?? res.data.data ?? [];
+      const res = await api.get(`/crm/doctors?search=${encodeURIComponent(q)}&limit=20`);
+      const raw = res.data?.data?.data ?? res.data?.data ?? [];
+      return Array.isArray(raw) ? raw : [];
     } catch {
       return [];
     }
@@ -1934,9 +1936,9 @@ export default function RegistrationPage() {
                     updateForm("organizationId", org.id);
                     updateForm("organizationName", org.name);
                     // Auto-load org's rate list + default referring doctor + credit auto-highlight
-                    api.get<{ data: { rateListId: string | null; paymentType?: string; defaultReferringDoctorId?: string | null; defaultReferringDoctorName?: string | null } }>(`/organisations/${org.id}`)
+                    api.get(`/organisations/${org.id}`)
                       .then((res) => {
-                        const orgData = res.data.data ?? res.data;
+                        const orgData = (res.data?.data ?? res.data) as { rateListId: string | null; paymentType?: string; defaultReferringDoctorId?: string | null; defaultReferringDoctorName?: string | null };
                         if (orgData.rateListId) updateForm("rateListId", orgData.rateListId);
                         if (orgData.defaultReferringDoctorName && !form.referralDoctorId) {
                           updateForm("referralDoctorId", orgData.defaultReferringDoctorId || "");

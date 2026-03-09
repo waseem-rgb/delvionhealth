@@ -326,13 +326,13 @@ export default function PayrollPage() {
     },
   });
 
-  const runs = Array.isArray(data) ? data : (data?.data ?? []);
+  const runs: any[] = Array.isArray(data) ? data : (data?.data ?? []);
   const total = data?.meta?.total ?? 0;
 
   // Summary across all displayed runs
-  const totalGross = runs.reduce((s, r) => s + r.totalGross, 0);
-  const totalNet = runs.reduce((s, r) => s + r.totalNet, 0);
-  const totalDeductions = runs.reduce((s, r) => s + r.totalDeductions, 0);
+  const totalGross = runs.reduce((s: number, r: any) => s + Number(r.totalGross ?? 0), 0);
+  const totalNet = runs.reduce((s: number, r: any) => s + Number(r.totalNet ?? 0), 0);
+  const totalDeductions = runs.reduce((s: number, r: any) => s + Number(r.totalDeductions ?? 0), 0);
 
   return (
     <div className="space-y-6">

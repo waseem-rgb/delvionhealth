@@ -42,7 +42,7 @@ export default function ReportSettingsPage() {
     queryKey: ["report-settings"],
     queryFn: async () => {
       const res = await api.get("/tenants/report-settings");
-      return res.data.data ?? res.data;
+      return (res.data?.data ?? res.data) as ReportSettings;
     },
   });
 
@@ -67,7 +67,7 @@ export default function ReportSettingsPage() {
         reportFooterImageUrl: footerImageUrl || null,
         showHeaderFooter,
       });
-      return res.data.data ?? res.data;
+      return (res.data?.data ?? res.data) as ReportSettings;
     },
     onSuccess: () => {
       toast.success("Report settings saved");
@@ -86,7 +86,7 @@ export default function ReportSettingsPage() {
         const res = await api.post(`/tenants/upload-report-image?type=${type}`, form, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        const data = res.data.data ?? res.data;
+        const data = (res.data?.data ?? res.data) as { url: string };
         if (type === "header") setHeaderImageUrl(data.url);
         else setFooterImageUrl(data.url);
         toast.success(`${type === "header" ? "Header" : "Footer"} image uploaded`);
