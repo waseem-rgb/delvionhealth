@@ -587,6 +587,7 @@ model Tenant {
   couponUsages        CouponUsage[]
   bankStatementUploads BankStatementUpload[]
   bankStatementLines   BankStatementLine[]
+  vendorInvoices       VendorInvoice[]
   patientSegments     PatientSegment[]
   customQuotes        CustomQuote[]
   aiPackageSessions   AIPackageSession[]
@@ -1385,7 +1386,7 @@ model Territory {
 model Invoice {
   id            String        @id @default(cuid())
   tenantId      String
-  orderId       String
+  orderId       String?
   patientId     String
   invoiceNumber String
   subtotal      Decimal       @db.Decimal(12, 2)
@@ -1403,7 +1404,7 @@ model Invoice {
   updatedAt     DateTime      @updatedAt
 
   tenant          Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  order           Order                @relation(fields: [orderId], references: [id])
+  order           Order?               @relation(fields: [orderId], references: [id])
   patient         Patient              @relation(fields: [patientId], references: [id])
   createdBy       User?                @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
   payments        Payment[]
@@ -1424,6 +1425,9 @@ model Invoice {
   insuranceTpaName     String?
   insurancePolicyNo    String?
   isCreditOrder        Boolean          @default(false)
+  journalEntryId       String?
+  invoiceType          String           @default("PATIENT")
+  tdsDeducted          Decimal          @db.Decimal(12, 2) @default(0)
 
   @@unique([tenantId, invoiceNumber])
   @@index([tenantId])
@@ -1442,12 +1446,15 @@ model Payment {
   status       PaymentStatus @default(COMPLETED)
   paidAt       DateTime      @default(now())
   recordedById String?
-  notes        String?
-  createdAt    DateTime      @default(now())
+  notes          String?
+  bankAccountId  String?
+  journalEntryId String?
+  createdAt      DateTime      @default(now())
 
-  tenant     Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  invoice    Invoice @relation(fields: [invoiceId], references: [id])
-  recordedBy User?   @relation("PaymentRecordedBy", fields: [recordedById], references: [id])
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoice     Invoice      @relation(fields: [invoiceId], references: [id])
+  recordedBy  User?        @relation("PaymentRecordedBy", fields: [recordedById], references: [id])
+  bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
 
   @@index([tenantId])
   @@index([invoiceId])
@@ -1647,43 +1654,56 @@ model Shift {
 // ─────────────────────────────────────────────
 
 model Vendor {
-  id            String   @id @default(cuid())
-  tenantId      String
-  name          String
-  contactPerson String?
-  email         String?
-  phone         String?
-  address       String?
-  gstNumber     String?
-  paymentTerms  Int?
-  rating        Float?
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String   @id @default(cuid())
+  tenantId        String
+  name            String
+  contactPerson   String?
+  email           String?
+  phone           String?
+  address         String?
+  gstNumber       String?
+  paymentTerms    Int?
+  rating          Float?
+  isActive        Boolean  @default(true)
+  code            String?
+  panNumber       String?
+  tdsApplicable   Boolean  @default(false)
+  tdsSection      String   @default("NONE")
+  ledgerAccountId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   purchaseOrders     PurchaseOrder[]
   inventoryItems     InventoryItem[]
   goodsReceivedNotes GoodsReceivedNote[]
+  vendorInvoices     VendorInvoice[]
 
   @@index([tenantId])
   @@map("vendors")
 }
 
 model PurchaseOrder {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
   tenantId         String
   vendorId         String
   poNumber         String
-  status           POStatus @default(DRAFT)
-  totalAmount      Decimal  @db.Decimal(12, 2) @default(0)
+  status           POStatus  @default(DRAFT)
+  totalAmount      Decimal   @db.Decimal(12, 2) @default(0)
+  subtotal         Decimal   @db.Decimal(12, 2) @default(0)
+  taxAmount        Decimal   @db.Decimal(12, 2) @default(0)
   expectedDelivery DateTime?
+  approvedById     String?
+  approvedAt       DateTime?
+  notes            String?
   createdById      String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  vendor    Vendor @relation(fields: [vendorId], references: [id])
+  tenant    Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vendor    Vendor              @relation(fields: [vendorId], references: [id])
+  items     PurchaseOrderItem[]
+  grns      GoodsReceivedNote[]
 
   @@unique([tenantId, poNumber])
   @@index([tenantId])
@@ -1692,11 +1712,13 @@ model PurchaseOrder {
 }
 
 model InventoryItem {
-  id           String    @id @default(cuid())
-  tenantId     String
-  name         String
-  category     String
-  unit         String
+  id              String    @id @default(cuid())
+  tenantId        String
+  name            String
+  category        String
+  unit            String
+  code            String?
+  ledgerAccountId String?
   currentStock Decimal   @db.Decimal(12, 3) @default(0)
   reorderLevel Decimal   @db.Decimal(12, 3) @default(0)
   expiryDate   DateTime?
@@ -1734,6 +1756,54 @@ model StockMovement {
   @@index([tenantId])
   @@index([itemId])
   @@map("stock_movements")
+}
+
+// ─────────────────────────────────────────────
+// VENDOR INVOICES & PURCHASE ORDER ITEMS
+// ─────────────────────────────────────────────
+
+model VendorInvoice {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  vendorId            String
+  vendorInvoiceNumber String
+  purchaseOrderId     String?
+  grnId               String?
+  invoiceDate         DateTime
+  dueDate             DateTime?
+  subtotal            Decimal  @db.Decimal(12, 2) @default(0)
+  tdsAmount           Decimal  @db.Decimal(12, 2) @default(0)
+  netPayable          Decimal  @db.Decimal(12, 2) @default(0)
+  paidAmount          Decimal  @db.Decimal(12, 2) @default(0)
+  status              String   @default("PENDING")
+  journalEntryId      String?
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vendor Vendor @relation(fields: [vendorId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, vendorId])
+  @@map("vendor_invoices")
+}
+
+model PurchaseOrderItem {
+  id               String  @id @default(cuid())
+  purchaseOrderId  String
+  itemName         String
+  itemCode         String?
+  quantity         Decimal @db.Decimal(12, 3)
+  unit             String  @default("pcs")
+  unitPrice        Decimal @db.Decimal(12, 2)
+  totalPrice       Decimal @db.Decimal(12, 2)
+  receivedQuantity Decimal @db.Decimal(12, 3) @default(0)
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+
+  @@index([purchaseOrderId])
+  @@map("purchase_order_items")
 }
 
 // ─────────────────────────────────────────────
@@ -1923,6 +1993,7 @@ model BankAccount {
   statements       BankStatement[]
   transactions     BankTransaction[]
   statementUploads BankStatementUpload[]
+  financePayments  Payment[]
 
   @@index([tenantId])
   @@map("bank_accounts")
@@ -2360,6 +2431,7 @@ model GoodsReceivedNote {
   tenantId        String
   vendorId        String
   purchaseOrderId String?
+  grnNumber       String?
   status          GRNStatus @default(DRAFT)
   totalAmount     Decimal   @db.Decimal(12, 2) @default(0)
   receivedById    String
@@ -2367,9 +2439,10 @@ model GoodsReceivedNote {
   notes           String?
   createdAt       DateTime  @default(now())
 
-  tenant Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  vendor Vendor    @relation(fields: [vendorId], references: [id])
-  items  GRNItem[]
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vendor        Vendor         @relation(fields: [vendorId], references: [id])
+  purchaseOrder PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+  items         GRNItem[]
 
   @@index([tenantId])
   @@map("goods_received_notes")

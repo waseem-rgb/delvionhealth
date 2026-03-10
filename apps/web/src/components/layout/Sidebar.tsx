@@ -213,7 +213,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: "Upload Statement", href: "/finance/accounting/upload", icon: Upload },
       { label: "Ledgers", href: "/finance/accounting/ledgers", icon: BookOpen },
       { label: "Journal Entries", href: "/finance/accounting/journals", icon: FileText },
-      { label: "Procurement", href: "/procurement", icon: Truck },
+      { label: "Procurement", href: "/finance/procurement", icon: Truck },
     ],
   },
   {

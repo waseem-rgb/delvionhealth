@@ -4,6 +4,8 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { FinanceService } from "./finance.service";
 import { AccountingService } from "./accounting.service";
 import { NarrationEngineService } from "./narration-engine.service";
+import { ReceivablesService } from "./services/receivables.service";
+import { ProcurementService } from "./services/procurement.service";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { TenantGuard } from "../../common/guards/tenant.guard";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
@@ -18,6 +20,8 @@ export class FinanceController {
     private readonly financeService: FinanceService,
     private readonly accountingService: AccountingService,
     private readonly narrationEngine: NarrationEngineService,
+    private readonly receivablesService: ReceivablesService,
+    private readonly procurementService: ProcurementService,
   ) {}
 
   // GL Accounts
@@ -299,5 +303,141 @@ export class FinanceController {
     @Query("source") source?: string,
   ) {
     return this.accountingService.getLedger(user.tenantId, { month, category, source });
+  }
+
+  // ── Phase 2: Receivables ──────────────────────────────────────────────
+
+  @Post("invoices")
+  @ApiOperation({ summary: "Create finance invoice" })
+  createInvoice(@CurrentUser() user: JwtPayload, @Body() dto: any) {
+    return this.receivablesService.createInvoice(dto, user.tenantId, user.sub);
+  }
+
+  @Get("invoices")
+  @ApiOperation({ summary: "List invoices with filters" })
+  @ApiQuery({ name: "status", required: false })
+  @ApiQuery({ name: "type", required: false })
+  @ApiQuery({ name: "dateFrom", required: false })
+  @ApiQuery({ name: "dateTo", required: false })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  getInvoices(
+    @CurrentUser() user: JwtPayload,
+    @Query("status") status?: string,
+    @Query("type") type?: string,
+    @Query("dateFrom") dateFrom?: string,
+    @Query("dateTo") dateTo?: string,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
+  ) {
+    return this.receivablesService.getInvoices(user.tenantId, {
+      status, type, dateFrom, dateTo,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+  }
+
+  @Get("invoices/:id")
+  @ApiOperation({ summary: "Get invoice by ID" })
+  getInvoiceById(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.receivablesService.getInvoiceById(id, user.tenantId);
+  }
+
+  @Post("payments")
+  @ApiOperation({ summary: "Record payment against invoice" })
+  recordPayment(@CurrentUser() user: JwtPayload, @Body() dto: any) {
+    return this.receivablesService.recordPayment(dto, user.tenantId, user.sub);
+  }
+
+  @Get("aging-report")
+  @ApiOperation({ summary: "Get accounts receivable aging report" })
+  getAgingReport(@CurrentUser() user: JwtPayload) {
+    return this.receivablesService.getAgingReport(user.tenantId);
+  }
+
+  @Get("insurance-claims")
+  @ApiOperation({ summary: "List insurance claims" })
+  getInsuranceClaims(@CurrentUser() user: JwtPayload) {
+    return this.receivablesService.getInsuranceClaims(user.tenantId);
+  }
+
+  @Patch("insurance-claims/:id")
+  @ApiOperation({ summary: "Update insurance claim" })
+  updateInsuranceClaim(@CurrentUser() user: JwtPayload, @Param("id") id: string, @Body() dto: any) {
+    return this.receivablesService.updateInsuranceClaim(id, user.tenantId, dto);
+  }
+
+  // ── Phase 2: Procurement ──────────────────────────────────────────────
+
+  @Post("vendors")
+  @ApiOperation({ summary: "Create vendor" })
+  createVendor(@CurrentUser() user: JwtPayload, @Body() dto: any) {
+    return this.procurementService.createVendor(dto, user.tenantId);
+  }
+
+  @Get("vendors")
+  @ApiOperation({ summary: "List vendors" })
+  getVendors(@CurrentUser() user: JwtPayload) {
+    return this.procurementService.getVendors(user.tenantId);
+  }
+
+  @Post("purchase-orders")
+  @ApiOperation({ summary: "Create purchase order" })
+  createPurchaseOrder(@CurrentUser() user: JwtPayload, @Body() dto: any) {
+    return this.procurementService.createPurchaseOrder(dto, user.tenantId, user.sub);
+  }
+
+  @Get("purchase-orders")
+  @ApiOperation({ summary: "List purchase orders" })
+  getPurchaseOrders(@CurrentUser() user: JwtPayload) {
+    return this.procurementService.getPurchaseOrders(user.tenantId);
+  }
+
+  @Patch("purchase-orders/:id/approve")
+  @ApiOperation({ summary: "Approve purchase order" })
+  approvePurchaseOrder(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.procurementService.approvePurchaseOrder(id, user.tenantId, user.sub);
+  }
+
+  @Post("grns")
+  @ApiOperation({ summary: "Create goods received note" })
+  createGRN(@CurrentUser() user: JwtPayload, @Body() dto: any) {
+    return this.procurementService.createGRN(dto, user.tenantId, user.sub);
+  }
+
+  @Post("grns/:id/confirm")
+  @ApiOperation({ summary: "Confirm GRN and update inventory" })
+  confirmGRN(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.procurementService.confirmGRN(id, user.tenantId, user.sub);
+  }
+
+  @Post("vendor-invoices")
+  @ApiOperation({ summary: "Create vendor invoice" })
+  createVendorInvoice(@CurrentUser() user: JwtPayload, @Body() dto: any) {
+    return this.procurementService.createVendorInvoice(dto, user.tenantId);
+  }
+
+  @Post("vendor-invoices/:id/match")
+  @ApiOperation({ summary: "Run 3-way match on vendor invoice" })
+  threeWayMatch(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.procurementService.threeWayMatch(id, user.tenantId, user.sub);
+  }
+
+  @Post("vendor-payments")
+  @ApiOperation({ summary: "Record vendor payment" })
+  recordVendorPayment(@CurrentUser() user: JwtPayload, @Body() dto: any) {
+    return this.procurementService.recordVendorPayment(dto, user.tenantId, user.sub);
+  }
+
+  @Get("inventory")
+  @ApiOperation({ summary: "List inventory items" })
+  getInventory(@CurrentUser() user: JwtPayload) {
+    return this.procurementService.getInventory(user.tenantId);
+  }
+
+  @Post("inventory/out")
+  @ApiOperation({ summary: "Record inventory consumption" })
+  recordInventoryOut(@CurrentUser() user: JwtPayload, @Body() dto: any) {
+    return this.procurementService.recordInventoryOut(dto, user.tenantId, user.sub);
   }
 }
