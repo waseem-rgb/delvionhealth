@@ -4,10 +4,19 @@ import { FinanceController } from "./finance.controller";
 import { AccountingService } from "./accounting.service";
 import { NarrationEngineService } from "./narration-engine.service";
 import { StatementParserService } from "./statement-parser.service";
+import { JournalService } from "./services/journal.service";
+import { AiCategorizeService } from "./services/ai-categorize.service";
 
 @Module({
-  providers: [FinanceService, AccountingService, NarrationEngineService, StatementParserService],
+  providers: [
+    FinanceService,
+    AccountingService,
+    NarrationEngineService,
+    StatementParserService,
+    JournalService,
+    AiCategorizeService,
+  ],
   controllers: [FinanceController],
-  exports: [FinanceService, AccountingService],
+  exports: [FinanceService, AccountingService, JournalService],
 })
 export class FinanceModule {}

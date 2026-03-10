@@ -26,7 +26,7 @@ export class FinanceService {
     });
   }
 
-  async createAccount(dto: { code: string; name: string; type: string; parentId?: string; normalBalance?: string }, tenantId: string) {
+  async createAccount(dto: { code: string; name: string; type: string; group?: string; subGroup?: string; parentId?: string; normalBalance?: string }, tenantId: string) {
     if (dto.parentId) {
       const parent = await this.prisma.gLAccount.findFirst({ where: { id: dto.parentId, tenantId } });
       if (!parent) throw new NotFoundException("Parent account not found");
@@ -36,8 +36,10 @@ export class FinanceService {
         tenantId,
         code: dto.code,
         name: dto.name,
-        type: dto.type as never,
-        normalBalance: (dto.normalBalance as never) ?? "DEBIT",
+        type: dto.type as any,
+        normalBalance: (dto.normalBalance as any) ?? "DEBIT",
+        group: dto.group ?? dto.type,
+        subGroup: dto.subGroup,
         parentId: dto.parentId ?? null,
       },
     });

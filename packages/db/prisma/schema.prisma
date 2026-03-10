@@ -585,6 +585,8 @@ model Tenant {
   healthCamps         HealthCamp[]
   coupons             Coupon[]
   couponUsages        CouponUsage[]
+  bankStatementUploads BankStatementUpload[]
+  bankStatementLines   BankStatementLine[]
   patientSegments     PatientSegment[]
   customQuotes        CustomQuote[]
   aiPackageSessions   AIPackageSession[]
@@ -679,6 +681,8 @@ model User {
   canApproveReports      Boolean  @default(false)
   approvedReports        LabReport[]  @relation("ReportApprovedBy")
   rejectedReports        LabReport[]  @relation("ReportRejectedBy")
+
+  statementUploads   BankStatementUpload[] @relation("StatementUploadedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -1494,6 +1498,11 @@ model GLAccount {
   type          GLAccountType
   normalBalance BalanceType   @default(DEBIT)
   balance       Decimal       @db.Decimal(15, 2) @default(0)
+  group         String
+  subGroup      String?
+  isSystem      Boolean       @default(true)
+  openingBalance BigInt       @default(0)
+  currentBalance BigInt       @default(0)
   parentId      String?
   isActive      Boolean       @default(true)
 
@@ -1910,9 +1919,10 @@ model BankAccount {
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
 
-  tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  statements   BankStatement[]
-  transactions BankTransaction[]
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  statements       BankStatement[]
+  transactions     BankTransaction[]
+  statementUploads BankStatementUpload[]
 
   @@index([tenantId])
   @@map("bank_accounts")
@@ -1972,6 +1982,58 @@ model BankTransaction {
   @@index([tenantId, category])
   @@index([tenantId, matchType])
   @@map("bank_transactions")
+}
+
+model BankStatementUpload {
+  id             String   @id @default(cuid())
+  tenantId       String
+  bankAccountId  String
+  fileName       String
+  uploadedById   String
+  totalRows      Int      @default(0)
+  parsedRows     Int      @default(0)
+  confirmedRows  Int      @default(0)
+  status         String   @default("PARSING")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  bankAccount BankAccount @relation(fields: [bankAccountId], references: [id])
+  uploadedBy  User        @relation("StatementUploadedBy", fields: [uploadedById], references: [id])
+  lines       BankStatementLine[]
+
+  @@index([tenantId])
+  @@map("bank_statement_uploads")
+}
+
+model BankStatementLine {
+  id                String   @id @default(cuid())
+  uploadId          String
+  bankAccountId     String
+  tenantId          String
+  txnDate           DateTime
+  valueDate         DateTime?
+  narration         String
+  debit             BigInt   @default(0)
+  credit            BigInt   @default(0)
+  balance           BigInt   @default(0)
+  chequeNo          String?
+  referenceNo       String?
+  suggestedLedgerId String?
+  confirmedLedgerId String?
+  aiConfidence      Float?
+  aiCategory        String?
+  status            String   @default("UNMATCHED")
+  journalEntryId    String?
+  notes             String?
+  createdAt         DateTime @default(now())
+
+  upload      BankStatementUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+  tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([uploadId])
+  @@index([tenantId])
+  @@map("bank_statement_lines")
 }
 
 model CashBookEntry {
