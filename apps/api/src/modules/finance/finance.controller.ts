@@ -6,6 +6,9 @@ import { AccountingService } from "./accounting.service";
 import { NarrationEngineService } from "./narration-engine.service";
 import { ReceivablesService } from "./services/receivables.service";
 import { ProcurementService } from "./services/procurement.service";
+import { PayrollCalculationService } from "./services/payroll.service";
+import { ComplianceService } from "./services/compliance.service";
+import { PayslipService } from "./services/payslip.service";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { TenantGuard } from "../../common/guards/tenant.guard";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
@@ -22,6 +25,9 @@ export class FinanceController {
     private readonly narrationEngine: NarrationEngineService,
     private readonly receivablesService: ReceivablesService,
     private readonly procurementService: ProcurementService,
+    private readonly payrollService: PayrollCalculationService,
+    private readonly complianceService: ComplianceService,
+    private readonly payslipService: PayslipService,
   ) {}
 
   // GL Accounts
@@ -439,5 +445,94 @@ export class FinanceController {
   @ApiOperation({ summary: "Record inventory consumption" })
   recordInventoryOut(@CurrentUser() user: JwtPayload, @Body() dto: any) {
     return this.procurementService.recordInventoryOut(dto, user.tenantId, user.sub);
+  }
+
+  // ── Phase 3: Payroll ───────────────────────────────────────────────────
+
+  @Get("employees")
+  @ApiOperation({ summary: "List employees with salary structures" })
+  getEmployeesWithStructures(@CurrentUser() user: JwtPayload) {
+    return this.payrollService.getEmployeesWithStructures(user.tenantId);
+  }
+
+  @Post("salary-structures")
+  @ApiOperation({ summary: "Create salary structure for employee" })
+  createSalaryStructure(@CurrentUser() user: JwtPayload, @Body() dto: any) {
+    return this.payrollService.createSalaryStructure(dto, user.tenantId);
+  }
+
+  @Post("payroll/run")
+  @ApiOperation({ summary: "Create payroll run for a month" })
+  createPayrollRun(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: { month: number; year: number },
+  ) {
+    return this.payrollService.createPayrollRun(dto.month, dto.year, user.tenantId, user.sub);
+  }
+
+  @Get("payroll/:id")
+  @ApiOperation({ summary: "Get payroll run details" })
+  getPayrollRun(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.payrollService.getPayrollRun(id, user.tenantId);
+  }
+
+  @Post("payroll/:id/approve")
+  @ApiOperation({ summary: "Approve payroll run" })
+  approvePayrollRun(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.payrollService.approvePayrollRun(id, user.tenantId, user.sub);
+  }
+
+  @Post("payroll/:id/post")
+  @ApiOperation({ summary: "Post payroll run to journal" })
+  postPayroll(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.payrollService.postPayroll(id, user.tenantId, user.sub);
+  }
+
+  @Get("payroll/:id/payslip/:employeeId")
+  @ApiOperation({ summary: "Generate payslip for employee" })
+  generatePayslip(
+    @CurrentUser() user: JwtPayload,
+    @Param("id") id: string,
+    @Param("employeeId") employeeId: string,
+  ) {
+    return this.payslipService.generatePayslip(id, employeeId, user.tenantId);
+  }
+
+  // ── Phase 3: Compliance ────────────────────────────────────────────────
+
+  @Get("compliance-calendar")
+  @ApiOperation({ summary: "Get compliance calendar" })
+  @ApiQuery({ name: "month", required: false, type: Number })
+  @ApiQuery({ name: "year", required: false, type: Number })
+  getComplianceCalendar(
+    @CurrentUser() user: JwtPayload,
+    @Query("month") month?: string,
+    @Query("year") year?: string,
+  ) {
+    return this.complianceService.getComplianceCalendar(
+      user.tenantId,
+      month ? Number(month) : undefined,
+      year ? Number(year) : undefined,
+    );
+  }
+
+  @Post("statutory-payments")
+  @ApiOperation({ summary: "Record statutory payment" })
+  recordStatutoryPayment(@CurrentUser() user: JwtPayload, @Body() dto: any) {
+    return this.complianceService.recordStatutoryPayment(dto, user.tenantId, user.sub);
+  }
+
+  @Get("statutory-payments")
+  @ApiOperation({ summary: "List statutory payments" })
+  @ApiQuery({ name: "type", required: false })
+  @ApiQuery({ name: "status", required: false })
+  @ApiQuery({ name: "period", required: false })
+  getStatutoryPayments(
+    @CurrentUser() user: JwtPayload,
+    @Query("type") type?: string,
+    @Query("status") status?: string,
+    @Query("period") period?: string,
+  ) {
+    return this.complianceService.getStatutoryPayments(user.tenantId, { type, status, period });
   }
 }

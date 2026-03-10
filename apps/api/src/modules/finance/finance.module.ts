@@ -8,6 +8,9 @@ import { JournalService } from "./services/journal.service";
 import { AiCategorizeService } from "./services/ai-categorize.service";
 import { ReceivablesService } from "./services/receivables.service";
 import { ProcurementService } from "./services/procurement.service";
+import { PayrollCalculationService } from "./services/payroll.service";
+import { ComplianceService } from "./services/compliance.service";
+import { PayslipService } from "./services/payslip.service";
 
 @Module({
   providers: [
@@ -19,8 +22,11 @@ import { ProcurementService } from "./services/procurement.service";
     AiCategorizeService,
     ReceivablesService,
     ProcurementService,
+    PayrollCalculationService,
+    ComplianceService,
+    PayslipService,
   ],
   controllers: [FinanceController],
-  exports: [FinanceService, AccountingService, JournalService, ReceivablesService, ProcurementService],
+  exports: [FinanceService, AccountingService, JournalService, ReceivablesService, ProcurementService, PayrollCalculationService, ComplianceService, PayslipService],
 })
 export class FinanceModule {}
