@@ -11,6 +11,9 @@ import { ProcurementService } from "./services/procurement.service";
 import { PayrollCalculationService } from "./services/payroll.service";
 import { ComplianceService } from "./services/compliance.service";
 import { PayslipService } from "./services/payslip.service";
+import { StatementsService } from "./services/statements.service";
+import { ReconciliationService } from "./services/reconciliation.service";
+import { DashboardService } from "./services/dashboard.service";
 
 @Module({
   providers: [
@@ -25,8 +28,11 @@ import { PayslipService } from "./services/payslip.service";
     PayrollCalculationService,
     ComplianceService,
     PayslipService,
+    StatementsService,
+    ReconciliationService,
+    DashboardService,
   ],
   controllers: [FinanceController],
-  exports: [FinanceService, AccountingService, JournalService, ReceivablesService, ProcurementService, PayrollCalculationService, ComplianceService, PayslipService],
+  exports: [FinanceService, AccountingService, JournalService, ReceivablesService, ProcurementService, PayrollCalculationService, ComplianceService, PayslipService, StatementsService, ReconciliationService, DashboardService],
 })
 export class FinanceModule {}

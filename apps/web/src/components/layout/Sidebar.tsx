@@ -207,8 +207,10 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Finance",
     roles: [Role.FINANCE_EXECUTIVE, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
     items: [
-      { label: "Finance Dashboard", href: "/finance", icon: Wallet },
+      { label: "Finance Dashboard", href: "/finance/dashboard", icon: Wallet },
+      { label: "Reports & Statements", href: "/finance/reports", icon: FileSpreadsheet },
       { label: "Receivables", href: "/finance/receivables", icon: Coins },
+      { label: "Reconciliation", href: "/finance/reconciliation", icon: GitMerge },
       { label: "Accounting", href: "/finance/accounting", icon: BookOpenCheck },
       { label: "Upload Statement", href: "/finance/accounting/upload", icon: Upload },
       { label: "Ledgers", href: "/finance/accounting/ledgers", icon: BookOpen },

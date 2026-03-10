@@ -9,6 +9,9 @@ import { ProcurementService } from "./services/procurement.service";
 import { PayrollCalculationService } from "./services/payroll.service";
 import { ComplianceService } from "./services/compliance.service";
 import { PayslipService } from "./services/payslip.service";
+import { StatementsService } from "./services/statements.service";
+import { ReconciliationService } from "./services/reconciliation.service";
+import { DashboardService } from "./services/dashboard.service";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { TenantGuard } from "../../common/guards/tenant.guard";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
@@ -28,6 +31,9 @@ export class FinanceController {
     private readonly payrollService: PayrollCalculationService,
     private readonly complianceService: ComplianceService,
     private readonly payslipService: PayslipService,
+    private readonly statementsService: StatementsService,
+    private readonly reconciliationService: ReconciliationService,
+    private readonly dashboardService: DashboardService,
   ) {}
 
   // GL Accounts
@@ -534,5 +540,129 @@ export class FinanceController {
     @Query("period") period?: string,
   ) {
     return this.complianceService.getStatutoryPayments(user.tenantId, { type, status, period });
+  }
+
+  // ── Phase 4: Financial Statements ────────────────────────────────────
+
+  @Get("statements/profit-loss")
+  @ApiOperation({ summary: "Enhanced P&L with line items" })
+  @ApiQuery({ name: "from", required: false })
+  @ApiQuery({ name: "to", required: false })
+  getDetailedProfitLoss(
+    @CurrentUser() user: JwtPayload,
+    @Query("from") from?: string,
+    @Query("to") to?: string,
+  ) {
+    const now = new Date();
+    const defaultFrom = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    return this.statementsService.getProfitAndLoss(user.tenantId, from ?? defaultFrom, to ?? now.toISOString());
+  }
+
+  @Get("statements/balance-sheet")
+  @ApiOperation({ summary: "Enhanced balance sheet with grouping" })
+  @ApiQuery({ name: "asOf", required: false })
+  getDetailedBalanceSheet(@CurrentUser() user: JwtPayload, @Query("asOf") asOf?: string) {
+    return this.statementsService.getBalanceSheet(user.tenantId, asOf);
+  }
+
+  @Get("statements/cash-flow")
+  @ApiOperation({ summary: "Cash flow statement (indirect method)" })
+  @ApiQuery({ name: "from", required: false })
+  @ApiQuery({ name: "to", required: false })
+  getDetailedCashFlow(
+    @CurrentUser() user: JwtPayload,
+    @Query("from") from?: string,
+    @Query("to") to?: string,
+  ) {
+    const now = new Date();
+    const defaultFrom = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    return this.statementsService.getCashFlowStatement(user.tenantId, from ?? defaultFrom, to ?? now.toISOString());
+  }
+
+  @Get("statements/ratios")
+  @ApiOperation({ summary: "Financial ratios" })
+  getFinancialRatios(@CurrentUser() user: JwtPayload) {
+    return this.statementsService.getFinancialRatios(user.tenantId);
+  }
+
+  // ── Phase 4: Bank Reconciliation ─────────────────────────────────────
+
+  @Post("reconciliation/auto-reconcile")
+  @ApiOperation({ summary: "Smart auto-reconcile bank statements" })
+  smartAutoReconcile(@CurrentUser() user: JwtPayload, @Body() dto: { bankAccountId: string }) {
+    return this.reconciliationService.smartAutoReconcile(user.tenantId, dto.bankAccountId);
+  }
+
+  @Get("reconciliation/summary")
+  @ApiOperation({ summary: "Get reconciliation summary" })
+  @ApiQuery({ name: "bankAccountId", required: true })
+  getReconciliationSummary(@CurrentUser() user: JwtPayload, @Query("bankAccountId") bankAccountId: string) {
+    return this.reconciliationService.getReconciliationSummary(user.tenantId, bankAccountId);
+  }
+
+  @Get("reconciliation/suggested")
+  @ApiOperation({ summary: "Get suggested matches" })
+  @ApiQuery({ name: "bankAccountId", required: true })
+  getSuggestedMatches(@CurrentUser() user: JwtPayload, @Query("bankAccountId") bankAccountId: string) {
+    return this.reconciliationService.getSuggestedMatches(user.tenantId, bankAccountId);
+  }
+
+  @Post("reconciliation/accept-match")
+  @ApiOperation({ summary: "Accept a suggested match" })
+  acceptMatch(@CurrentUser() user: JwtPayload, @Body() dto: { statementId: string; journalEntryId: string }) {
+    return this.reconciliationService.acceptMatch(user.tenantId, dto.statementId, dto.journalEntryId);
+  }
+
+  @Post("reconciliation/reject-match")
+  @ApiOperation({ summary: "Reject a suggested match" })
+  rejectMatch(@CurrentUser() user: JwtPayload, @Body() dto: { statementId: string }) {
+    return this.reconciliationService.rejectMatch(user.tenantId, dto.statementId);
+  }
+
+  @Post("reconciliation/adjustment")
+  @ApiOperation({ summary: "Create adjustment entry for unreconciled item" })
+  createAdjustmentEntry(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: { statementId: string; description: string; glAccountId: string },
+  ) {
+    return this.reconciliationService.createAdjustmentEntry(user.tenantId, dto, user.sub);
+  }
+
+  // ── Phase 4: Finance Dashboard ───────────────────────────────────────
+
+  @Get("dashboard/kpis")
+  @ApiOperation({ summary: "Get finance dashboard KPIs" })
+  getDashboardKPIs(@CurrentUser() user: JwtPayload) {
+    return this.dashboardService.getDashboardKPIs(user.tenantId);
+  }
+
+  @Get("dashboard/revenue-trend")
+  @ApiOperation({ summary: "Revenue trend (last 6 months)" })
+  getRevenueTrend(@CurrentUser() user: JwtPayload) {
+    return this.dashboardService.getRevenueTrend(user.tenantId);
+  }
+
+  @Get("dashboard/expense-breakdown")
+  @ApiOperation({ summary: "Expense breakdown by category" })
+  @ApiQuery({ name: "from", required: false })
+  @ApiQuery({ name: "to", required: false })
+  getExpenseBreakdown(
+    @CurrentUser() user: JwtPayload,
+    @Query("from") from?: string,
+    @Query("to") to?: string,
+  ) {
+    return this.dashboardService.getExpenseBreakdown(user.tenantId, from, to);
+  }
+
+  @Get("dashboard/recent-transactions")
+  @ApiOperation({ summary: "Recent journal entries" })
+  getRecentTransactions(@CurrentUser() user: JwtPayload) {
+    return this.dashboardService.getRecentTransactions(user.tenantId);
+  }
+
+  @Get("dashboard/insights")
+  @ApiOperation({ summary: "AI-powered financial insights" })
+  getAIInsights(@CurrentUser() user: JwtPayload) {
+    return this.dashboardService.getAIInsights(user.tenantId);
   }
 }
