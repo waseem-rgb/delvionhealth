@@ -97,6 +97,24 @@ export class ProcurementService {
   }
 
   // ── GRN ────────────────────────────────────────
+  async getGRNs(tenantId: string) {
+    return this.prisma.goodsReceivedNote.findMany({
+      where: { tenantId },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      include: { vendor: { select: { name: true } }, items: true },
+    });
+  }
+
+  async getVendorInvoices(tenantId: string) {
+    return this.prisma.vendorInvoice.findMany({
+      where: { tenantId },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      include: { vendor: { select: { name: true } } },
+    });
+  }
+
   async createGRN(dto: {
     vendorId: string;
     purchaseOrderId?: string;

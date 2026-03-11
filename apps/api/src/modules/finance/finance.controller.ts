@@ -355,6 +355,12 @@ export class FinanceController {
     return this.receivablesService.getInvoiceById(id, user.tenantId);
   }
 
+  @Get("payments")
+  @ApiOperation({ summary: "List payments" })
+  getPayments(@CurrentUser() user: JwtPayload) {
+    return this.receivablesService.getPayments(user.tenantId);
+  }
+
   @Post("payments")
   @ApiOperation({ summary: "Record payment against invoice" })
   recordPayment(@CurrentUser() user: JwtPayload, @Body() dto: any) {
@@ -411,6 +417,12 @@ export class FinanceController {
     return this.procurementService.approvePurchaseOrder(id, user.tenantId, user.sub);
   }
 
+  @Get("grns")
+  @ApiOperation({ summary: "List GRNs" })
+  getGRNs(@CurrentUser() user: JwtPayload) {
+    return this.procurementService.getGRNs(user.tenantId);
+  }
+
   @Post("grns")
   @ApiOperation({ summary: "Create goods received note" })
   createGRN(@CurrentUser() user: JwtPayload, @Body() dto: any) {
@@ -421,6 +433,12 @@ export class FinanceController {
   @ApiOperation({ summary: "Confirm GRN and update inventory" })
   confirmGRN(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
     return this.procurementService.confirmGRN(id, user.tenantId, user.sub);
+  }
+
+  @Get("vendor-invoices")
+  @ApiOperation({ summary: "List vendor invoices" })
+  getVendorInvoices(@CurrentUser() user: JwtPayload) {
+    return this.procurementService.getVendorInvoices(user.tenantId);
   }
 
   @Post("vendor-invoices")

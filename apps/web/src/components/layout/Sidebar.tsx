@@ -208,16 +208,10 @@ const NAV_GROUPS: NavGroup[] = [
     roles: [Role.FINANCE_EXECUTIVE, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
     items: [
       { label: "Finance Overview", href: "/finance", icon: LayoutDashboard },
-      { label: "Finance Dashboard", href: "/finance/dashboard", icon: Wallet },
-      { label: "Reports & Statements", href: "/finance/reports", icon: FileSpreadsheet },
       { label: "Receivables", href: "/finance/receivables", icon: Coins },
-      { label: "Reconciliation", href: "/finance/reconciliation", icon: GitMerge },
       { label: "Accounting", href: "/finance/accounting", icon: BookOpenCheck },
-      { label: "Upload Statement", href: "/finance/accounting/upload", icon: Upload },
-      { label: "Ledgers", href: "/finance/accounting/ledgers", icon: BookOpen },
-      { label: "Journal Entries", href: "/finance/accounting/journals", icon: FileText },
-      { label: "Statutory & Payroll", href: "/finance/statutory", icon: Shield },
       { label: "Procurement", href: "/finance/procurement", icon: Truck },
+      { label: "Statutory & Payroll", href: "/finance/statutory", icon: Shield },
     ],
   },
   {

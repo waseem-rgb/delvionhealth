@@ -93,6 +93,15 @@ export class ReceivablesService {
     return invoice;
   }
 
+  async getPayments(tenantId: string) {
+    return this.prisma.payment.findMany({
+      where: { tenantId },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      include: { invoice: { select: { invoiceNumber: true } } },
+    });
+  }
+
   // recordPayment: Record payment against invoice, auto-post journal
   // Journal: DEBIT Bank/Cash, CREDIT AR
   // Update invoice.amountPaid, invoice.balance, status
