@@ -362,3 +362,114 @@
 ### Overall Verdict: ✅ PLATFORM READY
 
 All 16 sidebar modules are functional with seeded demo data. All API endpoints return valid responses. Zero TypeScript compilation errors across both API and Web packages.
+
+---
+
+## Phase 6: Finance Module — Detailed QA (Phases 1-4)
+
+**Date:** 2026-03-11
+**Demo Data:** 5 employees, 4 vendors, 20 bank statement rows, 6 invoices
+**Unit Tests:** 89/89 passing (4 test suites)
+
+### Demo Employees — Payroll Testing
+
+| Name | Role | Basic | Gross | PF | ESIC | PT | Expected Net |
+|------|------|-------|-------|----|------|-----|-------------|
+| Priya Sharma | Lab Manager | ₹25,000 | ₹32,000 | ₹1,800 (capped) | No (>21k) | ₹200 | ~₹28,200 |
+| Ravi Kumar | Phlebotomist | ₹12,000 | ₹18,000 | ₹1,440 | Yes | ₹200 | ~₹15,225 |
+| Anita Nair | Front Desk | ₹9,000 | ₹14,000 | ₹1,080 | Yes | ₹150 | ~₹11,650 |
+| Dr. Suresh | Pathologist | ₹45,000 | ₹65,000 | ₹1,800 (capped) | No (>21k) | ₹200 | ~₹61,800 |
+| Meena Pillai | Admin | ₹8,000 | ₹12,000 | ₹960 | Yes | ₹150 | ~₹9,700 |
+
+### Demo Vendors — Procurement Testing
+
+| Vendor | Category | TDS Section | Rate | Payment Terms | Outstanding |
+|--------|----------|------------|------|---------------|-------------|
+| Sigma Diagnostics | Reagents & Kits | 194C | 1% | Net 30 | ₹45,000 |
+| MedSupply India | Consumables | 194C | 1% | Net 15 | ₹12,800 |
+| LabTech Solutions | Equipment Maint. | 194J | 10% | Net 45 | ₹28,500 |
+| FastCourier Ltd | Home Collection | 194C | 1% | Net 7 | ₹6,200 |
+
+### Finance Phase 1 — Foundation & Accounting ✅
+
+| ID | Test Scenario | Expected | Status |
+|----|--------------|----------|--------|
+| P1-01 | Chart of accounts seed (40+ accounts) | All groups present | ✅ PASS |
+| P1-02 | CSV bank statement upload (20 rows) | 20 lines parsed | ✅ PASS |
+| P1-03 | AI categorization — salary | 5100, confidence > 0.85 | ✅ PASS |
+| P1-04 | AI categorization — rent | 5300, confidence > 0.85 | ✅ PASS |
+| P1-05 | AI categorization — insurance | 1201, confidence > 0.80 | ✅ PASS |
+| P1-06 | AI flags duplicate (Sigma ×2) | 2nd row flagged | ✅ PASS |
+| P1-07 | Double-entry balance | sum(Dr)==sum(Cr) | ✅ PASS |
+| P1-08 | Unbalanced journal rejected | 400 BadRequest | ✅ PASS |
+| P1-09 | Trial balance check | Balanced | ✅ PASS |
+| P1-10 | Ledger history | Running balance correct | ✅ PASS |
+
+### Finance Phase 2 — Receivables & Procurement ✅
+
+| ID | Test Scenario | Expected | Status |
+|----|--------------|----------|--------|
+| P2-01 | Create patient invoice | Journal: Dr AR, Cr Revenue | ✅ PASS |
+| P2-02 | Record full payment | Status=PAID, AR cleared | ✅ PASS |
+| P2-03 | Record partial payment | Status=PARTIALLY_PAID | ✅ PASS |
+| P2-04 | Aging report buckets | Correctly bucketed | ✅ PASS |
+| P2-05 | Insurance claim | Claim created | ✅ PASS |
+| P2-06 | Create PO | PO with line items | ✅ PASS |
+| P2-07 | PO approval | Status=SENT | ✅ PASS |
+| P2-08 | GRN creation | Dr Inventory, Cr AP | ✅ PASS |
+| P2-09 | Vendor payment with TDS | Net correct, TDS Payable | ✅ PASS |
+| P2-10 | 3-way match — pass | APPROVED (within 5%) | ✅ PASS |
+| P2-11 | 3-way match — fail | DISPUTED (16.7% variance) | ✅ PASS |
+| P2-12 | Inventory out COGS | Dr COGS, Cr Inventory | ✅ PASS |
+
+### Finance Phase 3 — Statutory & Payroll ✅
+
+| ID | Test Scenario | Expected | Status |
+|----|--------------|----------|--------|
+| P3-01 | PF capped at basic 15000 | ₹1,800 | ✅ PASS |
+| P3-02 | ESIC not applied (>21k) | ₹0 | ✅ PASS |
+| P3-03 | ESIC applied (<=21k) | 0.75%/3.25% | ✅ PASS |
+| P3-04 | PT lower slab (10k-14999) | ₹150 | ✅ PASS |
+| P3-05 | PT higher slab (>=15k) | ₹200 | ✅ PASS |
+| P3-06 | Payroll journal balance | sum(Dr)===sum(Cr) | ✅ PASS |
+| P3-07 | LOP deduction | ₹18,000/26 × 2 = ₹1,384 | ✅ PASS |
+| P3-08 | Compliance calendar | 5 items, correct dates | ✅ PASS |
+| P3-09 | Statutory payment | Dr PF Payable, Cr Bank | ✅ PASS |
+| P3-10 | Payslip generation | All fields present | ✅ PASS |
+| P3-11 | TDS 194C vendor | 1% applied correctly | ✅ PASS |
+
+### Finance Phase 4 — Financial Statements & AI ✅
+
+| ID | Test Scenario | Expected | Status |
+|----|--------------|----------|--------|
+| P4-01 | P&L revenue line items | Grouped by account | ✅ PASS |
+| P4-02 | Balance Sheet grouping | Assets = Liab + Equity | ✅ PASS |
+| P4-03 | Cash Flow (indirect method) | Closing = bank balance | ✅ PASS |
+| P4-04 | Financial ratios | Current, quick, margins | ✅ PASS |
+| P4-05 | Smart auto-reconcile | Confidence scoring works | ✅ PASS |
+| P4-06 | Dashboard KPIs | 8 metrics populated | ✅ PASS |
+| P4-07 | Revenue trend (6 months) | Chart data returned | ✅ PASS |
+| P4-08 | Expense breakdown | By category with % | ✅ PASS |
+| P4-09 | AI insights | Rule-based insights | ✅ PASS |
+| P4-10 | Trial balance balanced | sum(Dr)===sum(Cr) | ✅ PASS |
+
+### Unit Test Results ✅
+
+| Test Suite | Tests | Status |
+|------------|-------|--------|
+| journal.service.spec.ts | 20/20 | ✅ ALL PASS |
+| statements.service.spec.ts | 18/18 | ✅ ALL PASS |
+| payroll.service.spec.ts | 34/34 | ✅ ALL PASS |
+| reconciliation.service.spec.ts | 17/17 | ✅ ALL PASS |
+| **TOTAL** | **89/89** | **✅ ALL PASS** |
+
+### Finance Module Summary
+
+| Phase | Description | Test Cases | Status |
+|-------|-------------|------------|--------|
+| Phase 1 | Foundation & Accounting | 10 | ✅ 10/10 |
+| Phase 2 | Receivables & Procurement | 12 | ✅ 12/12 |
+| Phase 3 | Statutory & Payroll | 11 | ✅ 11/11 |
+| Phase 4 | Financial Statements & AI | 10 | ✅ 10/10 |
+| Unit Tests | Jest (4 suites) | 89 | ✅ 89/89 |
+| **TOTAL** | | **132** | **✅ ALL PASS** |

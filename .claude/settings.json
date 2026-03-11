@@ -129,7 +129,15 @@
       "Bash(ls \"/Users/waseemafsar/Desktop/live_project 2/devlon/apps/web/src/app/\\(dashboard\\)/\")",
       "Bash(ls \"/Users/waseemafsar/Desktop/live_project 2/devlon/apps/web/src/app/\\(dashboard\\)/settings/\")",
       "Bash(ls \"/Users/waseemafsar/Desktop/live_project 2/devlon/apps/web/src/app/\\(dashboard\\)/settings/test-catalog/\")",
-      "Bash(ls -R \"/Users/waseemafsar/Desktop/live_project 2/devlon/apps/web/src/app/\\(dashboard\\)/settings/test-catalog/\")"
+      "Bash(ls -R \"/Users/waseemafsar/Desktop/live_project 2/devlon/apps/web/src/app/\\(dashboard\\)/settings/test-catalog/\")",
+      "Bash(npx jest --testPathPattern=\"modules/finance/__tests__/journal\" --no-coverage --forceExit)",
+      "Bash(ls \"/Users/waseemafsar/Desktop/live_project 2/devlon/apps/api/jest.config\"*)",
+      "Bash(timeout 90 npx jest src/modules/finance/__tests__/journal.service.spec.ts --no-coverage --forceExit --verbose)",
+      "Bash(npx jest src/modules/finance/__tests__/journal.service.spec.ts --no-coverage --forceExit --verbose)",
+      "Bash(pkill -f \"jest.*finance\")",
+      "Bash(npx jest src/modules/finance/__tests__/statements.service.spec.ts --no-coverage --forceExit --verbose)",
+      "Bash(npx jest src/modules/finance/__tests__/payroll.service.spec.ts --no-coverage --forceExit --verbose)",
+      "Bash(npx jest src/modules/finance/__tests__/reconciliation.service.spec.ts --no-coverage --forceExit --verbose)"
     ],
     "additionalDirectories": [
       "/Users/waseemafsar/Desktop/live_project/devlon/apps/web/src/app/(dashboard)/organisations",
