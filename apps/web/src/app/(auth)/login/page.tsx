@@ -34,7 +34,14 @@ export default function LoginPage() {
     setServerError(null);
     try {
       await login(data.email, data.password);
-      router.push("/dashboard");
+      const role = useAuthStore.getState().user?.role;
+      if (role === 'SUPER_ADMIN') {
+        router.push('/super-admin');
+      } else if (role === 'FRONT_DESK') {
+        router.push('/front-desk');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Invalid credentials";

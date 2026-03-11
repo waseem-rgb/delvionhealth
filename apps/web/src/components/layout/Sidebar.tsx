@@ -207,6 +207,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Finance",
     roles: [Role.FINANCE_EXECUTIVE, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
     items: [
+      { label: "Finance Overview", href: "/finance", icon: LayoutDashboard },
       { label: "Finance Dashboard", href: "/finance/dashboard", icon: Wallet },
       { label: "Reports & Statements", href: "/finance/reports", icon: FileSpreadsheet },
       { label: "Receivables", href: "/finance/receivables", icon: Coins },
@@ -371,8 +372,8 @@ export function Sidebar() {
             <div className="space-y-0.5">
               {group.items.map((item) => {
                 const isActive =
-                  item.href === "/dashboard"
-                    ? pathname === "/dashboard"
+                  item.href === "/dashboard" || item.href === "/finance"
+                    ? pathname === item.href
                     : pathname.startsWith(item.href);
 
                 return (

@@ -32,7 +32,11 @@ const PROTECTED_PREFIXES = [
   "/organisations",
   "/corporate",
   "/doctor-portal",
+  "/front-desk",
 ];
+
+// Public routes (never protected — no auth required)
+// /unauthorized is intentionally NOT in PROTECTED_PREFIXES
 
 // Routes only for unauthenticated users
 const AUTH_ROUTES = ["/login", "/forgot-password", "/reset-password"];
