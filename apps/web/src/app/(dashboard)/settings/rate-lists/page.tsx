@@ -23,6 +23,9 @@ import {
   FileDown,
   History,
   Check,
+  Users2,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
@@ -125,19 +128,34 @@ export default function RateListsPage() {
   const [showAddTestModal, setShowAddTestModal] = useState(false);
   const [editingTest, setEditingTest] = useState<TestCatalogItem | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
-  const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
   const [catalogPage, setCatalogPage] = useState(1);
   const catalogPageSize = 50;
 
   // ── Import state ────────────────────────────────────────────────────────
   const [showImportModal, setShowImportModal] = useState(false);
-  const [importMode, setImportMode] = useState<"excel" | "pdf">("excel");
   const [parsedTests, setParsedTests] = useState<ParsedTestRow[]>([]);
   const [isParsing, setIsParsing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const pdfInputRef = useRef<HTMLInputElement>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const [uploadTargetId, setUploadTargetId] = useState<string | null>(null);
+
+  // ── Inline rate edit state ───────────────────────────────────────────────
+  const [editingCell, setEditingCell] = useState<{ testId: string; field: "price" | "b2bPrice" | "cogs"; value: string } | null>(null);
+  const [savingCell, setSavingCell] = useState<string | null>(null);
+  const [savedCell, setSavedCell] = useState<string | null>(null);
+
+  // ── Add Profile state ────────────────────────────────────────────────────
+  const [showAddProfileModal, setShowAddProfileModal] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: "", code: "", outsource: "SELF", integrationCode: "", shortDescription: "", description: "" });
+  const [profileTestSearch, setProfileTestSearch] = useState("");
+  const [selectedProfileTests, setSelectedProfileTests] = useState<{ id: string; code: string; name: string; price: number }[]>([]);
+  const [profileTestResults, setProfileTestResults] = useState<{ id: string; code: string; name: string; price: number }[]>([]);
+  const [profileTestDropdownOpen, setProfileTestDropdownOpen] = useState(false);
+
+  // ── Import results state ─────────────────────────────────────────────────
+  const [importResult, setImportResult] = useState<{ totalRows: number; inserted: number; duplicates: number; duplicateList: { row: number; testCode: string; testName: string; reason: string }[]; errors: number; errorList: { row: number; reason: string }[] } | null>(null);
+  const [showImportResult, setShowImportResult] = useState(false);
+  const [showDuplicates, setShowDuplicates] = useState(false);
 
   // ── Rate Lists query ──────────────────────────────────────────────────
   const { data: rateLists, isLoading: listsLoading } = useQuery({
@@ -276,18 +294,6 @@ export default function RateListsPage() {
     onError: () => toast.error("Failed to delete test"),
   });
 
-  const clearAllMutation = useMutation({
-    mutationFn: async () => { const res = await api.delete("/test-catalog/clear-all"); return res.data; },
-    onSuccess: (data: { data?: { deleted?: number; deactivated?: number } }) => {
-      const d = data.data?.deleted ?? 0;
-      const da = data.data?.deactivated ?? 0;
-      toast.success(`Cleared ${d} tests${da > 0 ? `, ${da} deactivated (referenced by orders)` : ""}`);
-      setShowClearAllConfirm(false);
-      void qc.invalidateQueries({ queryKey: ["test-catalog-all"] });
-    },
-    onError: () => toast.error("Failed to clear catalog"),
-  });
-
   const importMutation = useMutation({
     mutationFn: async (tests: ParsedTestRow[]) => {
       const res = await api.post("/test-catalog/bulk-upload", {
@@ -304,9 +310,19 @@ export default function RateListsPage() {
       });
       return res.data;
     },
-    onSuccess: (data: { data?: { imported?: number; updated?: number; skipped?: number } }) => {
-      toast.success(`Import complete: ${data.data?.imported ?? 0} new, ${data.data?.updated ?? 0} updated, ${data.data?.skipped ?? 0} skipped`);
+    onSuccess: (data: { data?: { totalRows?: number; inserted?: number; duplicates?: number; duplicateList?: { row: number; testCode: string; testName: string; reason: string }[]; errors?: number; errorList?: { row: number; reason: string }[] } }) => {
+      const d = data.data ?? {};
+      setImportResult({
+        totalRows: d.totalRows ?? 0,
+        inserted: d.inserted ?? 0,
+        duplicates: d.duplicates ?? 0,
+        duplicateList: d.duplicateList ?? [],
+        errors: d.errors ?? 0,
+        errorList: d.errorList ?? [],
+      });
       setShowImportModal(false);
+      setShowImportResult(true);
+      setShowDuplicates(false);
       setParsedTests([]);
       void qc.invalidateQueries({ queryKey: ["test-catalog-all"] });
     },
@@ -320,7 +336,6 @@ export default function RateListsPage() {
   const handleExcelFile = useCallback(async (file: File) => {
     try {
       setIsParsing(true);
-      setImportMode("excel");
       const xlsxModule = await import("xlsx");
       const XLSX = xlsxModule.default ?? xlsxModule;
       const buffer = await file.arrayBuffer();
@@ -479,42 +494,6 @@ export default function RateListsPage() {
     }
   }, [allTests]);
 
-  // ── PDF handler ───────────────────────────────────────────────────────
-  const handlePdfFile = useCallback(async (file: File) => {
-    try {
-      setIsParsing(true);
-      setImportMode("pdf");
-      setShowImportModal(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const res = await api.post<any>("/test-catalog/parse-pdf", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      const existingCodes = new Set((allTests ?? []).map((t) => t.code.toLowerCase()));
-      const responseData = res.data?.data ?? res.data;
-      const testsArray: Array<{ code?: string; name?: string; department?: string; category?: string; sampleType?: string; tatHours?: number; price?: number }> =
-        responseData?.tests ?? responseData?.data?.tests ?? [];
-      const parsed = testsArray.map((t) => {
-        const code = (t.code ?? "").trim();
-        return {
-          code, name: (t.name ?? "").trim(), department: (t.department ?? "").trim(),
-          category: (t.category ?? "").trim(), sampleType: (t.sampleType ?? "").trim(),
-          tatHours: t.tatHours ?? 24, price: t.price ?? 0,
-          status: (code && existingCodes.has(code.toLowerCase()) ? "update" : "new") as ParsedTestRow["status"],
-        };
-      });
-      setParsedTests(parsed);
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Failed to parse PDF";
-      toast.error(msg);
-      setShowImportModal(false);
-    } finally {
-      setIsParsing(false);
-      if (pdfInputRef.current) pdfInputRef.current.value = "";
-    }
-  }, [allTests]);
-
   // ── Download DOS ──────────────────────────────────────────────────────
   const handleDownloadDos = useCallback(async () => {
     try {
@@ -580,6 +559,59 @@ export default function RateListsPage() {
       prev.map((t, i) => (i !== index ? t : { ...t, status: t.status === "skip" ? "new" : "skip" }))
     );
   }, []);
+
+  const saveInlineRate = useCallback(async () => {
+    if (!editingCell) return;
+    const { testId, field, value } = editingCell;
+    const numVal = parseFloat(value);
+    if (isNaN(numVal) || numVal < 0) { toast.error("Invalid value"); return; }
+    setSavingCell(`${testId}-${field}`);
+    try {
+      await api.put(`/test-catalog/${testId}`, { [field]: numVal });
+      setSavedCell(`${testId}-${field}`);
+      void qc.invalidateQueries({ queryKey: ["test-catalog-all"] });
+      setTimeout(() => setSavedCell(null), 1500);
+    } catch {
+      toast.error("Failed to save");
+    } finally {
+      setSavingCell(null);
+      setEditingCell(null);
+    }
+  }, [editingCell, qc]);
+
+  const searchProfileTests = useCallback(async (q: string) => {
+    if (q.length < 2) { setProfileTestResults([]); return; }
+    try {
+      const res = await api.get(`/test-catalog/search?q=${encodeURIComponent(q)}`);
+      const results = (res.data?.data ?? res.data) as { id: string; code: string; name: string; price: number }[];
+      setProfileTestResults(Array.isArray(results) ? results.slice(0, 10) : []);
+      setProfileTestDropdownOpen(true);
+    } catch { setProfileTestResults([]); }
+  }, []);
+
+  const createProfileMutation = useMutation({
+    mutationFn: async () => {
+      if (!profileForm.name.trim()) throw new Error("Profile name is required");
+      if (selectedProfileTests.length === 0) throw new Error("Select at least one test");
+      const res = await api.post("/test-catalog/profiles", {
+        name: profileForm.name,
+        ...(profileForm.code && { category: profileForm.code }),
+        componentTestIds: selectedProfileTests.map((t) => t.id),
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Profile created successfully");
+      setShowAddProfileModal(false);
+      setProfileForm({ name: "", code: "", outsource: "SELF", integrationCode: "", shortDescription: "", description: "" });
+      setSelectedProfileTests([]);
+      setProfileTestSearch("");
+    },
+    onError: (err: unknown) => {
+      const msg = (err as Error).message ?? "Failed to create profile";
+      toast.error(msg);
+    },
+  });
 
   // ── Rate Lists Tab ──────────────────────────────────────────────────────
 
@@ -779,27 +811,13 @@ export default function RateListsPage() {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowClearAllConfirm(true)}
-              className="flex items-center gap-2 px-3 py-2 border border-red-200 rounded-lg text-sm text-red-600 hover:bg-red-50"
-            >
-              <Trash2 size={14} />
-              Clear All
-            </button>
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
             >
               <FileSpreadsheet size={14} />
               Import Excel
-            </button>
-            <button
-              onClick={() => pdfInputRef.current?.click()}
-              className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
-            >
-              <FileText size={14} />
-              Import PDF
             </button>
             <button
               onClick={handleDownloadDos}
@@ -817,10 +835,17 @@ export default function RateListsPage() {
             </button>
             <button
               onClick={() => setShowAddTestModal(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-[#0D7E8A] text-white rounded-lg text-sm font-medium hover:bg-[#0a6b75]"
+              className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
             >
               <Plus size={14} />
               Add Test
+            </button>
+            <button
+              onClick={() => setShowAddProfileModal(true)}
+              className="flex items-center gap-2 px-3 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700"
+            >
+              <Users2 size={14} />
+              Add Profile
             </button>
           </div>
         </div>
@@ -894,9 +919,72 @@ export default function RateListsPage() {
                         )}
                       </td>
                       <td className="px-4 py-2.5 text-xs text-slate-500">{test.turnaroundHours}h</td>
-                      <td className="px-4 py-2.5 text-sm font-medium text-slate-700">{formatCurrency(Number(test.price))}</td>
-                      <td className="px-4 py-2.5 text-xs text-slate-500">{test.b2bPrice ? formatCurrency(Number(test.b2bPrice)) : <span className="text-slate-300">&mdash;</span>}</td>
-                      <td className="px-4 py-2.5 text-xs text-slate-500">{test.cogs ? formatCurrency(Number(test.cogs)) : <span className="text-slate-300">&mdash;</span>}</td>
+                      <td className="px-4 py-2.5 text-sm font-medium text-slate-700">
+                        {editingCell?.testId === test.id && editingCell.field === "price" ? (
+                          <input
+                            autoFocus
+                            type="number"
+                            min="0"
+                            value={editingCell.value}
+                            onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })}
+                            onBlur={() => void saveInlineRate()}
+                            onKeyDown={(e) => { if (e.key === "Enter") void saveInlineRate(); if (e.key === "Escape") setEditingCell(null); }}
+                            className="w-24 px-2 py-1 border border-teal-400 rounded text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
+                          />
+                        ) : savingCell === `${test.id}-price` ? (
+                          <span className="text-slate-400">saving…</span>
+                        ) : savedCell === `${test.id}-price` ? (
+                          <span className="text-emerald-600 flex items-center gap-1"><CheckCircle2 size={12} /> saved</span>
+                        ) : (
+                          <span className="cursor-pointer hover:text-teal-600 hover:underline" onClick={() => setEditingCell({ testId: test.id, field: "price", value: String(Number(test.price) || 0) })} title="Click to edit">
+                            {formatCurrency(Number(test.price))}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 text-xs text-slate-500">
+                        {editingCell?.testId === test.id && editingCell.field === "b2bPrice" ? (
+                          <input
+                            autoFocus
+                            type="number"
+                            min="0"
+                            value={editingCell.value}
+                            onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })}
+                            onBlur={() => void saveInlineRate()}
+                            onKeyDown={(e) => { if (e.key === "Enter") void saveInlineRate(); if (e.key === "Escape") setEditingCell(null); }}
+                            className="w-24 px-2 py-1 border border-teal-400 rounded text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
+                          />
+                        ) : savingCell === `${test.id}-b2bPrice` ? (
+                          <span className="text-slate-400">saving…</span>
+                        ) : savedCell === `${test.id}-b2bPrice` ? (
+                          <span className="text-emerald-600 flex items-center gap-1"><CheckCircle2 size={12} /> saved</span>
+                        ) : (
+                          <span className="cursor-pointer hover:text-teal-600 hover:underline" onClick={() => setEditingCell({ testId: test.id, field: "b2bPrice", value: String(Number(test.b2bPrice) || 0) })} title="Click to edit">
+                            {test.b2bPrice ? formatCurrency(Number(test.b2bPrice)) : <span className="text-slate-300 cursor-pointer hover:text-teal-400">+ B2B</span>}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 text-xs text-slate-500">
+                        {editingCell?.testId === test.id && editingCell.field === "cogs" ? (
+                          <input
+                            autoFocus
+                            type="number"
+                            min="0"
+                            value={editingCell.value}
+                            onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })}
+                            onBlur={() => void saveInlineRate()}
+                            onKeyDown={(e) => { if (e.key === "Enter") void saveInlineRate(); if (e.key === "Escape") setEditingCell(null); }}
+                            className="w-24 px-2 py-1 border border-teal-400 rounded text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
+                          />
+                        ) : savingCell === `${test.id}-cogs` ? (
+                          <span className="text-slate-400">saving…</span>
+                        ) : savedCell === `${test.id}-cogs` ? (
+                          <span className="text-emerald-600 flex items-center gap-1"><CheckCircle2 size={12} /> saved</span>
+                        ) : (
+                          <span className="cursor-pointer hover:text-teal-600 hover:underline" onClick={() => setEditingCell({ testId: test.id, field: "cogs", value: String(Number(test.cogs) || 0) })} title="Click to edit">
+                            {test.cogs ? formatCurrency(Number(test.cogs)) : <span className="text-slate-300 cursor-pointer hover:text-teal-400">+ COGS</span>}
+                          </span>
+                        )}
+                      </td>
                       <td className="px-4 py-2.5 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button onClick={() => router.push(`/settings/test-catalog/${test.id}/report`)} className="p-1.5 rounded-md text-slate-400 hover:text-violet-600 hover:bg-violet-50" title="Report Builder">
@@ -982,7 +1070,6 @@ export default function RateListsPage() {
 
       {/* Hidden file inputs */}
       <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) void handleExcelFile(file); }} />
-      <input ref={pdfInputRef} type="file" accept=".pdf" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) void handlePdfFile(file); }} />
       <input ref={uploadInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleUploadFile} />
 
       {/* ── Create Rate List Modal ─────────────────────────────────── */}
@@ -1016,19 +1103,69 @@ export default function RateListsPage() {
         </div>
       )}
 
-      {/* ── Clear All Confirmation ─────────────────────────────────── */}
-      {showClearAllConfirm && (
+      {/* ── Import Results Modal ──────────────────────────────────────── */}
+      {showImportResult && importResult && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm">
-            <div className="p-5 text-center">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3"><AlertTriangle size={20} className="text-red-600" /></div>
-              <h3 className="font-semibold text-slate-900 mb-1">Clear All Tests</h3>
-              <p className="text-sm text-slate-500">This will permanently delete <strong>all {allTests?.length ?? 0} tests</strong> from the catalog. You can re-import afterwards.</p>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">
+            <div className="p-6">
+              <h3 className="font-semibold text-slate-900 text-lg mb-4">Import Complete</h3>
+              <div className="space-y-3 mb-5">
+                <div className="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                  <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+                  <span className="text-sm text-emerald-700 font-medium">{importResult.inserted} tests added successfully</span>
+                </div>
+                {importResult.duplicates > 0 && (
+                  <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <AlertCircle size={18} className="text-amber-600 shrink-0" />
+                    <span className="text-sm text-amber-700 font-medium">{importResult.duplicates} duplicates skipped</span>
+                  </div>
+                )}
+                {importResult.errors > 0 && (
+                  <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <AlertCircle size={18} className="text-red-600 shrink-0" />
+                    <span className="text-sm text-red-700 font-medium">{importResult.errors} rows had errors</span>
+                  </div>
+                )}
+              </div>
+
+              {importResult.duplicates > 0 && (
+                <div className="mb-4">
+                  <button
+                    onClick={() => setShowDuplicates((v) => !v)}
+                    className="text-sm text-teal-600 hover:text-teal-700 font-medium underline"
+                  >
+                    {showDuplicates ? "Hide" : "View"} Duplicates ({importResult.duplicates})
+                  </button>
+                  {showDuplicates && (
+                    <div className="mt-3 border border-slate-200 rounded-lg overflow-hidden">
+                      <table className="w-full text-xs">
+                        <thead className="bg-slate-50">
+                          <tr>
+                            <th className="px-3 py-2 text-left font-medium text-slate-500">Row</th>
+                            <th className="px-3 py-2 text-left font-medium text-slate-500">Code</th>
+                            <th className="px-3 py-2 text-left font-medium text-slate-500">Name</th>
+                            <th className="px-3 py-2 text-left font-medium text-slate-500">Reason</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {importResult.duplicateList.map((d, i) => (
+                            <tr key={i} className="hover:bg-slate-50">
+                              <td className="px-3 py-2 text-slate-500">{d.row}</td>
+                              <td className="px-3 py-2 font-mono text-slate-600">{d.testCode}</td>
+                              <td className="px-3 py-2 text-slate-700 max-w-[180px] truncate">{d.testName}</td>
+                              <td className="px-3 py-2 text-amber-600">{d.reason}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            <div className="flex gap-2 p-4 border-t">
-              <button onClick={() => setShowClearAllConfirm(false)} className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">Cancel</button>
-              <button disabled={clearAllMutation.isPending} onClick={() => clearAllMutation.mutate()} className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2">
-                {clearAllMutation.isPending && <Loader2 size={14} className="animate-spin" />} Clear All
+            <div className="flex justify-end p-4 border-t border-slate-100">
+              <button onClick={() => { setShowImportResult(false); setImportResult(null); }} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800">
+                Close
               </button>
             </div>
           </div>
@@ -1040,7 +1177,146 @@ export default function RateListsPage() {
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-40">
           <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center gap-3">
             <Loader2 size={28} className="animate-spin text-[#0D7E8A]" />
-            <p className="text-sm text-slate-600">Parsing {importMode === "excel" ? "Excel" : "PDF"} file...</p>
+            <p className="text-sm text-slate-600">Parsing Excel file...</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Add Profile Modal ─────────────────────────────────────────── */}
+      {showAddProfileModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100">
+              <h3 className="font-semibold text-slate-900 text-lg">Add Profile</h3>
+              <button onClick={() => setShowAddProfileModal(false)} className="p-1.5 rounded-md text-slate-400 hover:bg-slate-100"><X size={16} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Profile Name *</label>
+                  <input
+                    value={profileForm.name}
+                    onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                    placeholder="e.g., Complete Blood Count Panel"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Profile Code</label>
+                  <input
+                    value={profileForm.code}
+                    onChange={(e) => setProfileForm({ ...profileForm, code: e.target.value })}
+                    placeholder="e.g., CBC-PANEL"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Outsource</label>
+                <select
+                  value={profileForm.outsource}
+                  onChange={(e) => setProfileForm({ ...profileForm, outsource: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
+                >
+                  <option value="SELF">Self</option>
+                  <option value="EXTERNAL">External Lab</option>
+                </select>
+              </div>
+
+              <div className="relative">
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Add Tests to Profile *</label>
+                <input
+                  value={profileTestSearch}
+                  onChange={(e) => {
+                    setProfileTestSearch(e.target.value);
+                    void searchProfileTests(e.target.value);
+                  }}
+                  onFocus={() => profileTestSearch.length >= 2 && setProfileTestDropdownOpen(true)}
+                  onBlur={() => setTimeout(() => setProfileTestDropdownOpen(false), 200)}
+                  placeholder="Type to search tests by name or code..."
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400"
+                />
+                {profileTestDropdownOpen && profileTestResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                    {profileTestResults.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onMouseDown={() => {
+                          if (!selectedProfileTests.find((s) => s.id === t.id)) {
+                            setSelectedProfileTests([...selectedProfileTests, t]);
+                          }
+                          setProfileTestSearch("");
+                          setProfileTestDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center justify-between text-sm"
+                      >
+                        <span className="text-slate-800">{t.name}</span>
+                        <span className="text-xs text-slate-400 ml-2">{formatCurrency(t.price)}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {selectedProfileTests.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {selectedProfileTests.map((t) => (
+                      <span key={t.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-teal-50 border border-teal-200 text-teal-700 text-xs rounded-full">
+                        {t.name}
+                        <button type="button" onClick={() => setSelectedProfileTests(selectedProfileTests.filter((s) => s.id !== t.id))} className="text-teal-400 hover:text-teal-600">
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Integration Code</label>
+                  <input
+                    value={profileForm.integrationCode}
+                    onChange={(e) => setProfileForm({ ...profileForm, integrationCode: e.target.value })}
+                    placeholder="Optional"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Short Description</label>
+                  <input
+                    value={profileForm.shortDescription}
+                    onChange={(e) => setProfileForm({ ...profileForm, shortDescription: e.target.value })}
+                    placeholder="Optional"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Profile Description</label>
+                <textarea
+                  value={profileForm.description}
+                  onChange={(e) => setProfileForm({ ...profileForm, description: e.target.value })}
+                  rows={3}
+                  placeholder="Optional description"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-300 resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-100">
+              <button onClick={() => setShowAddProfileModal(false)} className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">
+                Cancel
+              </button>
+              <button
+                disabled={createProfileMutation.isPending || !profileForm.name.trim() || selectedProfileTests.length === 0}
+                onClick={() => createProfileMutation.mutate()}
+                className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50"
+              >
+                {createProfileMutation.isPending && <Loader2 size={14} className="animate-spin" />}
+                Submit
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1364,7 +1640,7 @@ export default function RateListsPage() {
         <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col">
           <div className="flex items-center justify-between p-4 border-b shrink-0">
             <div>
-              <h3 className="font-semibold text-slate-900">Import Preview ({importMode.toUpperCase()})</h3>
+              <h3 className="font-semibold text-slate-900">Import Preview (EXCEL)</h3>
               <p className="text-xs text-slate-500 mt-0.5">{importable.length} tests to import, {parsedTests.length - importable.length} skipped</p>
             </div>
             <button onClick={() => { setShowImportModal(false); setParsedTests([]); }} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>

@@ -319,27 +319,55 @@ export class TestCatalogService {
       cptCode?: string;
       cogs?: number;
     }[],
-  ): Promise<{ imported: number; updated: number; skipped: number; errors: string[] }> {
-    let imported = 0;
-    let updated = 0;
-    let skipped = 0;
-    const errors: string[] = [];
-    const BATCH_SIZE = 50;
+  ): Promise<{
+    totalRows: number;
+    inserted: number;
+    duplicates: number;
+    duplicateList: { row: number; testCode: string; testName: string; reason: string }[];
+    errors: number;
+    errorList: { row: number; reason: string }[];
+  }> {
+    const inserted_list: number[] = [];
+    const duplicateList: { row: number; testCode: string; testName: string; reason: string }[] = [];
+    const errorList: { row: number; reason: string }[] = [];
 
+    // Pre-load all existing codes and names for this tenant for fast lookup
+    const existingTests = await this.prisma.testCatalog.findMany({
+      where: { tenantId },
+      select: { code: true, name: true },
+    });
+    const existingCodes = new Set(existingTests.map((t) => t.code.toLowerCase().trim()));
+    const existingNames = new Set(existingTests.map((t) => t.name.toLowerCase().trim()));
+
+    const BATCH_SIZE = 50;
     for (let i = 0; i < tests.length; i += BATCH_SIZE) {
       const batch = tests.slice(i, i + BATCH_SIZE);
       await Promise.all(
-        batch.map(async (t) => {
+        batch.map(async (t, batchIdx) => {
+          const rowNum = i + batchIdx + 1;
           try {
-            if (!t.name || t.name.length < 2) {
-              skipped++;
+            // Validate required fields
+            if (!t.name || t.name.trim().length < 2) {
+              errorList.push({ row: rowNum, reason: "Test name is missing or too short" });
+              return;
+            }
+            if (!t.code || t.code.trim().length === 0) {
+              errorList.push({ row: rowNum, reason: "Test code is missing" });
               return;
             }
 
-            const code = (
-              t.code ||
-              t.name.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10) + "_" + i
-            ).trim();
+            const normalizedCode = t.code.toLowerCase().trim();
+            const normalizedName = t.name.toLowerCase().trim();
+
+            // Duplicate check by code OR name
+            if (existingCodes.has(normalizedCode)) {
+              duplicateList.push({ row: rowNum, testCode: t.code, testName: t.name, reason: `Code "${t.code}" already exists` });
+              return;
+            }
+            if (existingNames.has(normalizedName)) {
+              duplicateList.push({ row: rowNum, testCode: t.code, testName: t.name, reason: `Test name "${t.name}" already exists` });
+              return;
+            }
 
             const data = {
               name: t.name.slice(0, 255),
@@ -357,32 +385,30 @@ export class TestCatalogService {
               ...(t.b2bPrice !== undefined && { b2bPrice: Number(t.b2bPrice) }),
             };
 
-            const existing = await this.prisma.testCatalog.findFirst({
-              where: { code, tenantId },
-              select: { id: true },
+            await this.prisma.testCatalog.create({
+              data: { ...data, code: t.code.trim(), tenantId, isActive: true },
             });
 
-            if (existing) {
-              await this.prisma.testCatalog.update({
-                where: { id: existing.id },
-                data,
-              });
-              updated++;
-            } else {
-              await this.prisma.testCatalog.create({
-                data: { ...data, code, tenantId, isActive: true },
-              });
-              imported++;
-            }
+            // Add to in-memory sets to prevent duplicates within same import
+            existingCodes.add(normalizedCode);
+            existingNames.add(normalizedName);
+            inserted_list.push(rowNum);
           } catch (err) {
-            this.logger.warn(`Skip row: ${t.name} — ${(err as Error).message}`);
-            skipped++;
+            this.logger.warn(`Skip row ${rowNum}: ${t.name} — ${(err as Error).message}`);
+            errorList.push({ row: rowNum, reason: (err as Error).message ?? "Unknown error" });
           }
         }),
       );
     }
 
-    return { imported, updated, skipped, errors };
+    return {
+      totalRows: tests.length,
+      inserted: inserted_list.length,
+      duplicates: duplicateList.length,
+      duplicateList,
+      errors: errorList.length,
+      errorList,
+    };
   }
 
   // ───────────────────────────────────────────
