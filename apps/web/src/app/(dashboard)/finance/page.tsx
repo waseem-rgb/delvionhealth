@@ -60,36 +60,36 @@ const MODULES = [
     desc: "Invoices, payments & aging report",
     href: "/finance/receivables",
     icon: Coins,
-    color: "text-teal-400",
-    bg: "bg-teal-500/10",
-    border: "border-teal-500/20",
+    color: "text-teal-600",
+    bg: "bg-teal-50",
+    border: "border-teal-100",
   },
   {
     label: "Accounting",
     desc: "GL accounts, journals & bank statements",
     href: "/finance/accounting",
     icon: BookOpenCheck,
-    color: "text-violet-400",
-    bg: "bg-violet-500/10",
-    border: "border-violet-500/20",
+    color: "text-violet-600",
+    bg: "bg-violet-50",
+    border: "border-violet-100",
   },
   {
     label: "Procurement",
     desc: "Vendors, purchase orders & 3-way match",
     href: "/finance/procurement",
     icon: Truck,
-    color: "text-orange-400",
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/20",
+    color: "text-orange-600",
+    bg: "bg-orange-50",
+    border: "border-orange-100",
   },
   {
     label: "Statutory & Payroll",
     desc: "PF, ESI, TDS & payroll runs",
     href: "/finance/statutory",
     icon: ShieldCheck,
-    color: "text-cyan-400",
-    bg: "bg-cyan-500/10",
-    border: "border-cyan-500/20",
+    color: "text-cyan-600",
+    bg: "bg-cyan-50",
+    border: "border-cyan-100",
   },
 ];
 
@@ -110,12 +110,12 @@ function KPICard({
 }) {
   const isUp = (trend ?? 0) >= 0;
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+    <div className="bg-white border border-slate-200 rounded-xl p-5">
       <div className="flex items-start justify-between mb-3">
-        <span className="text-slate-400 text-xs">{label}</span>
-        <Icon className="h-4 w-4 text-slate-500" />
+        <span className="text-slate-500 text-xs">{label}</span>
+        <Icon className="h-4 w-4 text-slate-400" />
       </div>
-      <p className="text-xl font-semibold text-white">{value}</p>
+      <p className="text-xl font-semibold text-slate-900">{value}</p>
       {trend !== undefined && (
         <div className={`flex items-center gap-1 mt-2 text-xs ${isUp ? "text-emerald-400" : "text-red-400"}`}>
           {isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
@@ -198,16 +198,16 @@ export default function FinanceOverviewPage() {
   const insights = insightsRaw as Insight[] | undefined;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50 p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Finance Overview</h1>
-          <p className="text-slate-400 text-sm mt-1">Real-time financial health of your lab</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Finance Overview</h1>
+          <p className="text-slate-500 text-sm mt-1">Real-time financial health of your lab</p>
         </div>
         <button
           onClick={() => refetch()}
-          className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm rounded-lg border border-slate-700 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-slate-50 text-slate-600 text-sm rounded-lg border border-slate-200 transition-colors"
         >
           <RefreshCw className="h-4 w-4" />
           Refresh
@@ -218,7 +218,7 @@ export default function FinanceOverviewPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         {kpiLoading
           ? Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-slate-900 border border-slate-800 rounded-xl p-5 animate-pulse h-28" />
+              <div key={i} className="bg-white border border-slate-200 rounded-xl p-5 animate-pulse h-28" />
             ))
           : [
               { label: "Revenue This Month", value: formatCurrency(kpi?.revenueThisMonth ?? 0), trend: kpi?.revenueTrend, icon: TrendingUp },
@@ -241,16 +241,16 @@ export default function FinanceOverviewPage() {
               <Link
                 key={mod.href}
                 href={mod.href}
-                className={`group flex items-start gap-4 p-5 bg-slate-900 border ${mod.border} rounded-xl hover:bg-slate-800 transition-colors`}
+                className={`group flex items-start gap-4 p-5 bg-white border ${mod.border} rounded-xl hover:bg-slate-50 transition-colors`}
               >
                 <div className={`${mod.bg} rounded-lg p-2.5 shrink-0`}>
                   <mod.icon className={`h-5 w-5 ${mod.color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-medium text-sm">{mod.label}</p>
-                  <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">{mod.desc}</p>
+                  <p className="text-slate-900 font-medium text-sm">{mod.label}</p>
+                  <p className="text-slate-600 text-xs mt-0.5 leading-relaxed">{mod.desc}</p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-600 group-hover:text-slate-300 shrink-0 mt-0.5 transition-colors" />
+                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700 shrink-0 mt-0.5 transition-colors" />
               </Link>
             ))}
           </div>
@@ -274,31 +274,31 @@ export default function FinanceOverviewPage() {
         </div>
 
         {/* Revenue vs Expenses */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+        <div className="bg-white border border-slate-200 rounded-xl p-5">
           <div className="flex items-center justify-between mb-5">
-            <p className="text-white font-medium text-sm">Revenue vs Expenses</p>
-            <span className="text-xs text-slate-500">Last 6 months</span>
+            <p className="text-slate-900 font-medium text-sm">Revenue vs Expenses</p>
+            <span className="text-xs text-slate-400">Last 6 months</span>
           </div>
           {trendLoading ? (
             <div className="space-y-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-6 bg-slate-800 animate-pulse rounded" />
+                <div key={i} className="h-6 bg-slate-100 animate-pulse rounded" />
               ))}
             </div>
           ) : trend && trend.length > 0 ? (
             <MiniChart data={trend} />
           ) : (
-            <p className="text-slate-600 text-sm text-center py-8">No trend data yet</p>
+            <p className="text-slate-400 text-sm text-center py-8">No trend data yet</p>
           )}
         </div>
       </div>
 
       {/* AI Insights */}
       {insights && insights.length > 0 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+        <div className="bg-white border border-slate-200 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-4">
-            <Lightbulb className="h-4 w-4 text-teal-400" />
-            <p className="text-white font-medium text-sm">AI Financial Insights</p>
+            <Lightbulb className="h-4 w-4 text-teal-600" />
+            <p className="text-slate-900 font-medium text-sm">AI Financial Insights</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {insights.map((ins, i) => (
@@ -306,10 +306,10 @@ export default function FinanceOverviewPage() {
                 key={i}
                 className={`flex gap-3 p-3 rounded-lg border text-sm ${
                   ins.type === "warning"
-                    ? "bg-amber-500/10 border-amber-500/20"
+                    ? "bg-amber-50 border-amber-200"
                     : ins.type === "success"
-                    ? "bg-emerald-500/10 border-emerald-500/20"
-                    : "bg-blue-500/10 border-blue-500/20"
+                    ? "bg-emerald-50 border-emerald-200"
+                    : "bg-blue-50 border-blue-200"
                 }`}
               >
                 {ins.type === "warning" ? (
@@ -320,8 +320,8 @@ export default function FinanceOverviewPage() {
                   <Lightbulb className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                 )}
                 <div>
-                  <p className="text-white font-medium text-xs">{ins.title}</p>
-                  <p className="text-slate-400 text-xs mt-0.5">{ins.description}</p>
+                  <p className="text-slate-900 font-medium text-xs">{ins.title}</p>
+                  <p className="text-slate-600 text-xs mt-0.5">{ins.description}</p>
                 </div>
               </div>
             ))}
@@ -331,7 +331,7 @@ export default function FinanceOverviewPage() {
 
       {/* Quick links to advanced tools */}
       <div>
-        <p className="text-xs text-slate-500 mb-3 uppercase tracking-wide">Advanced Tools</p>
+        <p className="text-xs text-slate-400 mb-3 uppercase tracking-wide">Advanced Tools</p>
         <div className="flex flex-wrap gap-2">
           {[
             { label: "Chart of Accounts", href: "/finance/accounting", icon: BookOpenCheck },
@@ -344,7 +344,7 @@ export default function FinanceOverviewPage() {
             <Link
               key={link.label}
               href={link.href}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg border border-slate-700 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-600 text-xs rounded-lg border border-slate-200 transition-colors"
             >
               <link.icon className="h-3.5 w-3.5" />
               {link.label}

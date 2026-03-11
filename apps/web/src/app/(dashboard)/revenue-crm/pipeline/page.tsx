@@ -89,18 +89,18 @@ function Skeleton() {
     <div className="space-y-6 animate-pulse">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <div className="h-3 w-20 bg-slate-800 rounded mb-3" />
-            <div className="h-7 w-28 bg-slate-800 rounded mb-2" />
+          <div key={i} className="bg-white border border-slate-200 rounded-xl p-5">
+            <div className="h-3 w-20 bg-slate-100 rounded mb-3" />
+            <div className="h-7 w-28 bg-slate-100 rounded mb-2" />
           </div>
         ))}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="bg-slate-900 border border-slate-800 rounded-xl p-4 min-h-[300px]">
-            <div className="h-5 w-24 bg-slate-800 rounded mb-4" />
+          <div key={i} className="bg-white border border-slate-200 rounded-xl p-4 min-h-[300px]">
+            <div className="h-5 w-24 bg-slate-100 rounded mb-4" />
             {Array.from({ length: 2 }).map((__, j) => (
-              <div key={j} className="h-28 bg-slate-800/50 rounded-lg mb-3" />
+              <div key={j} className="h-28 bg-slate-100/50 rounded-lg mb-3" />
             ))}
           </div>
         ))}
@@ -222,12 +222,12 @@ export default function PipelinePage() {
   })();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Sales Pipeline</h1>
-          <p className="text-slate-400 text-sm mt-1">Track deals through every stage of the sales process</p>
+          <p className="text-slate-500 text-sm mt-1">Track deals through every stage of the sales process</p>
         </div>
         <button
           onClick={() => setShowAddDeal(true)}
@@ -239,7 +239,7 @@ export default function PipelinePage() {
 
       {/* Error */}
       {isError && (
-        <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-5 py-4">
+        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-5 py-4">
           <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
           <p className="text-red-300 text-sm">{(error as Error)?.message ?? "Failed to load deals"}</p>
         </div>
@@ -257,12 +257,12 @@ export default function PipelinePage() {
               { label: "Win Rate", value: `${winRate}%`, icon: Target, gradient: "from-violet-500 to-violet-700" },
               { label: "Avg Cycle Days", value: `${avgCycle}`, icon: Clock, gradient: "from-amber-500 to-amber-700" },
             ].map((stat) => (
-              <div key={stat.label} className="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors">
+              <div key={stat.label} className="bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-300 transition-colors">
                 <div className="flex items-center gap-3 mb-3">
                   <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${stat.gradient} flex items-center justify-center`}>
-                    <stat.icon className="h-5 w-5 text-white" />
+                    <stat.icon className="h-5 w-5 text-slate-900" />
                   </div>
-                  <span className="text-xs text-slate-400">{stat.label}</span>
+                  <span className="text-xs text-slate-500">{stat.label}</span>
                 </div>
                 <p className="text-xl font-bold">{stat.value}</p>
               </div>
@@ -271,9 +271,9 @@ export default function PipelinePage() {
 
           {/* Kanban */}
           {!deals || deals.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-xl py-16 text-center">
+            <div className="bg-white border border-slate-200 rounded-xl py-16 text-center">
               <Target className="h-10 w-10 text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-400 text-sm">No deals in the pipeline</p>
+              <p className="text-slate-500 text-sm">No deals in the pipeline</p>
               <p className="text-slate-600 text-xs mt-1">Click &quot;Add Deal&quot; to get started</p>
             </div>
           ) : (
@@ -292,7 +292,7 @@ export default function PipelinePage() {
                     </div>
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-xs text-slate-500">{stageDeals.length} deals</span>
-                      <span className="text-xs text-slate-400 font-medium">₹{fmt(stageTotal)}</span>
+                      <span className="text-xs text-slate-500 font-medium">₹{fmt(stageTotal)}</span>
                     </div>
 
                     <div className="space-y-3">
@@ -300,17 +300,17 @@ export default function PipelinePage() {
                         <div
                           key={deal.id}
                           onClick={() => setSelectedDeal(deal)}
-                          className="bg-slate-900 border border-slate-800 rounded-lg p-3 cursor-pointer hover:border-slate-600 transition-colors"
+                          className="bg-white border border-slate-200 rounded-lg p-3 cursor-pointer hover:border-slate-600 transition-colors"
                         >
-                          <p className="text-sm font-medium text-white mb-1 truncate">{deal.title}</p>
+                          <p className="text-sm font-medium text-slate-900 mb-1 truncate">{deal.title}</p>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded ${clientTypeBadge[deal.clientType] ?? "bg-slate-700 text-slate-300"}`}>
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded ${clientTypeBadge[deal.clientType] ?? "bg-slate-200 text-slate-700"}`}>
                               {deal.clientType}
                             </span>
-                            <span className="text-xs text-slate-400 truncate">{deal.clientName}</span>
+                            <span className="text-xs text-slate-500 truncate">{deal.clientName}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold text-white">₹{fmt(deal.estimatedValue)}</span>
+                            <span className="text-sm font-semibold text-slate-900">₹{fmt(deal.estimatedValue)}</span>
                             <span className={`text-xs font-semibold ${probColor(deal.probability)}`}>
                               {deal.probability}%
                             </span>
@@ -327,7 +327,7 @@ export default function PipelinePage() {
                               e.stopPropagation();
                               setMoveStage({ dealId: deal.id, current: deal.stage });
                             }}
-                            className="mt-2 flex items-center gap-1 text-[10px] text-slate-500 hover:text-white transition-colors"
+                            className="mt-2 flex items-center gap-1 text-[10px] text-slate-500 hover:text-slate-900 transition-colors"
                           >
                             Move <ChevronRight className="h-3 w-3" />
                           </button>
@@ -345,14 +345,14 @@ export default function PipelinePage() {
       {/* ── Move Stage Modal ──────────────────────────────────────────────── */}
       {moveStage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+          <div className="bg-white border border-slate-300 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold">Move Deal</h2>
-              <button onClick={() => setMoveStage(null)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+              <button onClick={() => setMoveStage(null)} className="p-1 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="text-xs text-slate-400 mb-4">Select the new stage:</p>
+            <p className="text-xs text-slate-500 mb-4">Select the new stage:</p>
             <div className="space-y-2">
               {STAGES.filter((s) => s !== moveStage.current).map((stage) => {
                 const sc = stageColors[stage];
@@ -377,10 +377,10 @@ export default function PipelinePage() {
       {/* ── Deal Detail Sheet ─────────────────────────────────────────────── */}
       {selectedDeal && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm">
-          <div className="bg-slate-900 border-l border-slate-700 w-full max-w-lg h-full overflow-y-auto p-6 shadow-2xl">
+          <div className="bg-white border-l border-slate-300 w-full max-w-lg h-full overflow-y-auto p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold">{selectedDeal.title}</h2>
-              <button onClick={() => setSelectedDeal(null)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+              <button onClick={() => setSelectedDeal(null)} className="p-1 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -388,42 +388,42 @@ export default function PipelinePage() {
             {/* Deal info */}
             <div className="space-y-4 mb-6">
               <div className="flex items-center gap-2">
-                <span className={`text-xs px-2 py-0.5 rounded ${clientTypeBadge[selectedDeal.clientType] ?? "bg-slate-700 text-slate-300"}`}>
+                <span className={`text-xs px-2 py-0.5 rounded ${clientTypeBadge[selectedDeal.clientType] ?? "bg-slate-200 text-slate-700"}`}>
                   {selectedDeal.clientType}
                 </span>
-                <span className={`text-xs px-2 py-0.5 rounded ${stageColors[selectedDeal.stage]?.bg ?? ""} ${stageColors[selectedDeal.stage]?.text ?? "text-slate-300"}`}>
+                <span className={`text-xs px-2 py-0.5 rounded ${stageColors[selectedDeal.stage]?.bg ?? ""} ${stageColors[selectedDeal.stage]?.text ?? "text-slate-700"}`}>
                   {selectedDeal.stage.replace("_", " ")}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-800/50 rounded-lg p-3">
+                <div className="bg-slate-100/50 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <User className="h-3.5 w-3.5 text-slate-500" />
-                    <span className="text-xs text-slate-400">Client</span>
+                    <span className="text-xs text-slate-500">Client</span>
                   </div>
                   <p className="text-sm font-medium">{selectedDeal.clientName}</p>
                 </div>
-                <div className="bg-slate-800/50 rounded-lg p-3">
+                <div className="bg-slate-100/50 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <IndianRupee className="h-3.5 w-3.5 text-slate-500" />
-                    <span className="text-xs text-slate-400">Value</span>
+                    <span className="text-xs text-slate-500">Value</span>
                   </div>
                   <p className="text-sm font-medium">₹{fmt(selectedDeal.estimatedValue)}</p>
                 </div>
-                <div className="bg-slate-800/50 rounded-lg p-3">
+                <div className="bg-slate-100/50 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <Target className="h-3.5 w-3.5 text-slate-500" />
-                    <span className="text-xs text-slate-400">Probability</span>
+                    <span className="text-xs text-slate-500">Probability</span>
                   </div>
                   <p className={`text-sm font-medium ${probColor(selectedDeal.probability)}`}>
                     {selectedDeal.probability}%
                   </p>
                 </div>
-                <div className="bg-slate-800/50 rounded-lg p-3">
+                <div className="bg-slate-100/50 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <Calendar className="h-3.5 w-3.5 text-slate-500" />
-                    <span className="text-xs text-slate-400">Expected Close</span>
+                    <span className="text-xs text-slate-500">Expected Close</span>
                   </div>
                   <p className="text-sm font-medium">
                     {selectedDeal.expectedCloseDate
@@ -434,30 +434,30 @@ export default function PipelinePage() {
               </div>
 
               {selectedDeal.dealType && (
-                <div className="bg-slate-800/50 rounded-lg p-3">
+                <div className="bg-slate-100/50 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <FileText className="h-3.5 w-3.5 text-slate-500" />
-                    <span className="text-xs text-slate-400">Deal Type</span>
+                    <span className="text-xs text-slate-500">Deal Type</span>
                   </div>
                   <p className="text-sm font-medium">{selectedDeal.dealType}</p>
                 </div>
               )}
 
               {selectedDeal.notes && (
-                <div className="bg-slate-800/50 rounded-lg p-3">
+                <div className="bg-slate-100/50 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <MessageSquare className="h-3.5 w-3.5 text-slate-500" />
-                    <span className="text-xs text-slate-400">Notes</span>
+                    <span className="text-xs text-slate-500">Notes</span>
                   </div>
-                  <p className="text-sm text-slate-300">{selectedDeal.notes}</p>
+                  <p className="text-sm text-slate-700">{selectedDeal.notes}</p>
                 </div>
               )}
 
               {selectedDeal.assignedRepId && (
-                <div className="bg-slate-800/50 rounded-lg p-3">
+                <div className="bg-slate-100/50 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <User className="h-3.5 w-3.5 text-slate-500" />
-                    <span className="text-xs text-slate-400">Assigned Rep</span>
+                    <span className="text-xs text-slate-500">Assigned Rep</span>
                   </div>
                   <p className="text-sm font-medium">{selectedDeal.assignedRepId}</p>
                 </div>
@@ -466,20 +466,20 @@ export default function PipelinePage() {
 
             {/* Activities Timeline */}
             <div>
-              <h3 className="text-sm font-semibold text-slate-300 mb-3">Activities</h3>
+              <h3 className="text-sm font-semibold text-slate-700 mb-3">Activities</h3>
               {(!selectedDeal.activities || selectedDeal.activities.length === 0) ? (
                 <div className="py-8 text-center text-slate-500 text-sm">No activities recorded yet</div>
               ) : (
-                <div className="relative border-l-2 border-slate-800 ml-2 space-y-4">
+                <div className="relative border-l-2 border-slate-200 ml-2 space-y-4">
                   {selectedDeal.activities.map((act) => (
                     <div key={act.id} className="pl-5 relative">
-                      <div className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full bg-slate-800 border-2 border-slate-600" />
+                      <div className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full bg-slate-100 border-2 border-slate-600" />
                       <p className="text-xs text-slate-500 mb-0.5">
                         {new Date(act.createdAt).toLocaleDateString("en-IN")}
                         {act.createdBy ? ` - ${act.createdBy}` : ""}
                       </p>
-                      <p className="text-sm text-slate-300">
-                        <span className="text-xs px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 mr-2">{act.type}</span>
+                      <p className="text-sm text-slate-700">
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 mr-2">{act.type}</span>
                         {act.description}
                       </p>
                     </div>
@@ -489,13 +489,13 @@ export default function PipelinePage() {
             </div>
 
             {/* Move stage from detail */}
-            <div className="mt-6 pt-4 border-t border-slate-800">
+            <div className="mt-6 pt-4 border-t border-slate-200">
               <button
                 onClick={() => {
                   setMoveStage({ dealId: selectedDeal.id, current: selectedDeal.stage });
                   setSelectedDeal(null);
                 }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm text-slate-300 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm text-slate-700 transition-colors"
               >
                 Move to different stage <ArrowRight className="h-4 w-4" />
               </button>
@@ -507,31 +507,31 @@ export default function PipelinePage() {
       {/* ── Add Deal Modal ────────────────────────────────────────────────── */}
       {showAddDeal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 shadow-2xl">
+          <div className="bg-white border border-slate-300 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold">Add Deal</h2>
-              <button onClick={() => setShowAddDeal(false)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+              <button onClick={() => setShowAddDeal(false)} className="p-1 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Title</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Title</label>
                 <input
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder="Deal title"
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1.5">Client Type</label>
+                  <label className="block text-xs text-slate-500 mb-1.5">Client Type</label>
                   <select
                     value={form.clientType}
                     onChange={(e) => setForm({ ...form, clientType: e.target.value })}
-                    className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                    className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-blue-500"
                   >
                     {["B2B", "B2C", "CORPORATE", "HOSPITAL"].map((t) => (
                       <option key={t} value={t}>{t}</option>
@@ -539,37 +539,37 @@ export default function PipelinePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1.5">Client Name</label>
+                  <label className="block text-xs text-slate-500 mb-1.5">Client Name</label>
                   <input
                     value={form.clientName}
                     onChange={(e) => setForm({ ...form, clientName: e.target.value })}
                     placeholder="Client name"
-                    className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                    className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Deal Type</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Deal Type</label>
                 <input
                   value={form.dealType}
                   onChange={(e) => setForm({ ...form, dealType: e.target.value })}
                   placeholder="e.g. Annual Contract, One-time"
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1.5">Estimated Value (₹)</label>
+                  <label className="block text-xs text-slate-500 mb-1.5">Estimated Value (₹)</label>
                   <input
                     type="number"
                     value={form.estimatedValue}
                     onChange={(e) => setForm({ ...form, estimatedValue: e.target.value })}
                     placeholder="0"
-                    className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                    className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1.5">Probability (%)</label>
+                  <label className="block text-xs text-slate-500 mb-1.5">Probability (%)</label>
                   <input
                     type="number"
                     min="0"
@@ -577,46 +577,46 @@ export default function PipelinePage() {
                     value={form.probability}
                     onChange={(e) => setForm({ ...form, probability: e.target.value })}
                     placeholder="0-100"
-                    className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                    className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1.5">Expected Close Date</label>
+                  <label className="block text-xs text-slate-500 mb-1.5">Expected Close Date</label>
                   <input
                     type="date"
                     value={form.expectedCloseDate}
                     onChange={(e) => setForm({ ...form, expectedCloseDate: e.target.value })}
-                    className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                    className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1.5">Assigned Rep ID</label>
+                  <label className="block text-xs text-slate-500 mb-1.5">Assigned Rep ID</label>
                   <input
                     value={form.assignedRepId}
                     onChange={(e) => setForm({ ...form, assignedRepId: e.target.value })}
                     placeholder="Optional"
-                    className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                    className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Notes</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Notes</label>
                 <textarea
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   rows={3}
                   placeholder="Additional notes..."
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-800">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200">
               <button
                 onClick={() => setShowAddDeal(false)}
-                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm text-slate-300 transition-colors"
+                className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm text-slate-700 transition-colors"
               >
                 Cancel
               </button>

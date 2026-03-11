@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Pencil,
@@ -47,6 +48,14 @@ interface Patient {
     createdAt: string;
     _count: { items: number };
   }[];
+  reportDeliveryMode?: string;
+  preferredChannel?: string[];
+  reportMobile?: string;
+  reportEmail?: string;
+  reportLanguage?: string;
+  whatsappOptIn?: boolean;
+  emailOptIn?: boolean;
+  smsOptIn?: boolean;
 }
 
 interface PatientStats {
@@ -69,6 +78,7 @@ const TABS = [
   { id: "overview", label: "Overview", icon: Activity },
   { id: "orders", label: "Orders", icon: ClipboardList },
   { id: "reports", label: "Reports", icon: FileText },
+  { id: "delivery-prefs", label: "Report Preferences", icon: FileText },
   { id: "timeline", label: "Timeline", icon: Clock },
   { id: "documents", label: "Documents", icon: FileText },
 ];
@@ -78,12 +88,39 @@ export default function PatientDetailPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
 
+  const qc = useQueryClient();
+  const [deliveryPrefs, setDeliveryPrefs] = useState<{
+    reportDeliveryMode: string;
+    preferredChannel: string[];
+    reportMobile: string;
+    reportEmail: string;
+    whatsappOptIn: boolean;
+    emailOptIn: boolean;
+    smsOptIn: boolean;
+  } | null>(null);
+
   const { data: patient, isLoading } = useQuery({
     queryKey: ["patient", id],
     queryFn: async () => {
       const res = await api.get<{ data: Patient }>(`/patients/${id}`);
-      return res.data.data;
+      const p = res.data.data;
+      setDeliveryPrefs({
+        reportDeliveryMode: p.reportDeliveryMode ?? "MANUAL",
+        preferredChannel: p.preferredChannel ?? ["WHATSAPP"],
+        reportMobile: p.reportMobile ?? "",
+        reportEmail: p.reportEmail ?? "",
+        whatsappOptIn: p.whatsappOptIn ?? true,
+        emailOptIn: p.emailOptIn ?? true,
+        smsOptIn: p.smsOptIn ?? false,
+      });
+      return p;
     },
+  });
+
+  const updatePrefsMut = useMutation({
+    mutationFn: (data: typeof deliveryPrefs) => api.patch(`/patients/${id}`, data),
+    onSuccess: () => { toast.success("Report preferences saved"); qc.invalidateQueries({ queryKey: ["patient", id] }); },
+    onError: () => toast.error("Failed to save preferences"),
   });
 
   const { data: stats } = useQuery({
@@ -330,6 +367,86 @@ export default function PatientDetailPage() {
             <div className="bg-white rounded-xl card-shadow p-8 text-center text-slate-400">
               <FileText size={36} className="mx-auto mb-3" />
               <p className="text-sm">Reports will appear here once orders are resulted and signed.</p>
+            </div>
+          )}
+
+          {/* Report Preferences tab */}
+          {activeTab === "delivery-prefs" && deliveryPrefs && (
+            <div className="bg-white rounded-xl card-shadow p-6 space-y-5">
+              <h3 className="font-semibold text-slate-800">Report Delivery Preferences</h3>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-2">Delivery Mode</label>
+                <div className="flex gap-2">
+                  {(["AUTO", "MANUAL", "DOWNLOAD"] as const).map((mode) => {
+                    const labels: Record<string, string> = { AUTO: "⚡ Auto-Send", MANUAL: "👤 Manual", DOWNLOAD: "⬇ Download" };
+                    const active = deliveryPrefs.reportDeliveryMode === mode;
+                    return (
+                      <button key={mode} type="button" onClick={() => setDeliveryPrefs({ ...deliveryPrefs, reportDeliveryMode: mode })}
+                        className={`flex-1 py-2 rounded-lg border-2 text-xs font-medium transition ${active ? "border-[#1B4F8A] bg-[#1B4F8A]/5 text-[#1B4F8A]" : "border-slate-200 text-slate-500 hover:border-slate-300"}`}>
+                        {labels[mode]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-2">Preferred Channels</label>
+                <div className="flex gap-2">
+                  {["WHATSAPP", "EMAIL", "SMS"].map((ch) => {
+                    const selected = deliveryPrefs.preferredChannel.includes(ch);
+                    const icons: Record<string, string> = { WHATSAPP: "💬", EMAIL: "✉️", SMS: "📱" };
+                    return (
+                      <button key={ch} type="button"
+                        onClick={() => {
+                          const c = deliveryPrefs.preferredChannel;
+                          setDeliveryPrefs({ ...deliveryPrefs, preferredChannel: selected ? c.filter((x) => x !== ch) : [...c, ch] });
+                        }}
+                        className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-lg border text-xs font-medium transition ${selected ? "border-teal-500 bg-teal-50 text-teal-700" : "border-slate-200 text-slate-400 hover:border-slate-300"}`}>
+                        {icons[ch]} {ch.charAt(0) + ch.slice(1).toLowerCase()}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Report Mobile</label>
+                  <input value={deliveryPrefs.reportMobile}
+                    onChange={(e) => setDeliveryPrefs({ ...deliveryPrefs, reportMobile: e.target.value })}
+                    placeholder={patient?.phone}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1B4F8A]" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Report Email</label>
+                  <input value={deliveryPrefs.reportEmail}
+                    onChange={(e) => setDeliveryPrefs({ ...deliveryPrefs, reportEmail: e.target.value })}
+                    placeholder={patient?.email ?? ""}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1B4F8A]" />
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                {[
+                  { key: "whatsappOptIn" as const, label: "💬 WhatsApp Opt-in" },
+                  { key: "emailOptIn" as const, label: "✉️ Email Opt-in" },
+                  { key: "smsOptIn" as const, label: "📱 SMS Opt-in" },
+                ].map(({ key, label }) => (
+                  <label key={key} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                    <input type="checkbox" checked={deliveryPrefs[key]}
+                      onChange={(e) => setDeliveryPrefs({ ...deliveryPrefs, [key]: e.target.checked })}
+                      className="w-4 h-4 accent-teal-600 rounded" />
+                    {label}
+                  </label>
+                ))}
+              </div>
+
+              <button onClick={() => updatePrefsMut.mutate(deliveryPrefs)} disabled={updatePrefsMut.isPending}
+                className="px-4 py-2 bg-[#1B4F8A] hover:bg-[#164070] text-white text-sm font-medium rounded-lg transition disabled:opacity-50">
+                {updatePrefsMut.isPending ? "Saving..." : "Save Preferences"}
+              </button>
             </div>
           )}
 

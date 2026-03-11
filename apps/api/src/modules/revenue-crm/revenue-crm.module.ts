@@ -20,6 +20,16 @@ import { PatientSegmentsController } from "./patient-segments.controller";
 import { PatientSegmentsService } from "./patient-segments.service";
 import { RevenueCommandController } from "./revenue-command.controller";
 import { RevenueCommandService } from "./revenue-command.service";
+import { CampaignsController } from "./campaigns.controller";
+import { CampaignsService } from "./campaigns.service";
+import { ContentController } from "./content.controller";
+import { ContentService } from "./content.service";
+import { LeadsController } from "./leads.controller";
+import { LeadsService } from "./leads.service";
+import { RepeatAnalyticsController } from "./repeat-analytics.controller";
+import { RepeatAnalyticsService } from "./repeat-analytics.service";
+import { RoiController } from "./roi.controller";
+import { RoiService } from "./roi.service";
 
 @Module({
   imports: [PrismaModule],
@@ -34,6 +44,11 @@ import { RevenueCommandService } from "./revenue-command.service";
     SalesDealsController,
     RevShareController,
     PatientSegmentsController,
+    CampaignsController,
+    ContentController,
+    LeadsController,
+    RepeatAnalyticsController,
+    RoiController,
   ],
   providers: [
     RevenueCommandService,
@@ -46,7 +61,12 @@ import { RevenueCommandService } from "./revenue-command.service";
     SalesDealsService,
     RevShareService,
     PatientSegmentsService,
+    CampaignsService,
+    ContentService,
+    LeadsService,
+    RepeatAnalyticsService,
+    RoiService,
   ],
-  exports: [RevShareService],
+  exports: [RevShareService, CampaignsService, LeadsService, RepeatAnalyticsService, RoiService],
 })
 export class RevenueCrmModule {}

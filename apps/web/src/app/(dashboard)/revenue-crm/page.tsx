@@ -66,11 +66,11 @@ function formatINR(value: number): string {
 function severityColor(severity: string) {
   switch (severity) {
     case "critical":
-      return { bg: "bg-red-500/20", text: "text-red-400", border: "border-red-500/30", label: "Critical" };
+      return { bg: "bg-red-50", text: "text-red-600", border: "border-red-200", label: "Critical" };
     case "warning":
-      return { bg: "bg-yellow-500/20", text: "text-yellow-400", border: "border-yellow-500/30", label: "Warning" };
+      return { bg: "bg-yellow-50", text: "text-yellow-600", border: "border-yellow-200", label: "Warning" };
     default:
-      return { bg: "bg-emerald-500/20", text: "text-emerald-400", border: "border-emerald-500/30", label: "Info" };
+      return { bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-200", label: "Info" };
   }
 }
 
@@ -100,13 +100,13 @@ function SkeletonKPIStrip() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="bg-slate-900 border border-slate-800 rounded-xl p-4 animate-pulse">
+        <div key={i} className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse">
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-10 w-10 rounded-lg bg-slate-800" />
-            <div className="h-3 w-20 rounded bg-slate-800" />
+            <div className="h-10 w-10 rounded-lg bg-slate-200" />
+            <div className="h-3 w-20 rounded bg-slate-200" />
           </div>
-          <div className="h-6 w-24 rounded bg-slate-800 mb-2" />
-          <div className="h-3 w-16 rounded bg-slate-800" />
+          <div className="h-6 w-24 rounded bg-slate-200 mb-2" />
+          <div className="h-3 w-16 rounded bg-slate-200" />
         </div>
       ))}
     </div>
@@ -115,12 +115,12 @@ function SkeletonKPIStrip() {
 
 function SkeletonColumn() {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 animate-pulse">
-      <div className="h-5 w-40 rounded bg-slate-800 mb-5" />
+    <div className="bg-white border border-slate-200 rounded-xl p-5 animate-pulse">
+      <div className="h-5 w-40 rounded bg-slate-200 mb-5" />
       {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className="mb-4">
-          <div className="h-4 w-full rounded bg-slate-800 mb-2" />
-          <div className="h-3 w-3/4 rounded bg-slate-800" />
+          <div className="h-4 w-full rounded bg-slate-200 mb-2" />
+          <div className="h-3 w-3/4 rounded bg-slate-200" />
         </div>
       ))}
     </div>
@@ -167,18 +167,18 @@ export default function RevenueCRMPage() {
     overview?.revenueByChannel?.reduce((max, ch) => Math.max(max, ch.amount), 0) || 1;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50 p-6 space-y-6">
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Revenue Command Center</h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Revenue Command Center</h1>
+          <p className="text-slate-500 text-sm mt-1">
             Real-time revenue intelligence and sales performance
           </p>
         </div>
         <button
           onClick={() => refetchOverview()}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm text-slate-300 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white hover:bg-slate-50 text-sm text-slate-600 border border-slate-200 transition-colors"
         >
           <RefreshCw className="h-4 w-4" />
           Refresh
@@ -187,9 +187,9 @@ export default function RevenueCRMPage() {
 
       {/* ── Error Banner ────────────────────────────────────────────────── */}
       {hasError && (
-        <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-5 py-4">
-          <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
-          <p className="text-red-300 text-sm">{errorMessage}</p>
+        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-5 py-4">
+          <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
+          <p className="text-red-600 text-sm">{errorMessage}</p>
         </div>
       )}
 
@@ -206,7 +206,7 @@ export default function RevenueCRMPage() {
             return (
               <div
                 key={key}
-                className="bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition-colors"
+                className="bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 transition-colors"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div
@@ -214,21 +214,21 @@ export default function RevenueCRMPage() {
                   >
                     <Icon className="h-5 w-5 text-white" />
                   </div>
-                  <span className="text-xs text-slate-400 leading-tight">{kpi.label}</span>
+                  <span className="text-xs text-slate-500 leading-tight">{kpi.label}</span>
                 </div>
-                <p className="text-xl font-bold text-white">
+                <p className="text-xl font-bold text-slate-900">
                   {key === "activeCampaigns"
                     ? indianFormat.format(kpi.value)
                     : formatINR(kpi.value)}
                 </p>
-                <p className="text-xs text-slate-500 mt-1">{kpi.subtitle}</p>
+                <p className="text-xs text-slate-400 mt-1">{kpi.subtitle}</p>
               </div>
             );
           })}
         </div>
       ) : (
         !hasError && (
-          <div className="text-center py-10 text-slate-500">No data available</div>
+          <div className="text-center py-10 text-slate-400">No data available</div>
         )
       )}
 
@@ -242,10 +242,10 @@ export default function RevenueCRMPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* ── Column 1: Revenue by Channel ──────────────────────────── */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <div className="bg-white border border-slate-200 rounded-xl p-5">
             <div className="flex items-center gap-2 mb-5">
-              <BarChart3 className="h-5 w-5 text-blue-400" />
-              <h2 className="text-base font-semibold">Revenue by Channel</h2>
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              <h2 className="text-base font-semibold text-slate-900">Revenue by Channel</h2>
             </div>
 
             {overview?.revenueByChannel && overview.revenueByChannel.length > 0 ? (
@@ -255,12 +255,12 @@ export default function RevenueCRMPage() {
                   return (
                     <div key={ch.channel}>
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm text-slate-300">{ch.channel}</span>
-                        <span className="text-sm font-medium text-white">
+                        <span className="text-sm text-slate-700">{ch.channel}</span>
+                        <span className="text-sm font-medium text-slate-900">
                           {formatINR(ch.amount)}
                         </span>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+                      <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-500"
                           style={{
@@ -274,15 +274,15 @@ export default function RevenueCRMPage() {
                 })}
               </div>
             ) : (
-              <p className="text-sm text-slate-500 text-center py-6">No data available</p>
+              <p className="text-sm text-slate-400 text-center py-6">No data available</p>
             )}
           </div>
 
           {/* ── Column 2: AI Intelligence Panel ──────────────────────── */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <div className="bg-white border border-slate-200 rounded-xl p-5">
             <div className="flex items-center gap-2 mb-5">
-              <Brain className="h-5 w-5 text-violet-400" />
-              <h2 className="text-base font-semibold">AI Intelligence Panel</h2>
+              <Brain className="h-5 w-5 text-violet-600" />
+              <h2 className="text-base font-semibold text-slate-900">AI Intelligence Panel</h2>
             </div>
 
             {alerts && alerts.length > 0 ? (
@@ -310,7 +310,7 @@ export default function RevenueCRMPage() {
                               {sev.label}
                             </span>
                           </div>
-                          <p className="text-sm text-slate-300 leading-relaxed">
+                          <p className="text-sm text-slate-700 leading-relaxed">
                             {alert.message}
                           </p>
                           <button
@@ -326,22 +326,22 @@ export default function RevenueCRMPage() {
                 })}
               </div>
             ) : (
-              <p className="text-sm text-slate-500 text-center py-6">No data available</p>
+              <p className="text-sm text-slate-400 text-center py-6">No data available</p>
             )}
           </div>
 
           {/* ── Column 3: Sales Team Scoreboard ──────────────────────── */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <div className="bg-white border border-slate-200 rounded-xl p-5">
             <div className="flex items-center gap-2 mb-5">
-              <Trophy className="h-5 w-5 text-amber-400" />
-              <h2 className="text-base font-semibold">Sales Team Scoreboard</h2>
+              <Trophy className="h-5 w-5 text-amber-600" />
+              <h2 className="text-base font-semibold text-slate-900">Sales Team Scoreboard</h2>
             </div>
 
             {overview?.salesTeam && overview.salesTeam.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-slate-500 text-xs uppercase tracking-wider border-b border-slate-800">
+                    <tr className="text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
                       <th className="text-left py-2 pr-2">Rep</th>
                       <th className="text-right py-2 px-2">Target</th>
                       <th className="text-right py-2 px-2">Achieved</th>
@@ -366,20 +366,20 @@ export default function RevenueCRMPage() {
                       return (
                         <tr
                           key={rep.name}
-                          className="border-b border-slate-800/50 last:border-0"
+                          className="border-b border-slate-100 last:border-0"
                         >
-                          <td className="py-2.5 pr-2 text-slate-300 font-medium whitespace-nowrap">
+                          <td className="py-2.5 pr-2 text-slate-700 font-medium whitespace-nowrap">
                             {rep.name}
                           </td>
-                          <td className="py-2.5 px-2 text-right text-slate-400 whitespace-nowrap">
+                          <td className="py-2.5 px-2 text-right text-slate-500 whitespace-nowrap">
                             {formatINR(rep.target)}
                           </td>
-                          <td className="py-2.5 px-2 text-right text-white font-medium whitespace-nowrap">
+                          <td className="py-2.5 px-2 text-right text-slate-900 font-medium whitespace-nowrap">
                             {formatINR(rep.achieved)}
                           </td>
                           <td className="py-2.5 pl-2">
                             <div className="flex items-center gap-2">
-                              <div className="flex-1 h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                              <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
                                 <div
                                   className={`h-full rounded-full ${barColor} transition-all duration-500`}
                                   style={{ width: `${Math.min(pct, 100)}%` }}
@@ -397,7 +397,7 @@ export default function RevenueCRMPage() {
                 </table>
               </div>
             ) : (
-              <p className="text-sm text-slate-500 text-center py-6">No data available</p>
+              <p className="text-sm text-slate-400 text-center py-6">No data available</p>
             )}
           </div>
         </div>

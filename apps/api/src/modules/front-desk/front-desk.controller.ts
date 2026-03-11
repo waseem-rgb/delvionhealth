@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards, Res } from "@nestjs/common";
+import type { Response } from "express";
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { TenantGuard } from "../../common/guards/tenant.guard";
@@ -9,6 +10,8 @@ import { QueueService } from "./queue.service";
 import { PhlebScheduleService } from "./phleb-schedule.service";
 import { PriceEnquiryService } from "./price-enquiry.service";
 import { NotificationLogService } from "./notification-log.service";
+import { DepartmentService } from "./department.service";
+import { TokenPdfService } from "./token-pdf.service";
 
 @ApiTags("front-desk")
 @ApiBearerAuth()
@@ -21,6 +24,8 @@ export class FrontDeskController {
     private readonly phlebScheduleService: PhlebScheduleService,
     private readonly priceEnquiryService: PriceEnquiryService,
     private readonly notificationLogService: NotificationLogService,
+    private readonly departmentService: DepartmentService,
+    private readonly tokenPdfService: TokenPdfService,
   ) {}
 
   // ── Overview ────────────────────────────────────────────────────────────
@@ -44,9 +49,22 @@ export class FrontDeskController {
   @ApiOperation({ summary: "Issue new queue token" })
   issueToken(@CurrentUser() user: JwtPayload, @Body() dto: {
     patientName: string; patientId?: string; orderId?: string;
-    appointmentId?: string; type?: string;
+    appointmentId?: string; type?: string; phone?: string;
+    departmentCode?: string; departmentName?: string; investigationType?: string;
+    doctorId?: string; doctorName?: string; roomNumber?: string;
   }) {
     return this.queueService.issueToken(user.tenantId, dto);
+  }
+
+  @Post("queue/issue-investigation")
+  @ApiOperation({ summary: "Issue investigation tokens for non-pathology tests in an order" })
+  issueInvestigationTokens(@CurrentUser() user: JwtPayload, @Body() dto: {
+    orderId: string; patientName: string; patientId: string; phone?: string;
+    orderItems: Array<{ testCatalogId: string }>;
+  }) {
+    return this.queueService.issueInvestigationTokens(
+      user.tenantId, dto.orderId, dto.patientName, dto.patientId, dto.phone ?? "", dto.orderItems,
+    );
   }
 
   @Get("queue/next")
@@ -71,6 +89,34 @@ export class FrontDeskController {
   @ApiOperation({ summary: "Mark token as done" })
   completeToken(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
     return this.queueService.completeToken(user.tenantId, id);
+  }
+
+  @Get("queue/:id/pdf")
+  @ApiOperation({ summary: "Download token slip as PDF" })
+  async getTokenPdf(
+    @CurrentUser() user: JwtPayload,
+    @Param("id") id: string,
+    @Res() res: Response,
+  ) {
+    const pdf = await this.tokenPdfService.generatePdf(user.tenantId, id);
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `inline; filename="token-${id.slice(-8)}.pdf"`,
+      "Content-Length": pdf.length,
+    });
+    res.end(pdf);
+  }
+
+  @Get("queue/:id/slip-html")
+  @ApiOperation({ summary: "Get token slip as HTML (for preview/print)" })
+  async getTokenSlipHtml(
+    @CurrentUser() user: JwtPayload,
+    @Param("id") id: string,
+    @Res() res: Response,
+  ) {
+    const html = await this.tokenPdfService.generateTokenSlipHtml(user.tenantId, id);
+    res.set({ "Content-Type": "text/html" });
+    res.end(html);
   }
 
   // ── Phlebotomist Schedule ───────────────────────────────────────────────
@@ -156,6 +202,61 @@ export class FrontDeskController {
     @Body() dto: { orderId: string },
   ) {
     return this.priceEnquiryService.markConverted(user.tenantId, id, dto.orderId);
+  }
+
+  // ── Departments ─────────────────────────────────────────────────────────
+
+  @Get("departments")
+  @ApiOperation({ summary: "List departments" })
+  getDepartments(@CurrentUser() user: JwtPayload) {
+    return this.departmentService.list(user.tenantId);
+  }
+
+  @Get("departments/queue-summary")
+  @ApiOperation({ summary: "Queue summary per department" })
+  @ApiQuery({ name: "date", required: false })
+  getDeptQueueSummary(@CurrentUser() user: JwtPayload, @Query("date") date?: string) {
+    return this.departmentService.getQueueSummary(user.tenantId, date);
+  }
+
+  @Post("departments")
+  @ApiOperation({ summary: "Create department" })
+  createDepartment(@CurrentUser() user: JwtPayload, @Body() dto: {
+    code: string; name: string; shortCode: string; roomNumbers?: string[]; avgDurationMinutes?: number;
+  }) {
+    return this.departmentService.create(user.tenantId, dto);
+  }
+
+  @Patch("departments/:id")
+  @ApiOperation({ summary: "Update department" })
+  updateDepartment(@CurrentUser() user: JwtPayload, @Param("id") id: string, @Body() dto: Record<string, unknown>) {
+    return this.departmentService.update(user.tenantId, id, dto as any);
+  }
+
+  @Delete("departments/:id")
+  @ApiOperation({ summary: "Delete department" })
+  removeDepartment(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.departmentService.remove(user.tenantId, id);
+  }
+
+  @Post("departments/:id/staff")
+  @ApiOperation({ summary: "Add staff to department" })
+  addDeptStaff(@CurrentUser() user: JwtPayload, @Param("id") departmentId: string, @Body() dto: {
+    staffName: string; role?: string; userId?: string; availableFrom?: string; availableTo?: string; avgPatientMins?: number;
+  }) {
+    return this.departmentService.addStaff(user.tenantId, departmentId, dto);
+  }
+
+  @Patch("departments/staff/:staffId")
+  @ApiOperation({ summary: "Update department staff" })
+  updateDeptStaff(@CurrentUser() user: JwtPayload, @Param("staffId") staffId: string, @Body() dto: Record<string, unknown>) {
+    return this.departmentService.updateStaff(user.tenantId, staffId, dto as any);
+  }
+
+  @Delete("departments/staff/:staffId")
+  @ApiOperation({ summary: "Remove department staff" })
+  removeDeptStaff(@CurrentUser() user: JwtPayload, @Param("staffId") staffId: string) {
+    return this.departmentService.removeStaff(user.tenantId, staffId);
   }
 
   // ── Notification Logs ───────────────────────────────────────────────────

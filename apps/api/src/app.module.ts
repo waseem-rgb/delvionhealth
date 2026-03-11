@@ -51,6 +51,9 @@ import { FrontDeskModule } from "./modules/front-desk/front-desk.module";
 import { CouponsModule } from "./modules/coupons/coupons.module";
 import { RevenueCrmModule } from "./modules/revenue-crm/revenue-crm.module";
 import { LabPackagesModule } from "./modules/lab-packages/lab-packages.module";
+import { SopsModule } from "./modules/sops/sops.module";
+import { QualityFormsModule } from "./modules/quality-forms/quality-forms.module";
+import { NonPathModule } from "./modules/non-path/non-path.module";
 import { TenantMiddleware } from "./common/middleware/tenant.middleware";
 
 @Module({
@@ -121,6 +124,9 @@ import { TenantMiddleware } from "./common/middleware/tenant.middleware";
     CouponsModule,
     RevenueCrmModule,
     LabPackagesModule,
+    SopsModule,
+    QualityFormsModule,
+    NonPathModule,
   ],
 })
 export class AppModule {

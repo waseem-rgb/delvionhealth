@@ -41,6 +41,8 @@ interface Order {
   deliveredAt: string | null;
   tat: string | null;
   tatOverdue: boolean;
+  reportDeliveryMode?: string;
+  deliveryOverridden?: boolean;
 }
 
 interface OrdersResponse {
@@ -48,10 +50,12 @@ interface OrdersResponse {
   meta: { total: number; page: number; limit: number; totalPages: number };
 }
 
-type TabKey = "ready" | "pending" | "delivered" | "search";
+type TabKey = "ready" | "auto" | "download" | "pending" | "delivered" | "search";
 
-const TABS: { key: TabKey; label: string }[] = [
+const TABS: { key: TabKey; label: string; icon?: string }[] = [
   { key: "ready", label: "Ready to Send" },
+  { key: "auto", label: "⚡ Auto-Sent" },
+  { key: "download", label: "⬇ Download Only" },
   { key: "pending", label: "Pending" },
   { key: "delivered", label: "Delivered Today" },
   { key: "search", label: "Search" },
@@ -98,6 +102,28 @@ export default function ReportsDeliveryPage() {
       return res.data?.data ?? res.data;
     },
     enabled: activeTab === "delivered",
+  });
+
+  const autoQuery = useQuery<OrdersResponse>({
+    queryKey: ["reports-delivery", "auto"],
+    queryFn: async () => {
+      const res = await api.get("/orders", {
+        params: { status: "DISPATCHED,DELIVERED", reportDeliveryMode: "AUTO", limit: 50 },
+      });
+      return res.data?.data ?? res.data;
+    },
+    enabled: activeTab === "auto",
+  });
+
+  const downloadQuery = useQuery<OrdersResponse>({
+    queryKey: ["reports-delivery", "download"],
+    queryFn: async () => {
+      const res = await api.get("/orders", {
+        params: { status: "APPROVED,REPORTED", reportDeliveryMode: "DOWNLOAD", limit: 50 },
+      });
+      return res.data?.data ?? res.data;
+    },
+    enabled: activeTab === "download",
   });
 
   const searchQuery = useQuery<OrdersResponse>({
@@ -171,29 +197,17 @@ export default function ReportsDeliveryPage() {
   const getActiveData = (): { orders: Order[]; isLoading: boolean; isError: boolean } => {
     switch (activeTab) {
       case "ready":
-        return {
-          orders: extractOrders(readyQuery.data),
-          isLoading: readyQuery.isLoading,
-          isError: readyQuery.isError,
-        };
+        return { orders: extractOrders(readyQuery.data), isLoading: readyQuery.isLoading, isError: readyQuery.isError };
+      case "auto":
+        return { orders: extractOrders(autoQuery.data), isLoading: autoQuery.isLoading, isError: autoQuery.isError };
+      case "download":
+        return { orders: extractOrders(downloadQuery.data), isLoading: downloadQuery.isLoading, isError: downloadQuery.isError };
       case "pending":
-        return {
-          orders: extractOrders(pendingQuery.data),
-          isLoading: pendingQuery.isLoading,
-          isError: pendingQuery.isError,
-        };
+        return { orders: extractOrders(pendingQuery.data), isLoading: pendingQuery.isLoading, isError: pendingQuery.isError };
       case "delivered":
-        return {
-          orders: extractOrders(deliveredQuery.data),
-          isLoading: deliveredQuery.isLoading,
-          isError: deliveredQuery.isError,
-        };
+        return { orders: extractOrders(deliveredQuery.data), isLoading: deliveredQuery.isLoading, isError: deliveredQuery.isError };
       case "search":
-        return {
-          orders: extractOrders(searchQuery.data),
-          isLoading: searchQuery.isLoading,
-          isError: searchQuery.isError,
-        };
+        return { orders: extractOrders(searchQuery.data), isLoading: searchQuery.isLoading, isError: searchQuery.isError };
     }
   };
 
@@ -216,6 +230,13 @@ export default function ReportsDeliveryPage() {
         {s.label}
       </span>
     );
+  };
+
+  const deliveryModeBadge = (mode?: string) => {
+    if (!mode || mode === "MANUAL") return <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">👤 Manual</span>;
+    if (mode === "AUTO") return <span className="text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">⚡ Auto</span>;
+    if (mode === "DOWNLOAD") return <span className="text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">⬇ Download</span>;
+    return null;
   };
 
   // ── Render ───────────────────────────────────────────────────────────────
@@ -326,6 +347,7 @@ export default function ReportsDeliveryPage() {
                     {activeTab === "ready" ? "Ready Since" : activeTab === "delivered" ? "Delivered At" : "Status"}
                   </th>
                   <th className="px-4 py-3 font-medium text-slate-600">Status</th>
+                  <th className="px-4 py-3 font-medium text-slate-600">Mode</th>
                   <th className="px-4 py-3 text-right font-medium text-slate-600">Actions</th>
                 </tr>
               </thead>
@@ -363,6 +385,7 @@ export default function ReportsDeliveryPage() {
                         : order.tat ?? "—"}
                     </td>
                     <td className="px-4 py-3">{statusBadge(order.status, order.tatOverdue)}</td>
+                    <td className="px-4 py-3">{deliveryModeBadge(order.reportDeliveryMode)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1.5">
                         <button

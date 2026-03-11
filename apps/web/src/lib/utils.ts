@@ -95,8 +95,12 @@ export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-export function formatTAT(fromDate: string | Date): string {
-  const diffMs = Date.now() - new Date(fromDate).getTime();
+export function formatTAT(fromDate: string | Date | null | undefined): string {
+  if (!fromDate) return "—";
+  const d = new Date(fromDate);
+  if (isNaN(d.getTime())) return "—";
+  const diffMs = Date.now() - d.getTime();
+  if (diffMs < 0) return "0m";
   const hours = Math.floor(diffMs / (1000 * 60 * 60));
   const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
   if (hours === 0) return `${minutes}m`;

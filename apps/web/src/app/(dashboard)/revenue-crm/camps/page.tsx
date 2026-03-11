@@ -141,15 +141,15 @@ export default function CampsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 p-6">
+      <div className="min-h-screen bg-slate-50 p-6">
         <div className="mb-8">
-          <div className="h-8 w-48 animate-pulse rounded bg-slate-800" />
+          <div className="h-8 w-48 animate-pulse rounded bg-slate-100" />
         </div>
         <div className="mb-6 flex gap-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="h-10 w-36 animate-pulse rounded-lg bg-slate-800"
+              className="h-10 w-36 animate-pulse rounded-lg bg-slate-100"
             />
           ))}
         </div>
@@ -157,7 +157,7 @@ export default function CampsPage() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="h-56 animate-pulse rounded-xl bg-slate-900"
+              className="h-56 animate-pulse rounded-xl bg-white"
             />
           ))}
         </div>
@@ -169,7 +169,7 @@ export default function CampsPage() {
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-slate-950 p-6">
+      <div className="min-h-screen bg-slate-50 p-6">
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-red-400">
           Failed to load camps:{" "}
           {error instanceof Error ? error.message : "Unknown error"}
@@ -181,12 +181,12 @@ export default function CampsPage() {
   // ── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
+    <div className="min-h-screen bg-slate-50 p-6">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Health Camps</h1>
-          <p className="text-slate-400">
+          <h1 className="text-2xl font-bold text-slate-900">Health Camps</h1>
+          <p className="text-slate-500">
             Plan and track health camp events
           </p>
         </div>
@@ -213,9 +213,9 @@ export default function CampsPage() {
 
       {/* Empty State */}
       {camps.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-800 bg-slate-900 py-20">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white py-20">
           <Tent className="mb-4 h-12 w-12 text-slate-600" />
-          <p className="text-lg font-medium text-slate-400">No data found</p>
+          <p className="text-lg font-medium text-slate-500">No data found</p>
         </div>
       ) : (
         /* Camp Cards Grid */
@@ -223,18 +223,18 @@ export default function CampsPage() {
           {camps.map((c) => (
             <div
               key={c.id}
-              className="rounded-xl border border-slate-800 bg-slate-900 p-5"
+              className="rounded-xl border border-slate-200 bg-white p-5"
             >
               <div className="mb-3 flex items-start justify-between">
-                <h3 className="text-lg font-semibold text-white">{c.name}</h3>
+                <h3 className="text-lg font-semibold text-slate-900">{c.name}</h3>
                 <span
-                  className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[c.status] ?? "bg-slate-700 text-slate-300"}`}
+                  className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[c.status] ?? "bg-slate-200 text-slate-700"}`}
                 >
                   {c.status.replace("_", " ")}
                 </span>
               </div>
 
-              <div className="space-y-2 text-sm text-slate-400">
+              <div className="space-y-2 text-sm text-slate-500">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   <span>Organiser: {c.organiserName}</span>
@@ -275,12 +275,12 @@ export default function CampsPage() {
       {/* ── New Camp Modal ─────────────────────────────────────────────────── */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-800 bg-slate-900 p-6">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 bg-white p-6">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">New Camp</h2>
+              <h2 className="text-lg font-semibold text-slate-900">New Camp</h2>
               <button
                 onClick={() => setShowForm(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-500 hover:text-slate-900"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -294,20 +294,20 @@ export default function CampsPage() {
               className="space-y-4"
             >
               <div>
-                <label className="mb-1 block text-sm text-slate-400">
+                <label className="mb-1 block text-sm text-slate-500">
                   Camp Name *
                 </label>
                 <input
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Organiser Name *
                   </label>
                   <input
@@ -316,11 +316,11 @@ export default function CampsPage() {
                     onChange={(e) =>
                       setForm({ ...form, organiserName: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Organiser Type
                   </label>
                   <select
@@ -328,7 +328,7 @@ export default function CampsPage() {
                     onChange={(e) =>
                       setForm({ ...form, organiserType: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
                   >
                     {ORGANISER_TYPES.map((t) => (
                       <option key={t} value={t}>
@@ -341,7 +341,7 @@ export default function CampsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Contact Name
                   </label>
                   <input
@@ -349,11 +349,11 @@ export default function CampsPage() {
                     onChange={(e) =>
                       setForm({ ...form, contactName: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Contact Phone
                   </label>
                   <input
@@ -361,13 +361,13 @@ export default function CampsPage() {
                     onChange={(e) =>
                       setForm({ ...form, contactPhone: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-sm text-slate-400">
+                <label className="mb-1 block text-sm text-slate-500">
                   Address
                 </label>
                 <input
@@ -375,13 +375,13 @@ export default function CampsPage() {
                   onChange={(e) =>
                     setForm({ ...form, address: e.target.value })
                   }
-                  className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     City
                   </label>
                   <input
@@ -389,11 +389,11 @@ export default function CampsPage() {
                     onChange={(e) =>
                       setForm({ ...form, city: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Camp Date
                   </label>
                   <input
@@ -402,14 +402,14 @@ export default function CampsPage() {
                     onChange={(e) =>
                       setForm({ ...form, campDate: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Package Name
                   </label>
                   <input
@@ -417,11 +417,11 @@ export default function CampsPage() {
                     onChange={(e) =>
                       setForm({ ...form, packageName: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Price/Person
                   </label>
                   <input
@@ -430,11 +430,11 @@ export default function CampsPage() {
                     onChange={(e) =>
                       setForm({ ...form, pricePerPerson: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Expected Pax *
                   </label>
                   <input
@@ -444,20 +444,20 @@ export default function CampsPage() {
                     onChange={(e) =>
                       setForm({ ...form, expectedPax: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-sm text-slate-400">
+                <label className="mb-1 block text-sm text-slate-500">
                   Notes
                 </label>
                 <textarea
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   rows={3}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                 />
               </div>
 

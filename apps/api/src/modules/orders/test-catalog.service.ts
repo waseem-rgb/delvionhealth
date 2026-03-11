@@ -53,7 +53,7 @@ export class TestCatalogService {
     query: TestCatalogQuery
   ): Promise<{ data: unknown[]; meta: PaginationMeta }> {
     const page = query.page ?? 1;
-    const limit = Math.min(query.limit ?? 20, 1000);
+    const limit = Math.min(query.limit ?? 20, 10000);
     const skip = (page - 1) * limit;
 
     const where = {
@@ -1192,6 +1192,132 @@ export class TestCatalogService {
       complete: complete.length,
       incomplete: incomplete.length,
       tests: scored,
+    };
+  }
+
+  // ───────────────────────────────────────────
+  // Parameter Stats (for UI progress / counts)
+  // ───────────────────────────────────────────
+
+  async getParameterStats(tenantId: string) {
+    const [total, withParams] = await Promise.all([
+      this.prisma.testCatalog.count({ where: { tenantId, isActive: true } }),
+      this.prisma.testCatalog.count({
+        where: { tenantId, isActive: true, reportParameters: { some: {} } },
+      }),
+    ]);
+
+    // Count by category
+    const byCategory = await this.prisma.testCatalog.groupBy({
+      by: ["category"],
+      where: { tenantId, isActive: true, reportParameters: { some: {} } },
+      _count: { _all: true },
+    });
+
+    // Top seeded tests (with most parameters)
+    const topTests = await this.prisma.testCatalog.findMany({
+      where: { tenantId, isActive: true, reportParameters: { some: {} } },
+      orderBy: { reportParameters: { _count: "desc" } },
+      take: 50,
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        category: true,
+        department: true,
+        isTemplateComplete: true,
+        _count: { select: { reportParameters: true } },
+      },
+    });
+
+    return {
+      total,
+      withParams,
+      withoutParams: total - withParams,
+      percentComplete: total > 0 ? Math.round((withParams / total) * 100) : 0,
+      byCategory: byCategory.map((g) => ({ category: g.category, count: g._count._all })),
+      recentlySeeded: topTests.map((t) => ({
+        id: t.id,
+        code: t.code,
+        name: t.name,
+        category: t.category,
+        department: t.department,
+        paramCount: t._count.reportParameters,
+        isTemplateComplete: t.isTemplateComplete ?? false,
+      })),
+    };
+  }
+
+  // ───────────────────────────────────────────
+  // Classify Investigation Types (pattern matching)
+  // ───────────────────────────────────────────
+
+  async classifyInvestigationTypes(tenantId: string) {
+    const tests = await this.prisma.testCatalog.findMany({
+      where: { tenantId, isActive: true },
+      select: { id: true, name: true, department: true, category: true, investigationType: true },
+    });
+
+    const patterns: Array<{ keywords: string[]; type: string; departmentCode: string; requiresDoctor: boolean; avgDurationMinutes: number }> = [
+      { keywords: ["ultrasound", "usg", "sonography", "doppler", "echo", "abdominal scan", "pelvis scan", "thyroid scan"], type: "ULTRASOUND", departmentCode: "USG", requiresDoctor: true, avgDurationMinutes: 20 },
+      { keywords: ["x-ray", "xray", "chest x", "bone x", "radiograph", "kub x"], type: "XRAY", departmentCode: "XR", requiresDoctor: false, avgDurationMinutes: 10 },
+      { keywords: ["ecg", "ekg", "electrocardiogram", "holter", "tmt", "stress test"], type: "ECG", departmentCode: "ECG", requiresDoctor: false, avgDurationMinutes: 15 },
+      { keywords: ["mri", "magnetic resonance"], type: "MRI", departmentCode: "MRI", requiresDoctor: true, avgDurationMinutes: 45 },
+      { keywords: ["ct scan", "computed tomography", "hrct", "ct chest", "ct abdomen", "ct brain"], type: "CT_SCAN", departmentCode: "CT", requiresDoctor: true, avgDurationMinutes: 30 },
+      { keywords: ["echocardiogram", "2d echo", "echo cardiography", "cardiac echo"], type: "ECHO", departmentCode: "ECHO", requiresDoctor: true, avgDurationMinutes: 30 },
+      { keywords: ["pulmonary function", "pft", "spirometry", "lung function"], type: "PFT", departmentCode: "PFT", requiresDoctor: false, avgDurationMinutes: 20 },
+      { keywords: ["dexa", "bone density", "bone mineral"], type: "DEXA", departmentCode: "DEXA", requiresDoctor: false, avgDurationMinutes: 20 },
+      { keywords: ["audiometry", "hearing test", "tympanometry"], type: "AUDIOMETRY", departmentCode: "AUD", requiresDoctor: false, avgDurationMinutes: 20 },
+      { keywords: ["vision", "eye test", "optometry", "refraction", "retinal"], type: "OPHTHALMOLOGY", departmentCode: "OPH", requiresDoctor: true, avgDurationMinutes: 15 },
+    ];
+
+    const updates: Array<{ id: string; investigationType: string; departmentCode: string; requiresDoctor: boolean; avgDurationMinutes: number }> = [];
+
+    for (const test of tests) {
+      const nameLower = test.name.toLowerCase();
+      let matched = false;
+      for (const pattern of patterns) {
+        if (pattern.keywords.some((kw) => nameLower.includes(kw))) {
+          updates.push({
+            id: test.id,
+            investigationType: pattern.type,
+            departmentCode: pattern.departmentCode,
+            requiresDoctor: pattern.requiresDoctor,
+            avgDurationMinutes: pattern.avgDurationMinutes,
+          });
+          matched = true;
+          break;
+        }
+      }
+      if (!matched && test.investigationType === "PATHOLOGY") {
+        // Keep as pathology — no update needed
+      }
+    }
+
+    // Batch update
+    let updated = 0;
+    for (const u of updates) {
+      await this.prisma.testCatalog.update({
+        where: { id: u.id },
+        data: {
+          investigationType: u.investigationType,
+          departmentCode: u.departmentCode,
+          requiresDoctor: u.requiresDoctor,
+          avgDurationMinutes: u.avgDurationMinutes,
+        },
+      });
+      updated++;
+    }
+
+    const summary = updates.reduce((acc, u) => {
+      acc[u.investigationType] = (acc[u.investigationType] ?? 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      totalProcessed: tests.length,
+      updated,
+      summary,
     };
   }
 }

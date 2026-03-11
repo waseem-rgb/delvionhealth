@@ -21,6 +21,7 @@ import {
   ArrowRight,
   RefreshCw,
   Hash,
+  FileText,
 } from "lucide-react";
 import api from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -41,6 +42,9 @@ interface QueueToken {
   calledAt: string | null;
   completedAt: string | null;
   waitMinutes: number | null;
+  departmentCode?: string;
+  departmentName?: string;
+  investigationType?: string;
 }
 
 interface QueueDisplayData {
@@ -110,6 +114,7 @@ export default function QueuePage() {
 
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [deptFilter, setDeptFilter] = useState<string>("ALL");
   const [issueForm, setIssueForm] = useState({ patientName: "", type: "WALKIN" as string });
 
   // ── Queries ──────────────────────────────────────────────────────────────
@@ -196,17 +201,38 @@ export default function QueuePage() {
 
   // ── Derived data ─────────────────────────────────────────────────────────
 
+  const allTokens = tokens ?? [];
+
+  // Unique departments in today's queue
+  const departments = useMemo(() => {
+    const seen = new Set<string>();
+    const result: Array<{ code: string; name: string }> = [];
+    for (const t of allTokens) {
+      if (t.departmentCode && !seen.has(t.departmentCode)) {
+        seen.add(t.departmentCode);
+        result.push({ code: t.departmentCode, name: t.departmentName ?? t.departmentCode });
+      }
+    }
+    return result;
+  }, [allTokens]);
+
+  const filteredTokens = useMemo(() => {
+    if (deptFilter === "ALL") return allTokens;
+    if (deptFilter === "LAB") return allTokens.filter((t) => !t.departmentCode);
+    return allTokens.filter((t) => t.departmentCode === deptFilter);
+  }, [allTokens, deptFilter]);
+
   const waitingTokens = useMemo(
-    () => (tokens ?? []).filter((t) => t.status === "WAITING"),
-    [tokens]
+    () => filteredTokens.filter((t) => t.status === "WAITING"),
+    [filteredTokens]
   );
   const calledTokens = useMemo(
-    () => (tokens ?? []).filter((t) => t.status === "CALLED" || t.status === "IN_PROGRESS"),
-    [tokens]
+    () => filteredTokens.filter((t) => t.status === "CALLED" || t.status === "IN_PROGRESS"),
+    [filteredTokens]
   );
   const completedTokens = useMemo(
-    () => (tokens ?? []).filter((t) => t.status === "DONE" || t.status === "COMPLETED"),
-    [tokens]
+    () => filteredTokens.filter((t) => t.status === "DONE" || t.status === "COMPLETED"),
+    [filteredTokens]
   );
 
   // ── Render ───────────────────────────────────────────────────────────────
@@ -274,6 +300,26 @@ export default function QueuePage() {
           <p className="text-sm text-red-500 mt-1">
             {(error as Error)?.message ?? "Unknown error"}
           </p>
+        </div>
+      )}
+
+      {/* Department Filter Tabs */}
+      {!isLoading && !isError && departments.length > 0 && (
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {[{ code: "ALL", name: "All" }, { code: "LAB", name: "Lab" }, ...departments].map((d) => (
+            <button
+              key={d.code}
+              onClick={() => setDeptFilter(d.code)}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-xs font-medium transition",
+                deptFilter === d.code
+                  ? "bg-blue-600 text-white"
+                  : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+              )}
+            >
+              {d.name}
+            </button>
+          ))}
         </div>
       )}
 
@@ -368,9 +414,14 @@ export default function QueuePage() {
                           <span className="text-sm font-bold text-slate-800 w-16 shrink-0">
                             {t.tokenDisplay}
                           </span>
-                          <span className="text-sm text-slate-700 truncate max-w-[140px]">
+                          <span className="text-sm text-slate-700 truncate max-w-[120px]">
                             {t.patientName}
                           </span>
+                          {t.departmentName && (
+                            <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full shrink-0">
+                              {t.departmentName}
+                            </span>
+                          )}
                           {typeBadge(t.type)}
                           <span
                             className={cn(
@@ -399,6 +450,16 @@ export default function QueuePage() {
                             <SkipForward className="h-3.5 w-3.5" />
                             Skip
                           </button>
+                          <a
+                            href={`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1"}/front-desk/queue/${t.id}/pdf`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 rounded-lg hover:bg-teal-100 transition"
+                            title="Download token slip PDF"
+                          >
+                            <FileText className="h-3.5 w-3.5" />
+                            Slip
+                          </a>
                         </div>
                       </div>
                     );
@@ -454,7 +515,7 @@ export default function QueuePage() {
                   Patient Display Preview
                 </h3>
                 <a
-                  href="/front-desk/queue/display"
+                  href="/front-desk/queue-display"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition"

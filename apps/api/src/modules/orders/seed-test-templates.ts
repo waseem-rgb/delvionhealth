@@ -2640,6 +2640,102 @@ export const TEST_TEMPLATES: TestTemplate[] = [
       },
     ],
   },
+
+  // ═══ Complete Urine Examination (CUE / PT_CUE) ═══════════════════════════
+  {
+    testCode: "PT_CUE",
+    reportTitle: "Complete Urine Examination (CUE)",
+    reportIntro:
+      "The Complete Urine Examination (CUE) is a comprehensive analysis of urine that provides valuable information about kidney function, metabolic disorders, and urinary tract health. It consists of three components: physical examination (colour, appearance, specific gravity, pH), chemical analysis (protein, glucose, ketones, blood, bilirubin, urobilinogen, leucocytes, nitrites), and microscopic examination of the urine sediment (cells, casts, crystals, bacteria). CUE is one of the most commonly ordered investigations and is an essential part of routine health screening, pre-operative evaluation, and monitoring of known renal or metabolic diseases.",
+    reportConclusion:
+      "Urine results should be interpreted in the context of clinical symptoms, hydration status, and concurrent medications. Significant abnormalities — particularly haematuria, proteinuria, glycosuria, or the presence of cellular casts — should be correlated with renal function tests and, if indicated, further specialised investigation including 24-hour urine protein, urine culture, or nephrology referral.",
+    parameters: [
+      {
+        name: "Specific Gravity",
+        clinicalNote:
+          "Specific gravity reflects the kidney's ability to concentrate or dilute urine and indicates overall hydration and renal tubular function. Values between 1.003 and 1.030 are normal; concentrated urine (>1.020) indicates good concentrating ability or dehydration, while persistently dilute urine (<1.005) may suggest diabetes insipidus or renal tubular dysfunction.",
+        abnormalityNote: [
+          { direction: "LOW", reasons: ["Excess fluid intake", "Diabetes insipidus (central or nephrogenic)", "Renal tubular dysfunction", "Medications (diuretics)"] },
+          { direction: "HIGH", reasons: ["Dehydration", "Fever or sweating", "Glycosuria (glucose adds to osmolality)", "Proteinuria (severe)", "SIADH"] },
+        ],
+      },
+      {
+        name: "Protein (Albumin)",
+        clinicalNote:
+          "The healthy kidney excretes very little protein (<150 mg/day). Detection of protein on dipstick typically indicates albuminuria and may reflect glomerular damage, tubular dysfunction, or overflow proteinuria. Trace or 1+ may occur with concentrated urine or after strenuous exercise (functional proteinuria).",
+        abnormalityNote: [
+          { direction: "HIGH", reasons: ["Glomerulonephritis (primary or secondary)", "Diabetic nephropathy", "Hypertensive nephropathy", "Nephrotic syndrome", "Urinary tract infection", "Pre-eclampsia (in pregnancy)", "Multiple myeloma (overflow proteinuria)", "Strenuous exercise (transient, benign)"] },
+        ],
+      },
+      {
+        name: "Glucose (Sugar)",
+        clinicalNote:
+          "Glucose appears in urine (glycosuria) when blood glucose exceeds the renal threshold (~180 mg/dL) or when renal tubular reabsorption is impaired. Glycosuria is an important clue to undiagnosed or poorly controlled diabetes mellitus.",
+        abnormalityNote: [
+          { direction: "HIGH", reasons: ["Uncontrolled diabetes mellitus", "Impaired glucose tolerance or gestational diabetes", "Renal glycosuria (normal blood glucose — tubular defect)", "Fanconi syndrome", "Steroid therapy", "Acute stress hyperglycaemia"] },
+        ],
+      },
+      {
+        name: "Pus Cells",
+        clinicalNote:
+          "Pus cells (white blood cells / leucocytes) in urine indicate inflammation in the urinary tract. 0–5 pus cells per HPF is normal. Elevated counts suggest infection or sterile pyuria from non-infectious inflammation.",
+        abnormalityNote: [
+          { direction: "HIGH", reasons: ["Urinary tract infection (UTI) — bacterial cystitis, pyelonephritis", "Urethritis (sexually transmitted infections)", "Renal tuberculosis (sterile pyuria)", "Interstitial nephritis", "Contamination during sample collection"] },
+        ],
+      },
+      {
+        name: "Red Blood Cells",
+        clinicalNote:
+          "Red blood cells in urine (haematuria) may be visible (gross haematuria) or detected only on microscopy (microscopic haematuria). Even 3 RBCs/HPF is considered significant and warrants further evaluation.",
+        abnormalityNote: [
+          { direction: "HIGH", reasons: ["Urinary tract infection", "Kidney stones (nephrolithiasis)", "Glomerulonephritis", "Renal or bladder tumours", "Trauma", "Anticoagulant therapy", "Benign prostatic hyperplasia", "Vigorous exercise (runner's haematuria)"] },
+        ],
+      },
+      {
+        name: "Bacteria",
+        clinicalNote:
+          "Bacteria in a properly collected midstream urine sample indicates urinary tract infection. Bacteriuria with pyuria strongly suggests active infection. Significant bacteriuria on microscopy (many bacteria) should prompt urine culture and sensitivity.",
+        abnormalityNote: [
+          { direction: "HIGH", reasons: ["Urinary tract infection (Escherichia coli most common)", "Pyelonephritis", "Contamination during sample collection (most common cause of false positive)"] },
+        ],
+      },
+    ],
+  },
+
+  // ═══ FSH / LH (PT_FSH_LH) ══════════════════════════════════════════════
+  {
+    testCode: "PT_FSH_LH",
+    reportTitle: "FSH & LH (Gonadotropin Panel)",
+    reportIntro:
+      "FSH (Follicle-Stimulating Hormone) and LH (Luteinising Hormone) are pituitary gonadotropins that regulate reproductive function. FSH stimulates follicular growth in females and spermatogenesis in males; LH triggers ovulation in females and testosterone production in males. Their measurement is critical in evaluating infertility, menstrual irregularities, hypogonadism, precocious or delayed puberty, and pituitary disorders. Results must be interpreted in relation to the phase of the menstrual cycle, age, and clinical context.",
+    reportConclusion:
+      "FSH and LH levels alone are not diagnostic; they must be interpreted alongside other hormones (Estradiol, Testosterone, AMH, Prolactin, TSH) and clinical findings. Menstrual phase at the time of blood draw significantly affects reference ranges for female patients. Serial measurements or dynamic testing (GnRH stimulation) may be required in borderline cases.",
+    parameters: [
+      {
+        name: "FSH (Follicle Stimulating Hormone)",
+        clinicalNote:
+          "FSH is produced by the anterior pituitary and acts on the gonads to promote gamete development. In females, it is highest in the early follicular phase and peaks at ovulation. Elevated FSH (particularly >10 mIU/mL in a female of reproductive age) indicates diminished ovarian reserve and is a key marker of peri-menopause or premature ovarian insufficiency. In males, FSH drives spermatogenesis and elevated values indicate primary testicular failure.",
+        abnormalityNote: [
+          { direction: "LOW", reasons: ["Hypothalamic or pituitary dysfunction (hypogonadotropic hypogonadism)", "Hyperprolactinaemia", "Kallmann syndrome", "Severe systemic illness or malnutrition", "Anabolic steroid or exogenous sex hormone use"] },
+          { direction: "HIGH", reasons: ["Premature ovarian insufficiency / menopause (female)", "Primary testicular failure — Klinefelter syndrome, orchitis, chemotherapy (male)", "Turner syndrome", "Normal peri-menopause / menopause", "Resistance to gonadotropins"] },
+        ],
+      },
+      {
+        name: "LH (Luteinising Hormone)",
+        clinicalNote:
+          "LH triggers the LH surge at mid-cycle in females, causing ovulation and formation of the corpus luteum. Sustained LH elevation throughout the cycle may indicate polycystic ovarian syndrome (PCOS) or primary gonadal failure. The LH:FSH ratio is diagnostically important — an LH:FSH ratio >2:1 in the early follicular phase strongly supports PCOS.",
+        abnormalityNote: [
+          { direction: "LOW", reasons: ["Hypothalamic hypogonadism (Kallmann syndrome, eating disorders)", "Hyperprolactinaemia", "Exogenous sex hormone / steroid use", "Pituitary adenoma or pituitary surgery"] },
+          { direction: "HIGH", reasons: ["PCOS (elevated LH:FSH ratio, LH >10 mIU/mL in follicular phase)", "Primary gonadal failure (menopause, testicular failure)", "Precocious puberty (central)", "Resistance to sex hormones"] },
+        ],
+        footerNote:
+          "LH:FSH Ratio Interpretation: Ratio >2 in early follicular phase — consider PCOS. Ratio <1 with elevated absolute values — consider primary gonadal failure.",
+      },
+    ],
+  },
+
+  // ═══ Lipid Profile (PT_LIPID) — already in templates, adding extra note here ══════
+  // Already handled as PT0553 in the templates above.
 ];
 
 /**

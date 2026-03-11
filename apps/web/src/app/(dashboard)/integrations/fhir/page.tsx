@@ -82,7 +82,7 @@ function JsonViewer({ data }: { data: unknown }) {
       <div className="absolute right-3 top-3 z-10">
         <CopyButton text={text} />
       </div>
-      <pre className="bg-slate-900 text-green-300 rounded-xl p-4 pt-10 text-xs font-mono overflow-x-auto overflow-y-auto max-h-[500px] leading-relaxed whitespace-pre-wrap break-all">
+      <pre className="bg-white text-green-300 rounded-xl p-4 pt-10 text-xs font-mono overflow-x-auto overflow-y-auto max-h-[500px] leading-relaxed whitespace-pre-wrap break-all">
         {text}
       </pre>
     </div>
@@ -170,7 +170,7 @@ function PatientLookupTab() {
 
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -182,7 +182,7 @@ function PatientLookupTab() {
           <button
             onClick={handleSearch}
             disabled={!query.trim() || loading}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0D7E8A] text-white rounded-xl text-sm font-medium hover:bg-[#0a6b76] disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0D7E8A] text-slate-900 rounded-xl text-sm font-medium hover:bg-[#0a6b76] disabled:opacity-50 transition-colors"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             Search
@@ -207,13 +207,13 @@ function PatientLookupTab() {
           className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
         >
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-slate-400" />
+            <Shield className="w-4 h-4 text-slate-500" />
             CapabilityStatement
-            <span className="text-xs font-normal text-slate-400">GET /fhir/metadata</span>
+            <span className="text-xs font-normal text-slate-500">GET /fhir/metadata</span>
           </div>
           <div className="flex items-center gap-2">
-            {capabilityLoading && <Loader2 className="w-4 h-4 animate-spin text-slate-400" />}
-            {capabilityOpen ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
+            {capabilityLoading && <Loader2 className="w-4 h-4 animate-spin text-slate-500" />}
+            {capabilityOpen ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
           </div>
         </button>
         {capabilityOpen && capabilityStmt && (
@@ -254,10 +254,10 @@ function DiagnosticReportTab() {
     <div className="space-y-5">
       <div className="bg-white border border-slate-100 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-slate-400" />
+          <FileText className="w-4 h-4 text-slate-500" />
           <span className="text-sm font-semibold text-slate-700">Fetch DiagnosticReport by Order ID</span>
         </div>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-500">
           Endpoint: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">GET /fhir/DiagnosticReport?subject=&#123;orderId&#125;</code>
         </p>
 
@@ -272,7 +272,7 @@ function DiagnosticReportTab() {
           <button
             onClick={handleFetch}
             disabled={!orderId.trim() || loading}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0D7E8A] text-white rounded-xl text-sm font-medium hover:bg-[#0a6b76] disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0D7E8A] text-slate-900 rounded-xl text-sm font-medium hover:bg-[#0a6b76] disabled:opacity-50 transition-colors"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
             Fetch Report
@@ -323,10 +323,10 @@ function ObservationsTab() {
     <div className="space-y-5">
       <div className="bg-white border border-slate-100 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4 text-slate-400" />
+          <Activity className="w-4 h-4 text-slate-500" />
           <span className="text-sm font-semibold text-slate-700">Fetch Observations by Patient ID</span>
         </div>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-500">
           Endpoint: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">GET /fhir/Observation?subject=&#123;patientId&#125;</code>
         </p>
 
@@ -341,7 +341,7 @@ function ObservationsTab() {
           <button
             onClick={handleFetch}
             disabled={!patientId.trim() || loading}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0D7E8A] text-white rounded-xl text-sm font-medium hover:bg-[#0a6b76] disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0D7E8A] text-slate-900 rounded-xl text-sm font-medium hover:bg-[#0a6b76] disabled:opacity-50 transition-colors"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
             Fetch Observations
@@ -358,7 +358,7 @@ function ObservationsTab() {
                 <Activity className="w-3.5 h-3.5" />
                 {obsCount} Observation{obsCount !== 1 ? "s" : ""} returned
               </span>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-500">
                 resourceType: <code className="bg-slate-100 px-1 rounded">{result.resourceType}</code>
               </span>
             </div>

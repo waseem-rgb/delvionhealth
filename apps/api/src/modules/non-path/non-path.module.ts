@@ -1,0 +1,12 @@
+import { Module } from "@nestjs/common";
+import { NonPathController } from "./non-path.controller";
+import { NonPathService } from "./non-path.service";
+import { NonPathPdfService } from "./non-path-pdf.service";
+import { NonPathTemplateSeedService } from "./template-seed.service";
+
+@Module({
+  controllers: [NonPathController],
+  providers: [NonPathService, NonPathPdfService, NonPathTemplateSeedService],
+  exports: [NonPathService, NonPathPdfService],
+})
+export class NonPathModule {}

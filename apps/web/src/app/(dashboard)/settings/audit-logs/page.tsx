@@ -80,7 +80,7 @@ function JsonViewer({ data }: { data: Record<string, unknown> }) {
   }
 
   return (
-    <pre className="bg-slate-900 text-slate-100 rounded-lg p-4 text-xs font-mono overflow-x-auto max-h-80 overflow-y-auto">
+    <pre className="bg-white text-slate-100 rounded-lg p-4 text-xs font-mono overflow-x-auto max-h-80 overflow-y-auto">
       <code>
         {"{\n"}
         {Object.entries(data).map(([key, val], idx, arr) => {
@@ -93,9 +93,9 @@ function JsonViewer({ data }: { data: Record<string, unknown> }) {
             <span key={key}>
               {"  "}
               <span className="text-purple-300">{`"${key}"`}</span>
-              <span className="text-slate-400">{": "}</span>
+              <span className="text-slate-500">{": "}</span>
               <span className={color}>{valStr}</span>
-              {idx < arr.length - 1 && <span className="text-slate-400">{","}</span>}
+              {idx < arr.length - 1 && <span className="text-slate-500">{","}</span>}
               {"\n"}
             </span>
           );
@@ -111,7 +111,7 @@ function ChangesCell({ changes }: { changes: Record<string, unknown> | null }) {
   const [expanded, setExpanded] = useState(false);
 
   if (!changes || Object.keys(changes).length === 0) {
-    return <span className="text-xs text-slate-300">--</span>;
+    return <span className="text-xs text-slate-700">--</span>;
   }
 
   return (
@@ -248,7 +248,7 @@ export default function AuditLogsPage() {
       {/* Filter Bar */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Filter className="w-4 h-4 text-slate-400" />
+          <Filter className="w-4 h-4 text-slate-500" />
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Filters</span>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
@@ -303,7 +303,7 @@ export default function AuditLogsPage() {
           <div>
             <label className="block text-xs text-slate-500 mb-1">Search</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
               <input
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -317,7 +317,7 @@ export default function AuditLogsPage() {
         {/* Active filter indicator */}
         {(module || action || search || dateFrom || dateTo) && (
           <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-50">
-            <span className="text-xs text-slate-400">Active filters:</span>
+            <span className="text-xs text-slate-500">Active filters:</span>
             {module && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700">
                 Module: {module}

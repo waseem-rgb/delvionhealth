@@ -86,7 +86,7 @@ function Skeleton({ rows = 4 }: { rows?: number }) {
   return (
     <div className="space-y-4">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="h-24 rounded-xl bg-slate-800 animate-pulse" />
+        <div key={i} className="h-24 rounded-xl bg-slate-100 animate-pulse" />
       ))}
     </div>
   );
@@ -103,7 +103,7 @@ function ErrorBanner({ message }: { message: string }) {
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+    <div className="flex flex-col items-center justify-center py-20 text-slate-500">
       <ClipboardList className="h-12 w-12 mb-3 opacity-40" />
       <p>{text}</p>
     </div>
@@ -254,7 +254,7 @@ export default function SalesTeamPage() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -262,12 +262,12 @@ export default function SalesTeamPage() {
             <Users className="h-7 w-7 text-blue-400" />
             Sales Team
           </h1>
-          <p className="text-slate-400 text-sm mt-1">Manage reps, visits, targets and rev share</p>
+          <p className="text-slate-500 text-sm mt-1">Manage reps, visits, targets and rev share</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-900 rounded-xl p-1 w-fit">
+      <div className="flex gap-1 bg-white rounded-xl p-1 w-fit">
         {TABS.map((tab) => (
           <button
             key={tab.key}
@@ -276,7 +276,7 @@ export default function SalesTeamPage() {
               "px-4 py-2 rounded-lg text-sm font-medium transition-all",
               activeTab === tab.key
                 ? "bg-blue-600 text-white shadow"
-                : "text-slate-400 hover:text-white hover:bg-slate-800"
+                : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
             )}
           >
             {tab.label}
@@ -306,21 +306,21 @@ export default function SalesTeamPage() {
               {reps.map((rep) => {
                 const pct = rep.revenueTarget > 0 ? Math.round((rep.revenueMTD / rep.revenueTarget) * 100) : 0;
                 return (
-                  <div key={rep.id} className="bg-slate-900 rounded-xl p-5 border border-slate-800 space-y-3">
+                  <div key={rep.id} className="bg-white rounded-xl p-5 border border-slate-200 space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="font-semibold text-lg">{rep.name}</h3>
-                        <span className="inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full bg-blue-900/60 text-blue-300">
+                        <span className="inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
                           {rep.designation?.replace(/_/g, " ")}
                         </span>
                       </div>
-                      <button className="text-slate-400 hover:text-white transition">
+                      <button className="text-slate-500 hover:text-slate-900 transition">
                         <Eye className="h-4 w-4" />
                       </button>
                     </div>
 
                     {rep.branch && (
-                      <p className="text-xs text-slate-400 flex items-center gap-1">
+                      <p className="text-xs text-slate-500 flex items-center gap-1">
                         <MapPin className="h-3 w-3" /> {rep.branch.name}
                       </p>
                     )}
@@ -328,15 +328,15 @@ export default function SalesTeamPage() {
                     {/* Revenue progress */}
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-400">Revenue MTD / Target</span>
+                        <span className="text-slate-500">Revenue MTD / Target</span>
                         <span className={progressTextColor(pct)}>{pct}%</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <span className="font-medium">{fmt(rep.revenueMTD)}</span>
                         <span className="text-slate-500">/</span>
-                        <span className="text-slate-400">{fmt(rep.revenueTarget)}</span>
+                        <span className="text-slate-500">{fmt(rep.revenueTarget)}</span>
                       </div>
-                      <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                         <div
                           className={cn("h-full rounded-full transition-all", progressColor(pct))}
                           style={{ width: `${Math.min(pct, 100)}%` }}
@@ -345,11 +345,11 @@ export default function SalesTeamPage() {
                     </div>
 
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-400">Visits MTD</span>
+                      <span className="text-slate-500">Visits MTD</span>
                       <span className="font-medium">{rep.visitsMTD ?? 0}</span>
                     </div>
 
-                    <button className="w-full mt-1 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm font-medium text-slate-300 transition flex items-center justify-center gap-2">
+                    <button className="w-full mt-1 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm font-medium text-slate-700 transition flex items-center justify-center gap-2">
                       <Eye className="h-4 w-4" />
                       View Profile
                     </button>
@@ -362,45 +362,45 @@ export default function SalesTeamPage() {
           {/* Add Rep Modal */}
           {showAddRep && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-              <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
+              <div className="bg-white border border-slate-300 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold">Add Sales Rep</h2>
-                  <button onClick={() => setShowAddRep(false)} className="text-slate-400 hover:text-white">
+                  <button onClick={() => setShowAddRep(false)} className="text-slate-500 hover:text-slate-900">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="col-span-2">
-                    <label className="text-xs text-slate-400 mb-1 block">Name *</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Name *</label>
                     <input
                       value={repForm.name}
                       onChange={(e) => setRepForm((f) => ({ ...f, name: e.target.value }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Phone *</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Phone *</label>
                     <input
                       value={repForm.phone}
                       onChange={(e) => setRepForm((f) => ({ ...f, phone: e.target.value }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Email</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Email</label>
                     <input
                       value={repForm.email}
                       onChange={(e) => setRepForm((f) => ({ ...f, email: e.target.value }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Designation</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Designation</label>
                     <select
                       value={repForm.designation}
                       onChange={(e) => setRepForm((f) => ({ ...f, designation: e.target.value }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {DESIGNATIONS.map((d) => (
                         <option key={d} value={d}>{d.replace(/_/g, " ")}</option>
@@ -408,20 +408,20 @@ export default function SalesTeamPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Branch ID</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Branch ID</label>
                     <input
                       value={repForm.branchId}
                       onChange={(e) => setRepForm((f) => ({ ...f, branchId: e.target.value }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Rev Share %</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Rev Share %</label>
                     <input
                       type="number"
                       value={repForm.revSharePct}
                       onChange={(e) => setRepForm((f) => ({ ...f, revSharePct: Number(e.target.value) }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -429,7 +429,7 @@ export default function SalesTeamPage() {
                 <div className="flex justify-end gap-3 pt-2">
                   <button
                     onClick={() => setShowAddRep(false)}
-                    className="px-4 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition"
+                    className="px-4 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition"
                   >
                     Cancel
                   </button>
@@ -455,7 +455,7 @@ export default function SalesTeamPage() {
             <select
               value={visitRepId}
               onChange={(e) => setVisitRepId(e.target.value)}
-              className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select Rep to view visits</option>
               {reps.map((r) => (
@@ -481,10 +481,10 @@ export default function SalesTeamPage() {
           )}
 
           {visitRepId && visitsQuery.isSuccess && (visitsQuery.data ?? []).length > 0 && (
-            <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-x-auto">
+            <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 text-left">
+                  <tr className="border-b border-slate-200 text-slate-500 text-left">
                     <th className="px-4 py-3 font-medium">Date</th>
                     <th className="px-4 py-3 font-medium">Rep</th>
                     <th className="px-4 py-3 font-medium">Client</th>
@@ -496,29 +496,29 @@ export default function SalesTeamPage() {
                 </thead>
                 <tbody>
                   {(visitsQuery.data ?? []).map((v) => (
-                    <tr key={v.id} className="border-b border-slate-800/50 hover:bg-slate-800/40 transition">
+                    <tr key={v.id} className="border-b border-slate-200/50 hover:bg-slate-100/40 transition">
                       <td className="px-4 py-3">{v.visitDate ? new Date(v.visitDate).toLocaleDateString("en-IN") : "-"}</td>
                       <td className="px-4 py-3">{v.rep?.name ?? "-"}</td>
                       <td className="px-4 py-3 font-medium">{v.clientName}</td>
                       <td className="px-4 py-3">
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-300">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
                           {v.visitType?.replace(/_/g, " ")}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-300">{v.purpose?.replace(/_/g, " ")}</td>
+                      <td className="px-4 py-3 text-slate-700">{v.purpose?.replace(/_/g, " ")}</td>
                       <td className="px-4 py-3">
                         <span className={cn(
                           "px-2 py-0.5 rounded-full text-xs font-medium",
-                          v.outcome === "POSITIVE" && "bg-emerald-900/60 text-emerald-300",
-                          v.outcome === "DEAL_CLOSED" && "bg-emerald-900/60 text-emerald-300",
-                          v.outcome === "NEGATIVE" && "bg-red-900/60 text-red-300",
-                          v.outcome === "NEUTRAL" && "bg-slate-800 text-slate-300",
-                          v.outcome === "FOLLOW_UP_NEEDED" && "bg-amber-900/60 text-amber-300",
+                          v.outcome === "POSITIVE" && "bg-emerald-100 text-emerald-700",
+                          v.outcome === "DEAL_CLOSED" && "bg-emerald-100 text-emerald-700",
+                          v.outcome === "NEGATIVE" && "bg-red-100 text-red-700",
+                          v.outcome === "NEUTRAL" && "bg-slate-100 text-slate-700",
+                          v.outcome === "FOLLOW_UP_NEEDED" && "bg-amber-100 text-amber-700",
                         )}>
                           {v.outcome?.replace(/_/g, " ")}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-400">
+                      <td className="px-4 py-3 text-slate-500">
                         {v.nextActionDate ? new Date(v.nextActionDate).toLocaleDateString("en-IN") : "-"}
                       </td>
                     </tr>
@@ -531,21 +531,21 @@ export default function SalesTeamPage() {
           {/* Log Visit Form Modal */}
           {showVisitForm && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-              <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div className="bg-white border border-slate-300 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold">Log Visit</h2>
-                  <button onClick={() => setShowVisitForm(false)} className="text-slate-400 hover:text-white">
+                  <button onClick={() => setShowVisitForm(false)} className="text-slate-500 hover:text-slate-900">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
 
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Rep *</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Rep *</label>
                     <select
                       value={visitForm.repId}
                       onChange={(e) => setVisitForm((f) => ({ ...f, repId: e.target.value }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select rep</option>
                       {reps.map((r) => (
@@ -555,11 +555,11 @@ export default function SalesTeamPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs text-slate-400 mb-1 block">Visit Type *</label>
+                      <label className="text-xs text-slate-500 mb-1 block">Visit Type *</label>
                       <select
                         value={visitForm.visitType}
                         onChange={(e) => setVisitForm((f) => ({ ...f, visitType: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         {VISIT_TYPES.map((t) => (
                           <option key={t} value={t}>{t.replace(/_/g, " ")}</option>
@@ -567,30 +567,30 @@ export default function SalesTeamPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs text-slate-400 mb-1 block">Visit Date *</label>
+                      <label className="text-xs text-slate-500 mb-1 block">Visit Date *</label>
                       <input
                         type="date"
                         value={visitForm.visitDate}
                         onChange={(e) => setVisitForm((f) => ({ ...f, visitDate: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Client Name *</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Client Name *</label>
                     <input
                       value={visitForm.clientName}
                       onChange={(e) => setVisitForm((f) => ({ ...f, clientName: e.target.value }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs text-slate-400 mb-1 block">Purpose *</label>
+                      <label className="text-xs text-slate-500 mb-1 block">Purpose *</label>
                       <select
                         value={visitForm.purpose}
                         onChange={(e) => setVisitForm((f) => ({ ...f, purpose: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         {PURPOSES.map((p) => (
                           <option key={p} value={p}>{p.replace(/_/g, " ")}</option>
@@ -598,11 +598,11 @@ export default function SalesTeamPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs text-slate-400 mb-1 block">Outcome *</label>
+                      <label className="text-xs text-slate-500 mb-1 block">Outcome *</label>
                       <select
                         value={visitForm.outcome}
                         onChange={(e) => setVisitForm((f) => ({ ...f, outcome: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         {OUTCOMES.map((o) => (
                           <option key={o} value={o}>{o.replace(/_/g, " ")}</option>
@@ -611,21 +611,21 @@ export default function SalesTeamPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Notes</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Notes</label>
                     <textarea
                       value={visitForm.notes}
                       onChange={(e) => setVisitForm((f) => ({ ...f, notes: e.target.value }))}
                       rows={3}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Next Action Date</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Next Action Date</label>
                     <input
                       type="date"
                       value={visitForm.nextActionDate}
                       onChange={(e) => setVisitForm((f) => ({ ...f, nextActionDate: e.target.value }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -633,7 +633,7 @@ export default function SalesTeamPage() {
                 <div className="flex justify-end gap-3 pt-2">
                   <button
                     onClick={() => setShowVisitForm(false)}
-                    className="px-4 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition"
+                    className="px-4 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition"
                   >
                     Cancel
                   </button>
@@ -660,7 +660,7 @@ export default function SalesTeamPage() {
               <select
                 value={targetMonth}
                 onChange={(e) => setTargetMonth(Number(e.target.value))}
-                className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {Array.from({ length: 12 }, (_, i) => (
                   <option key={i + 1} value={i + 1}>
@@ -671,7 +671,7 @@ export default function SalesTeamPage() {
               <select
                 value={targetYear}
                 onChange={(e) => setTargetYear(Number(e.target.value))}
-                className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {[2024, 2025, 2026, 2027].map((y) => (
                   <option key={y} value={y}>{y}</option>
@@ -695,10 +695,10 @@ export default function SalesTeamPage() {
           )}
 
           {targetsQuery.isSuccess && (targetsQuery.data ?? []).length > 0 && (
-            <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-x-auto">
+            <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 text-left">
+                  <tr className="border-b border-slate-200 text-slate-500 text-left">
                     <th className="px-4 py-3 font-medium">Rep</th>
                     <th className="px-4 py-3 font-medium text-right">Revenue Target</th>
                     <th className="px-4 py-3 font-medium text-right">Actual</th>
@@ -711,16 +711,16 @@ export default function SalesTeamPage() {
                   {(targetsQuery.data ?? []).map((t) => {
                     const revPct = t.revenueTarget > 0 ? Math.round((t.revenueActual / t.revenueTarget) * 100) : 0;
                     return (
-                      <tr key={t.id} className="border-b border-slate-800/50 hover:bg-slate-800/40 transition">
+                      <tr key={t.id} className="border-b border-slate-200/50 hover:bg-slate-100/40 transition">
                         <td className="px-4 py-3 font-medium">{t.rep?.name ?? "-"}</td>
-                        <td className="px-4 py-3 text-right text-slate-300">{fmt(t.revenueTarget)}</td>
+                        <td className="px-4 py-3 text-right text-slate-700">{fmt(t.revenueTarget)}</td>
                         <td className="px-4 py-3 text-right font-medium">{fmt(t.revenueActual)}</td>
                         <td className="px-4 py-3 text-right">
                           <span className={cn("font-medium", progressTextColor(revPct))}>
                             {revPct}%
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-300">{t.visitTarget}</td>
+                        <td className="px-4 py-3 text-right text-slate-700">{t.visitTarget}</td>
                         <td className="px-4 py-3 text-right font-medium">{t.visitActual}</td>
                       </tr>
                     );
@@ -733,21 +733,21 @@ export default function SalesTeamPage() {
           {/* Set Target Modal */}
           {showTargetForm && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-              <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+              <div className="bg-white border border-slate-300 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold">Set Target</h2>
-                  <button onClick={() => setShowTargetForm(false)} className="text-slate-400 hover:text-white">
+                  <button onClick={() => setShowTargetForm(false)} className="text-slate-500 hover:text-slate-900">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
 
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Rep *</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Rep *</label>
                     <select
                       value={targetForm.repId}
                       onChange={(e) => setTargetForm((f) => ({ ...f, repId: e.target.value }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select rep</option>
                       {reps.map((r) => (
@@ -756,30 +756,30 @@ export default function SalesTeamPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Revenue Target</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Revenue Target</label>
                     <input
                       type="number"
                       value={targetForm.revenueTarget}
                       onChange={(e) => setTargetForm((f) => ({ ...f, revenueTarget: Number(e.target.value) }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Visit Target</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Visit Target</label>
                     <input
                       type="number"
                       value={targetForm.visitTarget}
                       onChange={(e) => setTargetForm((f) => ({ ...f, visitTarget: Number(e.target.value) }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-400 mb-1 block">New Doctor Target</label>
+                    <label className="text-xs text-slate-500 mb-1 block">New Doctor Target</label>
                     <input
                       type="number"
                       value={targetForm.newDoctorTarget}
                       onChange={(e) => setTargetForm((f) => ({ ...f, newDoctorTarget: Number(e.target.value) }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -787,7 +787,7 @@ export default function SalesTeamPage() {
                 <div className="flex justify-end gap-3 pt-2">
                   <button
                     onClick={() => setShowTargetForm(false)}
-                    className="px-4 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition"
+                    className="px-4 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition"
                   >
                     Cancel
                   </button>
@@ -816,10 +816,10 @@ export default function SalesTeamPage() {
           )}
 
           {revShareQuery.isSuccess && (revShareQuery.data ?? []).length > 0 && (
-            <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-x-auto">
+            <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 text-left">
+                  <tr className="border-b border-slate-200 text-slate-500 text-left">
                     <th className="px-4 py-3 font-medium">Rep</th>
                     <th className="px-4 py-3 font-medium text-right">Revenue Generated</th>
                     <th className="px-4 py-3 font-medium text-right">Rev Share %</th>
@@ -829,18 +829,18 @@ export default function SalesTeamPage() {
                 </thead>
                 <tbody>
                   {(revShareQuery.data ?? []).map((row) => (
-                    <tr key={row.repId} className="border-b border-slate-800/50 hover:bg-slate-800/40 transition">
+                    <tr key={row.repId} className="border-b border-slate-200/50 hover:bg-slate-100/40 transition">
                       <td className="px-4 py-3 font-medium">{row.repName}</td>
                       <td className="px-4 py-3 text-right">{fmt(row.revenueGenerated)}</td>
-                      <td className="px-4 py-3 text-right text-slate-300">{row.revSharePct}%</td>
+                      <td className="px-4 py-3 text-right text-slate-700">{row.revSharePct}%</td>
                       <td className="px-4 py-3 text-right font-semibold text-emerald-400">{fmt(row.amountEarned)}</td>
                       <td className="px-4 py-3">
                         <span className={cn(
                           "px-2 py-0.5 rounded-full text-xs font-medium",
-                          row.status === "PAID" && "bg-emerald-900/60 text-emerald-300",
-                          row.status === "PENDING" && "bg-amber-900/60 text-amber-300",
-                          row.status === "PROCESSING" && "bg-blue-900/60 text-blue-300",
-                          (!row.status || !["PAID", "PENDING", "PROCESSING"].includes(row.status)) && "bg-slate-800 text-slate-300",
+                          row.status === "PAID" && "bg-emerald-100 text-emerald-700",
+                          row.status === "PENDING" && "bg-amber-100 text-amber-700",
+                          row.status === "PROCESSING" && "bg-blue-100 text-blue-700",
+                          (!row.status || !["PAID", "PENDING", "PROCESSING"].includes(row.status)) && "bg-slate-100 text-slate-700",
                         )}>
                           {row.status ?? "N/A"}
                         </span>

@@ -5,7 +5,8 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@delvion/types": ["../../packages/types/src"]
+      "@delvion/types": ["../../packages/types/src"],
+      "@prisma/client": ["../../node_modules/.prisma/client"]
     },
     "strict": false,
     "noImplicitAny": false,

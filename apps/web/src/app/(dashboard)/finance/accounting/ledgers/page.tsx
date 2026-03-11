@@ -101,22 +101,22 @@ export default function LedgersPage() {
   const tbTotalCredit = trialBalance.reduce((s, r) => s + r.credit, 0);
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
+    <div className="min-h-screen bg-slate-50 p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Ledgers & Trial Balance</h1>
-          <p className="text-slate-400">View account ledgers and trial balance</p>
+          <h1 className="text-2xl font-bold text-slate-900">Ledgers & Trial Balance</h1>
+          <p className="text-slate-500">View account ledgers and trial balance</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 flex gap-1 rounded-lg border border-slate-800 bg-slate-900 p-1 w-fit">
+      <div className="mb-6 flex gap-1 rounded-lg border border-slate-200 bg-white p-1 w-fit">
         {(["ledgers", "trial-balance"] as TabKey[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-              tab === t ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
+              tab === t ? "bg-blue-600 text-white" : "text-slate-500 hover:text-slate-900"
             }`}
           >
             {t === "ledgers" ? "Ledgers" : "Trial Balance"}
@@ -127,22 +127,22 @@ export default function LedgersPage() {
       {tab === "ledgers" && (
         <div className="flex gap-6">
           {/* Sidebar: Account List */}
-          <div className="w-72 shrink-0 rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
-            <div className="p-3 border-b border-slate-800">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Chart of Accounts</p>
+          <div className="w-72 shrink-0 rounded-xl border border-slate-200 bg-white overflow-hidden">
+            <div className="p-3 border-b border-slate-200">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Chart of Accounts</p>
             </div>
             <div className="overflow-y-auto max-h-[calc(100vh-240px)]">
               {GROUPS.map((group) => (
                 <div key={group}>
-                  <div className="px-3 py-2 bg-slate-800/50">
+                  <div className="px-3 py-2 bg-slate-100/50">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{group}</p>
                   </div>
                   {(groupedAccounts[group] ?? []).map((a) => (
                     <button
                       key={a.id}
                       onClick={() => setSelectedId(a.id)}
-                      className={`w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-slate-800/70 ${
-                        selectedId === a.id ? "bg-blue-600/20 text-blue-400" : "text-slate-300"
+                      className={`w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-slate-100/70 ${
+                        selectedId === a.id ? "bg-blue-600/20 text-blue-400" : "text-slate-700"
                       }`}
                     >
                       <span className="text-xs text-slate-500 font-mono w-10">{a.code}</span>
@@ -158,15 +158,15 @@ export default function LedgersPage() {
           {/* Main: Ledger Detail */}
           <div className="flex-1">
             {!selectedId ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-slate-800 bg-slate-900 py-20">
+              <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white py-20">
                 <BookOpen className="mb-4 h-12 w-12 text-slate-600" />
-                <p className="text-lg font-medium text-slate-400">Select an account to view its ledger</p>
+                <p className="text-lg font-medium text-slate-500">Select an account to view its ledger</p>
               </div>
             ) : (
               <>
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold text-white">
+                    <h2 className="text-lg font-semibold text-slate-900">
                       {selectedAccount?.code} — {selectedAccount?.name}
                     </h2>
                     <p className="text-sm text-slate-500">Balance: {fmt(Number(selectedAccount?.balance ?? 0))}</p>
@@ -176,28 +176,28 @@ export default function LedgersPage() {
                       type="date"
                       value={dateFrom}
                       onChange={(e) => setDateFrom(e.target.value)}
-                      className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-white"
+                      className="rounded border border-slate-300 bg-slate-100 px-2 py-1 text-sm text-slate-900"
                     />
                     <span className="text-slate-500">to</span>
                     <input
                       type="date"
                       value={dateTo}
                       onChange={(e) => setDateTo(e.target.value)}
-                      className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-white"
+                      className="rounded border border-slate-300 bg-slate-100 px-2 py-1 text-sm text-slate-900"
                     />
                   </div>
                 </div>
 
-                <div className="overflow-hidden rounded-xl border border-slate-800">
+                <div className="overflow-hidden rounded-xl border border-slate-200">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-slate-800 bg-slate-900">
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Date</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Entry #</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Narration</th>
-                        <th className="px-4 py-3 text-right text-xs font-medium text-slate-400">Debit</th>
-                        <th className="px-4 py-3 text-right text-xs font-medium text-slate-400">Credit</th>
-                        <th className="px-4 py-3 text-right text-xs font-medium text-slate-400">Balance</th>
+                      <tr className="border-b border-slate-200 bg-white">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Date</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Entry #</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Narration</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-slate-500">Debit</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-slate-500">Credit</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-slate-500">Balance</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -207,19 +207,19 @@ export default function LedgersPage() {
                         <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">No entries found</td></tr>
                       ) : (
                         history.map((line) => (
-                          <tr key={line.id} className="border-b border-slate-800/50 bg-slate-900/50 hover:bg-slate-800/50">
-                            <td className="px-4 py-2.5 text-sm text-slate-300 whitespace-nowrap">
+                          <tr key={line.id} className="border-b border-slate-200/50 bg-white hover:bg-slate-100/50">
+                            <td className="px-4 py-2.5 text-sm text-slate-700 whitespace-nowrap">
                               {new Date(line.date).toLocaleDateString("en-IN")}
                             </td>
                             <td className="px-4 py-2.5 text-sm text-blue-400 font-mono">{line.entryNumber}</td>
-                            <td className="px-4 py-2.5 text-sm text-white">{line.narration}</td>
+                            <td className="px-4 py-2.5 text-sm text-slate-900">{line.narration}</td>
                             <td className="px-4 py-2.5 text-sm text-right text-red-400">
                               {line.debit > 0 ? fmt(line.debit) : ""}
                             </td>
                             <td className="px-4 py-2.5 text-sm text-right text-green-400">
                               {line.credit > 0 ? fmt(line.credit) : ""}
                             </td>
-                            <td className="px-4 py-2.5 text-sm text-right text-white font-medium">
+                            <td className="px-4 py-2.5 text-sm text-right text-slate-900 font-medium">
                               {fmt(line.balance)}
                             </td>
                           </tr>
@@ -228,15 +228,15 @@ export default function LedgersPage() {
                     </tbody>
                     {history.length > 0 && (
                       <tfoot>
-                        <tr className="border-t border-slate-700 bg-slate-900">
-                          <td colSpan={3} className="px-4 py-3 text-sm font-semibold text-slate-400">Totals</td>
+                        <tr className="border-t border-slate-300 bg-white">
+                          <td colSpan={3} className="px-4 py-3 text-sm font-semibold text-slate-500">Totals</td>
                           <td className="px-4 py-3 text-sm text-right font-bold text-red-400">
                             {fmt(history.reduce((s, l) => s + l.debit, 0))}
                           </td>
                           <td className="px-4 py-3 text-sm text-right font-bold text-green-400">
                             {fmt(history.reduce((s, l) => s + l.credit, 0))}
                           </td>
-                          <td className="px-4 py-3 text-sm text-right font-bold text-white">
+                          <td className="px-4 py-3 text-sm text-right font-bold text-slate-900">
                             {fmt(history[history.length - 1]?.balance ?? 0)}
                           </td>
                         </tr>
@@ -252,35 +252,35 @@ export default function LedgersPage() {
 
       {/* Trial Balance Tab */}
       {tab === "trial-balance" && (
-        <div className="overflow-hidden rounded-xl border border-slate-800">
+        <div className="overflow-hidden rounded-xl border border-slate-200">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-900">
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Code</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Account Name</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Group</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-slate-400">Debit</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-slate-400">Credit</th>
+              <tr className="border-b border-slate-200 bg-white">
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Code</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Account Name</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Group</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-slate-500">Debit</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-slate-500">Credit</th>
               </tr>
             </thead>
             <tbody>
               {trialBalance.map((row) => (
-                <tr key={row.id} className="border-b border-slate-800/50 bg-slate-900/50 hover:bg-slate-800/50">
-                  <td className="px-4 py-2.5 text-sm font-mono text-slate-400">{row.code}</td>
-                  <td className="px-4 py-2.5 text-sm text-white">{row.name}</td>
-                  <td className="px-4 py-2.5 text-sm text-slate-400">{row.group}</td>
+                <tr key={row.id} className="border-b border-slate-200/50 bg-white hover:bg-slate-100/50">
+                  <td className="px-4 py-2.5 text-sm font-mono text-slate-500">{row.code}</td>
+                  <td className="px-4 py-2.5 text-sm text-slate-900">{row.name}</td>
+                  <td className="px-4 py-2.5 text-sm text-slate-500">{row.group}</td>
                   <td className="px-4 py-2.5 text-sm text-right text-red-400">{row.debit > 0 ? fmt(row.debit) : ""}</td>
                   <td className="px-4 py-2.5 text-sm text-right text-green-400">{row.credit > 0 ? fmt(row.credit) : ""}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
-              <tr className="border-t-2 border-slate-700 bg-slate-900">
-                <td colSpan={3} className="px-4 py-3 text-sm font-bold text-white">Total</td>
+              <tr className="border-t-2 border-slate-300 bg-white">
+                <td colSpan={3} className="px-4 py-3 text-sm font-bold text-slate-900">Total</td>
                 <td className="px-4 py-3 text-sm text-right font-bold text-red-400">{fmt(tbTotalDebit)}</td>
                 <td className="px-4 py-3 text-sm text-right font-bold text-green-400">{fmt(tbTotalCredit)}</td>
               </tr>
-              <tr className="bg-slate-900">
+              <tr className="bg-white">
                 <td colSpan={3} className="px-4 py-2 text-sm text-slate-500">Difference</td>
                 <td colSpan={2} className={`px-4 py-2 text-sm text-right font-bold ${
                   Math.abs(tbTotalDebit - tbTotalCredit) < 0.01 ? "text-emerald-400" : "text-red-400"

@@ -30,7 +30,7 @@ const TYPE_COLORS: Record<string, string> = {
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE: "bg-green-500/20 text-green-400 border-green-500/30",
-  INACTIVE: "bg-slate-500/20 text-slate-400 border-slate-500/30",
+  INACTIVE: "bg-slate-500/20 text-slate-500 border-slate-500/30",
   SUSPENDED: "bg-red-500/20 text-red-400 border-red-500/30",
   PROSPECT: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
 };
@@ -142,19 +142,19 @@ export default function B2BAccountsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 p-6">
+      <div className="min-h-screen bg-slate-50 p-6">
         <div className="mb-8">
-          <div className="h-8 w-48 animate-pulse rounded bg-slate-800" />
+          <div className="h-8 w-48 animate-pulse rounded bg-slate-100" />
         </div>
         <div className="mb-6 flex gap-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="h-10 w-40 animate-pulse rounded-lg bg-slate-800"
+              className="h-10 w-40 animate-pulse rounded-lg bg-slate-100"
             />
           ))}
         </div>
-        <div className="h-96 animate-pulse rounded-xl bg-slate-900" />
+        <div className="h-96 animate-pulse rounded-xl bg-white" />
       </div>
     );
   }
@@ -163,7 +163,7 @@ export default function B2BAccountsPage() {
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-slate-950 p-6">
+      <div className="min-h-screen bg-slate-50 p-6">
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-red-400">
           Failed to load B2B accounts:{" "}
           {error instanceof Error ? error.message : "Unknown error"}
@@ -175,14 +175,14 @@ export default function B2BAccountsPage() {
   // ── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
+    <div className="min-h-screen bg-slate-50 p-6">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-slate-900">
             Hospitals &amp; Labs
           </h1>
-          <p className="text-slate-400">
+          <p className="text-slate-500">
             Manage B2B accounts and partnerships
           </p>
         </div>
@@ -203,13 +203,13 @@ export default function B2BAccountsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search accounts..."
-            className="rounded-lg border border-slate-700 bg-slate-800 py-2 pl-9 pr-3 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+            className="rounded-lg border border-slate-300 bg-slate-100 py-2 pl-9 pr-3 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
           />
         </div>
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+          className="rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
         >
           <option value="">All Types</option>
           {ACCOUNT_TYPES.map((t) => (
@@ -221,7 +221,7 @@ export default function B2BAccountsPage() {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+          className="rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
         >
           <option value="">All Statuses</option>
           {ACCOUNT_STATUSES.map((s) => (
@@ -234,40 +234,40 @@ export default function B2BAccountsPage() {
 
       {/* Table */}
       {accounts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-800 bg-slate-900 py-20">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white py-20">
           <Building className="mb-4 h-12 w-12 text-slate-600" />
-          <p className="text-lg font-medium text-slate-400">No data found</p>
+          <p className="text-lg font-medium text-slate-500">No data found</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-900">
-                <th className="px-4 py-3 text-left text-sm font-medium text-slate-400">
+              <tr className="border-b border-slate-200 bg-white">
+                <th className="px-4 py-3 text-left text-sm font-medium text-slate-500">
                   Name
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-slate-400">
+                <th className="px-4 py-3 text-left text-sm font-medium text-slate-500">
                   Type
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-slate-400">
+                <th className="px-4 py-3 text-left text-sm font-medium text-slate-500">
                   Contact Person
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-slate-400">
+                <th className="px-4 py-3 text-left text-sm font-medium text-slate-500">
                   City
                 </th>
-                <th className="px-4 py-3 text-right text-sm font-medium text-slate-400">
+                <th className="px-4 py-3 text-right text-sm font-medium text-slate-500">
                   Total Revenue
                 </th>
-                <th className="px-4 py-3 text-right text-sm font-medium text-slate-400">
+                <th className="px-4 py-3 text-right text-sm font-medium text-slate-500">
                   MTD Revenue
                 </th>
-                <th className="px-4 py-3 text-right text-sm font-medium text-slate-400">
+                <th className="px-4 py-3 text-right text-sm font-medium text-slate-500">
                   Outstanding
                 </th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-slate-400">
+                <th className="px-4 py-3 text-center text-sm font-medium text-slate-500">
                   Status
                 </th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-slate-400">
+                <th className="px-4 py-3 text-center text-sm font-medium text-slate-500">
                   Actions
                 </th>
               </tr>
@@ -276,42 +276,42 @@ export default function B2BAccountsPage() {
               {accounts.map((a) => (
                 <tr
                   key={a.id}
-                  className="border-b border-slate-800/50 bg-slate-900/50 hover:bg-slate-800/50"
+                  className="border-b border-slate-200/50 bg-white hover:bg-slate-100/50"
                 >
-                  <td className="px-4 py-3 text-sm font-medium text-white">
+                  <td className="px-4 py-3 text-sm font-medium text-slate-900">
                     {a.name}
                   </td>
                   <td className="px-4 py-3">
                     <span
-                      className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${TYPE_COLORS[a.type] ?? "bg-slate-700 text-slate-300"}`}
+                      className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${TYPE_COLORS[a.type] ?? "bg-slate-200 text-slate-700"}`}
                     >
                       {a.type.replace("_", " ")}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-300">
+                  <td className="px-4 py-3 text-sm text-slate-700">
                     {a.contactPerson ?? "-"}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-300">
+                  <td className="px-4 py-3 text-sm text-slate-700">
                     {a.city ?? "-"}
                   </td>
-                  <td className="px-4 py-3 text-right text-sm text-slate-300">
+                  <td className="px-4 py-3 text-right text-sm text-slate-700">
                     {a.totalRevenue !== undefined ? fmt(a.totalRevenue) : "-"}
                   </td>
-                  <td className="px-4 py-3 text-right text-sm text-slate-300">
+                  <td className="px-4 py-3 text-right text-sm text-slate-700">
                     {a.mtdRevenue !== undefined ? fmt(a.mtdRevenue) : "-"}
                   </td>
-                  <td className="px-4 py-3 text-right text-sm text-slate-300">
+                  <td className="px-4 py-3 text-right text-sm text-slate-700">
                     {a.outstanding !== undefined ? fmt(a.outstanding) : "-"}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span
-                      className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[a.status] ?? "bg-slate-700 text-slate-300"}`}
+                      className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[a.status] ?? "bg-slate-200 text-slate-700"}`}
                     >
                       {a.status}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <button className="rounded-lg bg-slate-800 px-3 py-1 text-xs text-slate-300 hover:bg-slate-700">
+                    <button className="rounded-lg bg-slate-100 px-3 py-1 text-xs text-slate-700 hover:bg-slate-200">
                       View
                     </button>
                   </td>
@@ -325,12 +325,12 @@ export default function B2BAccountsPage() {
       {/* ── Add Account Modal ─────────────────────────────────────────────── */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-800 bg-slate-900 p-6">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 bg-white p-6">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">Add Account</h2>
+              <h2 className="text-lg font-semibold text-slate-900">Add Account</h2>
               <button
                 onClick={() => setShowForm(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-500 hover:text-slate-900"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -344,13 +344,13 @@ export default function B2BAccountsPage() {
               className="space-y-4"
             >
               <div>
-                <label className="mb-1 block text-sm text-slate-400">
+                <label className="mb-1 block text-sm text-slate-500">
                   Type *
                 </label>
                 <select
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
                 >
                   {ACCOUNT_TYPES.map((t) => (
                     <option key={t} value={t}>
@@ -361,19 +361,19 @@ export default function B2BAccountsPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm text-slate-400">
+                <label className="mb-1 block text-sm text-slate-500">
                   Name *
                 </label>
                 <input
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm text-slate-400">
+                <label className="mb-1 block text-sm text-slate-500">
                   Contact Person
                 </label>
                 <input
@@ -381,13 +381,13 @@ export default function B2BAccountsPage() {
                   onChange={(e) =>
                     setForm({ ...form, contactPerson: e.target.value })
                   }
-                  className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Phone
                   </label>
                   <input
@@ -395,11 +395,11 @@ export default function B2BAccountsPage() {
                     onChange={(e) =>
                       setForm({ ...form, phone: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Email
                   </label>
                   <input
@@ -408,13 +408,13 @@ export default function B2BAccountsPage() {
                     onChange={(e) =>
                       setForm({ ...form, email: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-sm text-slate-400">
+                <label className="mb-1 block text-sm text-slate-500">
                   Address
                 </label>
                 <input
@@ -422,13 +422,13 @@ export default function B2BAccountsPage() {
                   onChange={(e) =>
                     setForm({ ...form, address: e.target.value })
                   }
-                  className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     City
                   </label>
                   <input
@@ -436,11 +436,11 @@ export default function B2BAccountsPage() {
                     onChange={(e) =>
                       setForm({ ...form, city: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Pincode
                   </label>
                   <input
@@ -448,14 +448,14 @@ export default function B2BAccountsPage() {
                     onChange={(e) =>
                       setForm({ ...form, pincode: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Credit Days
                   </label>
                   <input
@@ -464,11 +464,11 @@ export default function B2BAccountsPage() {
                     onChange={(e) =>
                       setForm({ ...form, creditDays: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-slate-400">
+                  <label className="mb-1 block text-sm text-slate-500">
                     Credit Limit
                   </label>
                   <input
@@ -477,7 +477,7 @@ export default function B2BAccountsPage() {
                     onChange={(e) =>
                       setForm({ ...form, creditLimit: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               </div>

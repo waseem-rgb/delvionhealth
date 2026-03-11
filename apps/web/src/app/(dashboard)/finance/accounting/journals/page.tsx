@@ -121,11 +121,11 @@ export default function JournalEntriesPage() {
   const isBalanced = totalDebit > 0 && totalDebit === totalCredit;
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
+    <div className="min-h-screen bg-slate-50 p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Journal Entries</h1>
-          <p className="text-slate-400">View and create manual journal entries</p>
+          <h1 className="text-2xl font-bold text-slate-900">Journal Entries</h1>
+          <p className="text-slate-500">View and create manual journal entries</p>
         </div>
         <button
           onClick={() => setShowCreate(!showCreate)}
@@ -138,18 +138,18 @@ export default function JournalEntriesPage() {
 
       {/* Create Form */}
       {showCreate && (
-        <div className="mb-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">New Journal Entry</h3>
+        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">New Journal Entry</h3>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm text-slate-400 mb-1">Date</label>
+              <label className="block text-sm text-slate-500 mb-1">Date</label>
               <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white" />
+                className="w-full rounded border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900" />
             </div>
             <div>
-              <label className="block text-sm text-slate-400 mb-1">Narration</label>
+              <label className="block text-sm text-slate-500 mb-1">Narration</label>
               <input value={narration} onChange={(e) => setNarration(e.target.value)}
-                className="w-full rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white"
+                className="w-full rounded border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900"
                 placeholder="Description of the entry..." />
             </div>
           </div>
@@ -165,29 +165,29 @@ export default function JournalEntriesPage() {
             </thead>
             <tbody>
               {lines.map((line, i) => (
-                <tr key={i} className="border-b border-slate-800/30">
+                <tr key={i} className="border-b border-slate-200/30">
                   <td className="py-1 pr-2">
                     <select value={line.ledgerAccountId} onChange={(e) => updateLine(i, "ledgerAccountId", e.target.value)}
-                      className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-white">
+                      className="w-full rounded border border-slate-300 bg-slate-100 px-2 py-1.5 text-xs text-slate-900">
                       <option value="">Select account...</option>
                       {ledgers.map((l) => <option key={l.id} value={l.id}>{l.code} — {l.name}</option>)}
                     </select>
                   </td>
                   <td className="py-1 pr-2">
                     <select value={line.type} onChange={(e) => updateLine(i, "type", e.target.value)}
-                      className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-white">
+                      className="w-full rounded border border-slate-300 bg-slate-100 px-2 py-1.5 text-xs text-slate-900">
                       <option value="DEBIT">Debit</option>
                       <option value="CREDIT">Credit</option>
                     </select>
                   </td>
                   <td className="py-1 pr-2">
                     <input type="number" value={line.amount} onChange={(e) => updateLine(i, "amount", e.target.value)}
-                      className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-white text-right"
+                      className="w-full rounded border border-slate-300 bg-slate-100 px-2 py-1.5 text-xs text-slate-900 text-right"
                       placeholder="0.00" />
                   </td>
                   <td className="py-1">
                     <input value={line.narration} onChange={(e) => updateLine(i, "narration", e.target.value)}
-                      className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-white"
+                      className="w-full rounded border border-slate-300 bg-slate-100 px-2 py-1.5 text-xs text-slate-900"
                       placeholder="Optional note" />
                   </td>
                 </tr>
@@ -212,16 +212,16 @@ export default function JournalEntriesPage() {
       )}
 
       {/* Entries List */}
-      <div className="overflow-hidden rounded-xl border border-slate-800">
+      <div className="overflow-hidden rounded-xl border border-slate-200">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-800 bg-slate-900">
-              <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Entry #</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Date</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Description</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-slate-400">Amount</th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Status</th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Action</th>
+            <tr className="border-b border-slate-200 bg-white">
+              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Entry #</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Date</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Description</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-slate-500">Amount</th>
+              <th className="px-4 py-3 text-center text-xs font-medium text-slate-500">Status</th>
+              <th className="px-4 py-3 text-center text-xs font-medium text-slate-500">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -231,25 +231,25 @@ export default function JournalEntriesPage() {
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center">
                   <FileText className="mx-auto h-10 w-10 text-slate-600 mb-3" />
-                  <p className="text-slate-400">No journal entries yet</p>
+                  <p className="text-slate-500">No journal entries yet</p>
                 </td>
               </tr>
             ) : (
               entries.map((entry) => {
                 const totalDr = (entry.lines ?? []).reduce((s, l) => s + Number(l.debit ?? 0), 0);
                 return (
-                  <tr key={entry.id} className="border-b border-slate-800/50 bg-slate-900/50 hover:bg-slate-800/50">
+                  <tr key={entry.id} className="border-b border-slate-200/50 bg-white hover:bg-slate-100/50">
                     <td className="px-4 py-3 text-sm font-mono text-blue-400">{entry.entryNumber}</td>
-                    <td className="px-4 py-3 text-sm text-slate-300 whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-slate-700 whitespace-nowrap">
                       {new Date(entry.date).toLocaleDateString("en-IN")}
                     </td>
-                    <td className="px-4 py-3 text-sm text-white">{entry.description}</td>
-                    <td className="px-4 py-3 text-sm text-right text-white font-medium">{fmt(totalDr)}</td>
+                    <td className="px-4 py-3 text-sm text-slate-900">{entry.description}</td>
+                    <td className="px-4 py-3 text-sm text-right text-slate-900 font-medium">{fmt(totalDr)}</td>
                     <td className="px-4 py-3 text-center">
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                         entry.status === "POSTED" ? "bg-green-500/20 text-green-400" :
                         entry.status === "REVERSED" ? "bg-red-500/20 text-red-400" :
-                        "bg-slate-700 text-slate-300"
+                        "bg-slate-200 text-slate-700"
                       }`}>
                         {entry.status}
                       </span>

@@ -91,20 +91,20 @@ function Skeleton() {
     <div className="space-y-6 animate-pulse">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <div className="h-3 w-20 bg-slate-800 rounded mb-3" />
-            <div className="h-7 w-28 bg-slate-800 rounded mb-2" />
-            <div className="h-3 w-16 bg-slate-800 rounded" />
+          <div key={i} className="bg-white border border-slate-200 rounded-xl p-5">
+            <div className="h-3 w-20 bg-slate-100 rounded mb-3" />
+            <div className="h-7 w-28 bg-slate-100 rounded mb-2" />
+            <div className="h-3 w-16 bg-slate-100 rounded" />
           </div>
         ))}
       </div>
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+      <div className="bg-white border border-slate-200 rounded-xl p-5">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex gap-4 py-3">
-            <div className="h-4 w-24 bg-slate-800 rounded" />
-            <div className="h-4 w-32 bg-slate-800 rounded" />
-            <div className="h-4 w-20 bg-slate-800 rounded" />
-            <div className="h-4 flex-1 bg-slate-800 rounded" />
+            <div className="h-4 w-24 bg-slate-100 rounded" />
+            <div className="h-4 w-32 bg-slate-100 rounded" />
+            <div className="h-4 w-20 bg-slate-100 rounded" />
+            <div className="h-4 flex-1 bg-slate-100 rounded" />
           </div>
         ))}
       </div>
@@ -217,29 +217,29 @@ export default function CouponsPage() {
 
   if (selectedCoupon) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white p-6 space-y-6">
+      <div className="min-h-screen bg-slate-50 text-slate-900 p-6 space-y-6">
         <button
           onClick={() => setSelectedCoupon(null)}
-          className="flex items-center gap-2 text-slate-400 hover:text-white text-sm transition-colors"
+          className="flex items-center gap-2 text-slate-500 hover:text-slate-900 text-sm transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Coupons
         </button>
 
         {usageLoading ? (
           <div className="animate-pulse space-y-4">
-            <div className="h-8 w-48 bg-slate-800 rounded" />
+            <div className="h-8 w-48 bg-slate-100 rounded" />
             <div className="grid grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-24 bg-slate-900 rounded-xl" />
+                <div key={i} className="h-24 bg-white rounded-xl" />
               ))}
             </div>
-            <div className="h-64 bg-slate-900 rounded-xl" />
+            <div className="h-64 bg-white rounded-xl" />
           </div>
         ) : usageData ? (
           <>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold">{usageData.coupon.code}</h1>
-              <span className={`text-xs px-2.5 py-1 rounded-full ${typeBadge[usageData.coupon.type] ?? "bg-slate-700 text-slate-300"}`}>
+              <span className={`text-xs px-2.5 py-1 rounded-full ${typeBadge[usageData.coupon.type] ?? "bg-slate-200 text-slate-700"}`}>
                 {usageData.coupon.type}
               </span>
               <span className={`text-xs px-2.5 py-1 rounded-full ${usageData.coupon.isActive ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"}`}>
@@ -254,18 +254,18 @@ export default function CouponsPage() {
                 { label: "Discount Given", value: `₹${fmt(usageData.stats.totalDiscount)}`, icon: Percent },
                 { label: "Avg Order Value", value: `₹${fmt(usageData.stats.avgOrderValue)}`, icon: IndianRupee },
               ].map((s) => (
-                <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <s.icon className="h-4 w-4 text-slate-400" />
-                    <span className="text-xs text-slate-400">{s.label}</span>
+                    <s.icon className="h-4 w-4 text-slate-500" />
+                    <span className="text-xs text-slate-500">{s.label}</span>
                   </div>
                   <p className="text-xl font-bold">{s.value}</p>
                 </div>
               ))}
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-xl">
-              <div className="px-5 py-4 border-b border-slate-800">
+            <div className="bg-white border border-slate-200 rounded-xl">
+              <div className="px-5 py-4 border-b border-slate-200">
                 <h3 className="text-base font-semibold">Usage History</h3>
               </div>
               {usageData.usageHistory.length === 0 ? (
@@ -274,7 +274,7 @@ export default function CouponsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-xs text-slate-500 uppercase tracking-wider border-b border-slate-800">
+                      <tr className="text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200">
                         <th className="text-left px-5 py-3">Date</th>
                         <th className="text-left px-5 py-3">Patient</th>
                         <th className="text-left px-5 py-3">Order #</th>
@@ -284,11 +284,11 @@ export default function CouponsPage() {
                     </thead>
                     <tbody>
                       {usageData.usageHistory.map((u) => (
-                        <tr key={u.id} className="border-b border-slate-800/50 hover:bg-slate-800/30">
-                          <td className="px-5 py-3 text-slate-300">{new Date(u.usedAt).toLocaleDateString("en-IN")}</td>
-                          <td className="px-5 py-3 text-white font-medium">{u.patientName}</td>
-                          <td className="px-5 py-3 text-slate-400">{u.orderNumber}</td>
-                          <td className="px-5 py-3 text-right text-white">₹{fmt(u.orderAmount)}</td>
+                        <tr key={u.id} className="border-b border-slate-200/50 hover:bg-slate-50">
+                          <td className="px-5 py-3 text-slate-700">{new Date(u.usedAt).toLocaleDateString("en-IN")}</td>
+                          <td className="px-5 py-3 text-slate-900 font-medium">{u.patientName}</td>
+                          <td className="px-5 py-3 text-slate-500">{u.orderNumber}</td>
+                          <td className="px-5 py-3 text-right text-slate-900">₹{fmt(u.orderAmount)}</td>
                           <td className="px-5 py-3 text-right text-red-400">-₹{fmt(u.discountAmount)}</td>
                         </tr>
                       ))}
@@ -308,12 +308,12 @@ export default function CouponsPage() {
   // ── Main list view ──
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Coupons & Offers</h1>
-          <p className="text-slate-400 text-sm mt-1">Manage discount coupons and promotional offers</p>
+          <p className="text-slate-500 text-sm mt-1">Manage discount coupons and promotional offers</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -325,7 +325,7 @@ export default function CouponsPage() {
 
       {/* Error */}
       {isError && (
-        <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-5 py-4">
+        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-5 py-4">
           <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
           <p className="text-red-300 text-sm">{(error as Error)?.message ?? "Failed to load coupons"}</p>
         </div>
@@ -343,12 +343,12 @@ export default function CouponsPage() {
               { label: "Discount Given Today", value: `₹${fmt(discountGivenToday)}`, icon: Percent, gradient: "from-amber-500 to-amber-700" },
               { label: "Revenue Generated", value: `₹${fmt(revenueGenerated)}`, icon: TrendingUp, gradient: "from-violet-500 to-violet-700" },
             ].map((stat) => (
-              <div key={stat.label} className="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors">
+              <div key={stat.label} className="bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-300 transition-colors">
                 <div className="flex items-center gap-3 mb-3">
                   <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${stat.gradient} flex items-center justify-center`}>
-                    <stat.icon className="h-5 w-5 text-white" />
+                    <stat.icon className="h-5 w-5 text-slate-900" />
                   </div>
-                  <span className="text-xs text-slate-400">{stat.label}</span>
+                  <span className="text-xs text-slate-500">{stat.label}</span>
                 </div>
                 <p className="text-xl font-bold">{stat.value}</p>
               </div>
@@ -357,17 +357,17 @@ export default function CouponsPage() {
 
           {/* Table */}
           {!coupons || coupons.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-xl py-16 text-center">
+            <div className="bg-white border border-slate-200 rounded-xl py-16 text-center">
               <Tag className="h-10 w-10 text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-400 text-sm">No coupons created yet</p>
+              <p className="text-slate-500 text-sm">No coupons created yet</p>
               <p className="text-slate-600 text-xs mt-1">Click &quot;Create Coupon&quot; to get started</p>
             </div>
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-xs text-slate-500 uppercase tracking-wider border-b border-slate-800">
+                    <tr className="text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200">
                       <th className="text-left px-5 py-3">Code</th>
                       <th className="text-left px-5 py-3">Name</th>
                       <th className="text-left px-5 py-3">Type</th>
@@ -382,25 +382,25 @@ export default function CouponsPage() {
                   </thead>
                   <tbody>
                     {coupons.map((coupon) => (
-                      <tr key={coupon.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
+                      <tr key={coupon.id} className="border-b border-slate-200/50 hover:bg-slate-50 transition-colors">
                         <td className="px-5 py-3">
-                          <span className="font-mono font-semibold text-white">{coupon.code}</span>
+                          <span className="font-mono font-semibold text-slate-900">{coupon.code}</span>
                         </td>
-                        <td className="px-5 py-3 text-slate-300">{coupon.name}</td>
+                        <td className="px-5 py-3 text-slate-700">{coupon.name}</td>
                         <td className="px-5 py-3">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${typeBadge[coupon.type] ?? "bg-slate-700 text-slate-300"}`}>
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${typeBadge[coupon.type] ?? "bg-slate-200 text-slate-700"}`}>
                             {coupon.type}
                           </span>
                         </td>
-                        <td className="px-5 py-3 text-right text-white font-medium">
+                        <td className="px-5 py-3 text-right text-slate-900 font-medium">
                           {coupon.discountType === "PERCENTAGE"
                             ? `${coupon.discountValue}%`
                             : `₹${fmt(coupon.discountValue)}`}
                         </td>
-                        <td className="px-5 py-3 text-right text-slate-300">{fmt(coupon.usageCount)}</td>
+                        <td className="px-5 py-3 text-right text-slate-700">{fmt(coupon.usageCount)}</td>
                         <td className="px-5 py-3 text-right text-emerald-400">₹{fmt(coupon.revenueGenerated)}</td>
                         <td className="px-5 py-3 text-right text-red-400">₹{fmt(coupon.discountGiven)}</td>
-                        <td className="px-5 py-3 text-slate-400">
+                        <td className="px-5 py-3 text-slate-500">
                           {coupon.validTo
                             ? new Date(coupon.validTo).toLocaleDateString("en-IN")
                             : "No expiry"}
@@ -421,7 +421,7 @@ export default function CouponsPage() {
                         <td className="px-5 py-3 text-center">
                           <button
                             onClick={() => setSelectedCoupon(coupon.id)}
-                            className="p-1.5 rounded-lg hover:bg-slate-700 transition-colors text-slate-400 hover:text-white"
+                            className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors text-slate-500 hover:text-slate-900"
                             title="View details"
                           >
                             <Eye className="h-4 w-4" />
@@ -440,10 +440,10 @@ export default function CouponsPage() {
       {/* ── Create Coupon Modal ────────────────────────────────────────────── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl">
+          <div className="bg-white border border-slate-300 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold">Create Coupon</h2>
-              <button onClick={() => setShowModal(false)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+              <button onClick={() => setShowModal(false)} className="p-1 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -451,31 +451,31 @@ export default function CouponsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Code */}
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Coupon Code</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Coupon Code</label>
                 <input
                   value={form.code}
                   onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
                   placeholder="e.g. SAVE20"
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
               {/* Name */}
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Name</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Name</label>
                 <input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="Coupon display name"
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
               {/* Type */}
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Type</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Type</label>
                 <select
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-blue-500"
                 >
                   {couponTypes.map((t) => (
                     <option key={t} value={t}>{t}</option>
@@ -484,7 +484,7 @@ export default function CouponsPage() {
               </div>
               {/* Discount Type */}
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Discount Type</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Discount Type</label>
                 <div className="flex gap-4 mt-1">
                   {(["PERCENTAGE", "FLAT"] as const).map((dt) => (
                     <label key={dt} className="flex items-center gap-2 cursor-pointer">
@@ -495,14 +495,14 @@ export default function CouponsPage() {
                         onChange={() => setForm({ ...form, discountType: dt })}
                         className="accent-blue-500"
                       />
-                      <span className="text-sm text-slate-300">{dt}</span>
+                      <span className="text-sm text-slate-700">{dt}</span>
                     </label>
                   ))}
                 </div>
               </div>
               {/* Discount Value */}
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">
+                <label className="block text-xs text-slate-500 mb-1.5">
                   Discount Value {form.discountType === "PERCENTAGE" ? "(%)" : "(₹)"}
                 </label>
                 <input
@@ -510,38 +510,38 @@ export default function CouponsPage() {
                   value={form.discountValue}
                   onChange={(e) => setForm({ ...form, discountValue: e.target.value })}
                   placeholder="0"
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
               {/* Min Order Value */}
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Min Order Value (₹)</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Min Order Value (₹)</label>
                 <input
                   type="number"
                   value={form.minOrderValue}
                   onChange={(e) => setForm({ ...form, minOrderValue: e.target.value })}
                   placeholder="Optional"
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
               {/* Max Discount */}
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Max Discount Amt (₹)</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Max Discount Amt (₹)</label>
                 <input
                   type="number"
                   value={form.maxDiscountAmt}
                   onChange={(e) => setForm({ ...form, maxDiscountAmt: e.target.value })}
                   placeholder="Optional"
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
               {/* Target Gender */}
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Target Gender</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Target Gender</label>
                 <select
                   value={form.targetGender}
                   onChange={(e) => setForm({ ...form, targetGender: e.target.value })}
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-blue-500"
                 >
                   <option value="ALL">All</option>
                   <option value="MALE">Male</option>
@@ -553,7 +553,7 @@ export default function CouponsPage() {
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, isFirstVisitOnly: !form.isFirstVisitOnly })}
-                  className="text-slate-400 hover:text-white"
+                  className="text-slate-500 hover:text-slate-900"
                 >
                   {form.isFirstVisitOnly ? (
                     <ToggleRight className="h-6 w-6 text-blue-400" />
@@ -561,57 +561,57 @@ export default function CouponsPage() {
                     <ToggleLeft className="h-6 w-6" />
                   )}
                 </button>
-                <span className="text-sm text-slate-300">First Visit Only</span>
+                <span className="text-sm text-slate-700">First Visit Only</span>
               </div>
               {/* Max Usage Total */}
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Max Usage Total</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Max Usage Total</label>
                 <input
                   type="number"
                   value={form.maxUsageTotal}
                   onChange={(e) => setForm({ ...form, maxUsageTotal: e.target.value })}
                   placeholder="Unlimited"
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
               {/* Max Usage Per Phone */}
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Max Usage Per Phone</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Max Usage Per Phone</label>
                 <input
                   type="number"
                   value={form.maxUsagePerPhone}
                   onChange={(e) => setForm({ ...form, maxUsagePerPhone: e.target.value })}
                   placeholder="Unlimited"
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
               {/* Valid From */}
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Valid From</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Valid From</label>
                 <input
                   type="date"
                   value={form.validFrom}
                   onChange={(e) => setForm({ ...form, validFrom: e.target.value })}
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
               {/* Valid To */}
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Valid To</label>
+                <label className="block text-xs text-slate-500 mb-1.5">Valid To</label>
                 <input
                   type="date"
                   value={form.validTo}
                   onChange={(e) => setForm({ ...form, validTo: e.target.value })}
-                  className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg bg-slate-100 border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-800">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm text-slate-300 transition-colors"
+                className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm text-slate-700 transition-colors"
               >
                 Cancel
               </button>

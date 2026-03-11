@@ -12,11 +12,13 @@ import { MisController } from "./mis.controller";
 import { MinioService } from "./minio.service";
 import { RealtimeModule } from "../realtime/realtime.module";
 import { NotificationsModule } from "../notifications/notifications.module";
+import { ReportGeneratorService } from "./report-generator.service";
+import { ReportGeneratorController } from "./report-generator.controller";
 
 @Module({
   imports: [RealtimeModule, NotificationsModule],
-  providers: [ReportsService, ReportTemplatesService, ReportApprovalService, ReportDispatchService, MisService, MinioService],
-  controllers: [ReportsController, ReportTemplatesController, ReportApprovalController, ReportDispatchController, MisController],
-  exports: [ReportsService, ReportTemplatesService, ReportApprovalService, ReportDispatchService, MisService, MinioService],
+  providers: [ReportsService, ReportTemplatesService, ReportApprovalService, ReportDispatchService, MisService, MinioService, ReportGeneratorService],
+  controllers: [ReportsController, ReportTemplatesController, ReportApprovalController, ReportDispatchController, MisController, ReportGeneratorController],
+  exports: [ReportsService, ReportTemplatesService, ReportApprovalService, ReportDispatchService, MisService, MinioService, ReportGeneratorService],
 })
 export class ReportsModule {}

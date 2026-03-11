@@ -92,7 +92,7 @@ function showToast(message: string, type: "success" | "error" = "success") {
   const el = document.createElement("div");
   el.className = `fixed bottom-6 right-6 z-50 ${
     type === "success" ? "bg-teal-600" : "bg-red-600"
-  } text-white px-4 py-2.5 rounded-lg text-sm font-medium shadow-lg`;
+  } text-slate-900 px-4 py-2.5 rounded-lg text-sm font-medium shadow-lg`;
   el.textContent = message;
   document.body.appendChild(el);
   setTimeout(() => {
@@ -109,10 +109,10 @@ function ConfidenceBadge({ score }: { score: number }) {
   const pct = Math.round(score * 100);
   const color =
     pct >= 90
-      ? "bg-emerald-900/60 text-emerald-300 border-emerald-700/50"
+      ? "bg-emerald-100 text-emerald-700 border-emerald-700/50"
       : pct >= 70
-        ? "bg-yellow-900/60 text-yellow-300 border-yellow-700/50"
-        : "bg-red-900/60 text-red-300 border-red-700/50";
+        ? "bg-yellow-100 text-yellow-700 border-yellow-700/50"
+        : "bg-red-100 text-red-700 border-red-700/50";
   return (
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${color}`}
@@ -276,7 +276,7 @@ export default function BankReconciliationPage() {
           label: "Unmatched",
           value: String(summary.unmatchedCount),
           icon: Unlink2,
-          color: summary.unmatchedCount > 0 ? "text-red-400" : "text-slate-400",
+          color: summary.unmatchedCount > 0 ? "text-red-400" : "text-slate-500",
         },
       ]
     : [];
@@ -286,11 +286,11 @@ export default function BankReconciliationPage() {
   if (banksLoading) {
     return (
       <div className="p-6 space-y-6">
-        <div className="h-8 w-72 bg-slate-800 rounded animate-pulse" />
-        <div className="h-12 w-64 bg-slate-900 border border-slate-800 rounded-xl animate-pulse" />
+        <div className="h-8 w-72 bg-slate-100 rounded animate-pulse" />
+        <div className="h-12 w-64 bg-white border border-slate-200 rounded-xl animate-pulse" />
         <div className="grid grid-cols-5 gap-4">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-28 bg-slate-900 border border-slate-800 rounded-xl animate-pulse" />
+            <div key={i} className="h-28 bg-white border border-slate-200 rounded-xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -300,22 +300,22 @@ export default function BankReconciliationPage() {
   // ── Render ────────────────────────────────────────────────────────────
 
   return (
-    <div className="p-6 space-y-6 bg-slate-950 min-h-screen">
+    <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <ArrowRightLeft className="w-6 h-6 text-teal-400" />
             Bank Reconciliation
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Match bank statements to journal entries
           </p>
         </div>
         <button
           onClick={() => autoReconcile.mutate()}
           disabled={!activeBankId || autoReconcile.isPending}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg- rounded-lg hover:bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
           {autoReconcile.isPending ? (
             <RefreshCw className="w-4 h-4 animate-spin" />
@@ -328,12 +328,12 @@ export default function BankReconciliationPage() {
 
       {/* Bank Account Selector */}
       <div className="flex items-center gap-4">
-        <label className="text-sm text-slate-400 font-medium">Bank Account</label>
+        <label className="text-sm text-slate-500 font-medium">Bank Account</label>
         <div className="relative">
           <select
             value={activeBankId}
             onChange={(e) => setSelectedBankId(e.target.value)}
-            className="appearance-none px-4 py-2.5 pr-10 text-sm bg-slate-900 border border-slate-800 rounded-lg text-slate-300 focus:outline-none focus:border-teal-500 min-w-[320px]"
+            className="appearance-none px-4 py-2.5 pr-10 text-sm bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:border-teal-500 min-w-[320px]"
           >
             {accounts.length === 0 && (
               <option value="">No bank accounts found</option>
@@ -352,7 +352,7 @@ export default function BankReconciliationPage() {
       {summaryLoading ? (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-28 bg-slate-900 border border-slate-800 rounded-xl animate-pulse" />
+            <div key={i} className="h-28 bg-white border border-slate-200 rounded-xl animate-pulse" />
           ))}
         </div>
       ) : summaryCards.length > 0 ? (
@@ -360,19 +360,19 @@ export default function BankReconciliationPage() {
           {summaryCards.map((card) => (
             <div
               key={card.label}
-              className={`bg-slate-900 border rounded-xl p-4 ${
+              className={`bg-white border rounded-xl p-4 ${
                 (card as any).highlight
                   ? "border-emerald-700/40 bg-emerald-950/20"
-                  : "border-slate-800"
+                  : "border-slate-200"
               }`}
             >
               <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 rounded-lg bg-slate-800">
+                <div className="p-1.5 rounded-lg bg-slate-100">
                   <card.icon className={`w-4 h-4 ${card.color}`} />
                 </div>
-                <span className="text-xs text-slate-400">{card.label}</span>
+                <span className="text-xs text-slate-500">{card.label}</span>
               </div>
-              <p className="text-xl font-bold text-white">{card.value}</p>
+              <p className="text-xl font-bold text-slate-900">{card.value}</p>
             </div>
           ))}
         </div>
@@ -381,7 +381,7 @@ export default function BankReconciliationPage() {
       {/* Sub-tabs */}
       {activeBankId && (
         <>
-          <div className="flex gap-1 bg-slate-900 border border-slate-800 rounded-lg p-1">
+          <div className="flex gap-1 bg-white border border-slate-200 rounded-lg p-1">
             {SUB_TABS.map((tab) => {
               let count = 0;
               if (tab === "Matched") count = matchedStatements.length;
@@ -394,7 +394,7 @@ export default function BankReconciliationPage() {
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md transition ${
                     activeSubTab === tab
                       ? "bg-teal-600 text-white"
-                      : "text-slate-400 hover:text-white hover:bg-slate-800"
+                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
                   {tab === "Matched" && <Link2 className="w-4 h-4" />}
@@ -404,8 +404,8 @@ export default function BankReconciliationPage() {
                   <span
                     className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
                       activeSubTab === tab
-                        ? "bg-white/20 text-white"
-                        : "bg-slate-800 text-slate-400"
+                        ? "bg-white/20 text-slate-900"
+                        : "bg-slate-100 text-slate-500"
                     }`}
                   >
                     {count}
@@ -417,12 +417,12 @@ export default function BankReconciliationPage() {
 
           {/* ── Matched Tab ────────────────────────────────────────────────── */}
           {activeSubTab === "Matched" && (
-            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-              <div className="p-4 border-b border-slate-800">
-                <h3 className="text-sm font-semibold text-white">
+            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+              <div className="p-4 border-b border-slate-200">
+                <h3 className="text-sm font-semibold text-slate-900">
                   Matched Pairs ({matchedStatements.length})
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Statement lines matched to journal entries
                 </p>
               </div>
@@ -434,11 +434,11 @@ export default function BankReconciliationPage() {
                   <p className="text-xs mt-1">Run auto-reconcile to find matches</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-800/60">
+                <div className="divide-y divide-slate-100/60">
                   {matchedStatements.map((stmt) => (
                     <div
                       key={stmt.id}
-                      className="flex items-center gap-4 p-4 hover:bg-slate-800/30 transition"
+                      className="flex items-center gap-4 p-4 hover:bg-slate-50 transition"
                     >
                       {/* Statement side */}
                       <div className="flex-1 min-w-0">
@@ -446,11 +446,11 @@ export default function BankReconciliationPage() {
                           <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-900/50 text-blue-300 font-medium uppercase">
                             Statement
                           </span>
-                          <span className="text-xs text-slate-400">
+                          <span className="text-xs text-slate-500">
                             {formatDate(stmt.date)}
                           </span>
                         </div>
-                        <p className="text-sm text-slate-300 truncate">
+                        <p className="text-sm text-slate-700 truncate">
                           {stmt.description}
                         </p>
                         <p className="text-xs text-slate-500 font-mono mt-0.5">
@@ -481,12 +481,12 @@ export default function BankReconciliationPage() {
 
           {/* ── Suggested Tab ──────────────────────────────────────────────── */}
           {activeSubTab === "Suggested" && (
-            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-              <div className="p-4 border-b border-slate-800">
-                <h3 className="text-sm font-semibold text-white">
+            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+              <div className="p-4 border-b border-slate-200">
+                <h3 className="text-sm font-semibold text-slate-900">
                   Suggested Matches ({suggested.length})
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   AI-suggested matches with confidence scores — review and accept or reject
                 </p>
               </div>
@@ -500,11 +500,11 @@ export default function BankReconciliationPage() {
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-800/60">
+                <div className="divide-y divide-slate-100/60">
                   {suggested.map((match) => (
                     <div
                       key={match.id ?? `${match.statementId}-${match.journalEntryId}`}
-                      className="p-4 hover:bg-slate-800/20 transition"
+                      className="p-4 hover:bg-slate-50 transition"
                     >
                       <div className="flex items-start justify-between gap-4">
                         {/* Left: match details */}
@@ -521,11 +521,11 @@ export default function BankReconciliationPage() {
                           {/* Two-column layout: Statement vs JE */}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {/* Statement */}
-                            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+                            <div className="bg-slate-100/50 rounded-lg p-3 border border-slate-300/50">
                               <p className="text-[10px] font-medium text-blue-400 uppercase tracking-wider mb-1.5">
                                 Bank Statement
                               </p>
-                              <p className="text-sm text-slate-300 truncate">
+                              <p className="text-sm text-slate-700 truncate">
                                 {match.statementDescription}
                               </p>
                               <div className="flex items-center gap-3 mt-1.5">
@@ -533,18 +533,18 @@ export default function BankReconciliationPage() {
                                   <Calendar className="w-3 h-3" />
                                   {formatDate(match.statementDate)}
                                 </span>
-                                <span className="text-sm font-semibold text-white font-mono">
+                                <span className="text-sm font-semibold text-slate-900 font-mono">
                                   {formatCurrency(match.statementAmount)}
                                 </span>
                               </div>
                             </div>
 
                             {/* Journal Entry */}
-                            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+                            <div className="bg-slate-100/50 rounded-lg p-3 border border-slate-300/50">
                               <p className="text-[10px] font-medium text-teal-400 uppercase tracking-wider mb-1.5">
                                 Journal Entry
                               </p>
-                              <p className="text-sm text-slate-300 truncate">
+                              <p className="text-sm text-slate-700 truncate">
                                 {match.journalDescription}
                               </p>
                               <div className="flex items-center gap-3 mt-1.5">
@@ -552,7 +552,7 @@ export default function BankReconciliationPage() {
                                   <Hash className="w-3 h-3" />
                                   {match.journalReference}
                                 </span>
-                                <span className="text-sm font-semibold text-white font-mono">
+                                <span className="text-sm font-semibold text-slate-900 font-mono">
                                   {formatCurrency(match.journalAmount)}
                                 </span>
                               </div>
@@ -570,7 +570,7 @@ export default function BankReconciliationPage() {
                               })
                             }
                             disabled={acceptMatch.isPending}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-500 disabled:opacity-50 transition"
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg- rounded-lg hover:bg-emerald-500 disabled:opacity-50 transition"
                           >
                             <Check className="w-3.5 h-3.5" />
                             Accept
@@ -582,7 +582,7 @@ export default function BankReconciliationPage() {
                               })
                             }
                             disabled={rejectMatch.isPending}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 disabled:opacity-50 transition"
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 disabled:opacity-50 transition"
                           >
                             <X className="w-3.5 h-3.5" />
                             Reject
@@ -598,12 +598,12 @@ export default function BankReconciliationPage() {
 
           {/* ── Unmatched Tab ──────────────────────────────────────────────── */}
           {activeSubTab === "Unmatched" && (
-            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-              <div className="p-4 border-b border-slate-800">
-                <h3 className="text-sm font-semibold text-white">
+            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+              <div className="p-4 border-b border-slate-200">
+                <h3 className="text-sm font-semibold text-slate-900">
                   Unmatched Statements ({unmatchedStatements.length})
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Statement lines with no matching journal entry
                 </p>
               </div>
@@ -618,37 +618,37 @@ export default function BankReconciliationPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-slate-700">
-                        <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                      <tr className="border-b border-slate-300">
+                        <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
                           Date
                         </th>
-                        <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                        <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
                           Description
                         </th>
-                        <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                        <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
                           Reference
                         </th>
-                        <th className="text-center py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                        <th className="text-center py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
                           Type
                         </th>
-                        <th className="text-right py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                        <th className="text-right py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
                           Amount
                         </th>
-                        <th className="text-center py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                        <th className="text-center py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
                           Action
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/60">
+                    <tbody className="divide-y divide-slate-100/60">
                       {unmatchedStatements.map((stmt) => (
                         <tr
                           key={stmt.id}
-                          className="hover:bg-slate-800/30 transition"
+                          className="hover:bg-slate-50 transition"
                         >
-                          <td className="py-3 px-4 text-slate-400 text-xs">
+                          <td className="py-3 px-4 text-slate-500 text-xs">
                             {formatDate(stmt.date)}
                           </td>
-                          <td className="py-3 px-4 text-slate-300 max-w-[250px] truncate">
+                          <td className="py-3 px-4 text-slate-700 max-w-[250px] truncate">
                             {stmt.description}
                           </td>
                           <td className="py-3 px-4 font-mono text-xs text-teal-400">
@@ -658,14 +658,14 @@ export default function BankReconciliationPage() {
                             <span
                               className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium uppercase ${
                                 stmt.type === "CREDIT"
-                                  ? "bg-emerald-900/60 text-emerald-300"
-                                  : "bg-red-900/60 text-red-300"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : "bg-red-100 text-red-700"
                               }`}
                             >
                               {stmt.type}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-right font-mono text-white font-medium">
+                          <td className="py-3 px-4 text-right font-mono text-slate-900 font-medium">
                             {formatCurrency(Math.abs(stmt.amount))}
                           </td>
                           <td className="py-3 px-4 text-center">
@@ -694,7 +694,7 @@ export default function BankReconciliationPage() {
       {!activeBankId && !banksLoading && (
         <div className="flex flex-col items-center justify-center py-24 text-slate-500">
           <Landmark className="w-12 h-12 mb-3 opacity-30" />
-          <p className="text-lg font-medium text-slate-400">No Bank Accounts</p>
+          <p className="text-lg font-medium text-slate-500">No Bank Accounts</p>
           <p className="text-sm mt-1">Add a bank account to start reconciliation</p>
         </div>
       )}

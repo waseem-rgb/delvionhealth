@@ -97,7 +97,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 const GENDER_COLORS: Record<string, string> = {
-  ALL: "bg-slate-500/20 text-slate-300",
+  ALL: "bg-slate-500/20 text-slate-700",
   MALE: "bg-cyan-500/20 text-cyan-400",
   FEMALE: "bg-pink-500/20 text-pink-400",
 };
@@ -177,11 +177,11 @@ export default function PackageBuilderPage() {
   return (
     <div className="min-h-[calc(100vh-120px)] flex gap-4">
       {/* ── LEFT PANEL (40%) ──────────────────────────────────────────────── */}
-      <div className="w-[40%] flex flex-col bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+      <div className="w-[40%] flex flex-col bg-white rounded-xl border border-slate-200 overflow-hidden">
         {/* Header */}
-        <div className="p-4 border-b border-slate-800 space-y-3">
+        <div className="p-4 border-b border-slate-200 space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">Packages</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Packages</h2>
             <button
               onClick={() => {
                 setEditingPackage(null);
@@ -202,7 +202,7 @@ export default function PackageBuilderPage() {
               placeholder="Search packages..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+              className="w-full pl-9 pr-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
             />
           </div>
 
@@ -211,7 +211,7 @@ export default function PackageBuilderPage() {
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="flex-1 px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+              className="flex-1 px-2 py-1.5 bg-slate-100 border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
             >
               <option value="">All Categories</option>
               {CATEGORIES.map((c) => (
@@ -221,7 +221,7 @@ export default function PackageBuilderPage() {
             <select
               value={filterGender}
               onChange={(e) => setFilterGender(e.target.value)}
-              className="flex-1 px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+              className="flex-1 px-2 py-1.5 bg-slate-100 border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
             >
               <option value="">All Genders</option>
               {GENDERS.map((g) => (
@@ -231,7 +231,7 @@ export default function PackageBuilderPage() {
             <select
               value={filterActive}
               onChange={(e) => setFilterActive(e.target.value as "" | "true" | "false")}
-              className="flex-1 px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+              className="flex-1 px-2 py-1.5 bg-slate-100 border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
             >
               <option value="">All Status</option>
               <option value="true">Active</option>
@@ -270,16 +270,16 @@ export default function PackageBuilderPage() {
       </div>
 
       {/* ── RIGHT PANEL (60%) ─────────────────────────────────────────────── */}
-      <div className="w-[60%] flex flex-col bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+      <div className="w-[60%] flex flex-col bg-white rounded-xl border border-slate-200 overflow-hidden">
         {/* Tabs */}
-        <div className="flex border-b border-slate-800">
+        <div className="flex border-b border-slate-200">
           <button
             onClick={() => setActiveTab("ai")}
             className={cn(
               "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
               activeTab === "ai"
                 ? "text-blue-400 border-b-2 border-blue-400 bg-blue-500/5"
-                : "text-slate-400 hover:text-slate-300"
+                : "text-slate-500 hover:text-slate-700"
             )}
           >
             <Sparkles className="h-4 w-4" />
@@ -291,7 +291,7 @@ export default function PackageBuilderPage() {
               "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
               activeTab === "manual"
                 ? "text-blue-400 border-b-2 border-blue-400 bg-blue-500/5"
-                : "text-slate-400 hover:text-slate-300"
+                : "text-slate-500 hover:text-slate-700"
             )}
           >
             <Wrench className="h-4 w-4" />
@@ -340,26 +340,26 @@ function PackageCard({
       className={cn(
         "p-3 rounded-lg border transition-colors",
         pkg.isActive
-          ? "bg-slate-800/50 border-slate-700 hover:border-slate-600"
-          : "bg-slate-800/20 border-slate-800 opacity-60"
+          ? "bg-slate-100/50 border-slate-300 hover:border-slate-600"
+          : "bg-slate-50 border-slate-200 opacity-60"
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             {pkg.isFeatured && <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400 shrink-0" />}
-            <h3 className="text-sm font-medium text-white truncate">{pkg.name}</h3>
+            <h3 className="text-sm font-medium text-slate-900 truncate">{pkg.name}</h3>
           </div>
           {pkg.code && <p className="text-xs text-slate-500 mt-0.5">{pkg.code}</p>}
         </div>
         <div className="flex items-center gap-1">
           {pkg.category && (
-            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", CATEGORY_COLORS[pkg.category] ?? "bg-slate-600/30 text-slate-400")}>
+            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", CATEGORY_COLORS[pkg.category] ?? "bg-slate-600/30 text-slate-500")}>
               {pkg.category}
             </span>
           )}
           {pkg.targetGender && pkg.targetGender !== "ALL" && (
-            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", GENDER_COLORS[pkg.targetGender] ?? "bg-slate-600/30 text-slate-400")}>
+            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", GENDER_COLORS[pkg.targetGender] ?? "bg-slate-600/30 text-slate-500")}>
               {pkg.targetGender}
             </span>
           )}
@@ -372,9 +372,9 @@ function PackageCard({
         </p>
       )}
 
-      <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-700/50">
+      <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-300/50">
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-slate-500">
             <Beaker className="h-3 w-3 inline mr-1" />
             {testsCount} tests
           </span>
@@ -388,18 +388,18 @@ function PackageCard({
                 )}
               </>
             ) : (
-              <span className="text-sm font-semibold text-white">{formatCurrency(pkg.mrpPrice)}</span>
+              <span className="text-sm font-semibold text-slate-900">{formatCurrency(pkg.mrpPrice)}</span>
             )}
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={onEdit} className="p-1.5 rounded hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Edit">
+          <button onClick={onEdit} className="p-1.5 rounded hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors" title="Edit">
             <Edit className="h-3.5 w-3.5" />
           </button>
-          <button onClick={onToggle} className="p-1.5 rounded hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title={pkg.isActive ? "Deactivate" : "Activate"}>
+          <button onClick={onToggle} className="p-1.5 rounded hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors" title={pkg.isActive ? "Deactivate" : "Activate"}>
             <Power className="h-3.5 w-3.5" />
           </button>
-          <button onClick={onDuplicate} className="p-1.5 rounded hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Duplicate">
+          <button onClick={onDuplicate} className="p-1.5 rounded hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors" title="Duplicate">
             <Copy className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -414,14 +414,14 @@ function LoadingSkeleton() {
   return (
     <div className="space-y-2">
       {[1, 2, 3, 4, 5].map((i) => (
-        <div key={i} className="p-3 rounded-lg border border-slate-800 animate-pulse">
+        <div key={i} className="p-3 rounded-lg border border-slate-200 animate-pulse">
           <div className="flex items-center gap-2">
-            <div className="h-4 w-32 bg-slate-700 rounded" />
-            <div className="h-4 w-16 bg-slate-700 rounded" />
+            <div className="h-4 w-32 bg-slate-200 rounded" />
+            <div className="h-4 w-16 bg-slate-200 rounded" />
           </div>
           <div className="flex items-center gap-3 mt-3">
-            <div className="h-3 w-16 bg-slate-700 rounded" />
-            <div className="h-4 w-20 bg-slate-700 rounded" />
+            <div className="h-3 w-16 bg-slate-200 rounded" />
+            <div className="h-4 w-20 bg-slate-200 rounded" />
           </div>
         </div>
       ))}
@@ -579,10 +579,10 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
   return (
     <div className="flex flex-col h-full">
       {/* Context Section */}
-      <div className="border-b border-slate-800">
+      <div className="border-b border-slate-200">
         <button
           onClick={() => setContextOpen(!contextOpen)}
-          className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-800/50 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100/50 transition-colors"
         >
           <span className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-slate-500" />
@@ -601,7 +601,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                     onClick={() => setTargetGender(g)}
                     className={cn(
                       "flex-1 py-1 text-xs rounded font-medium transition-colors",
-                      targetGender === g ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                      targetGender === g ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                     )}
                   >
                     {g}
@@ -617,14 +617,14 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                   placeholder="Min"
                   value={ageMin}
                   onChange={(e) => setAgeMin(e.target.value)}
-                  className="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-white placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                  className="w-full px-2 py-1 bg-slate-100 border border-slate-300 rounded text-xs text-slate-900 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
                 />
                 <input
                   type="number"
                   placeholder="Max"
                   value={ageMax}
                   onChange={(e) => setAgeMax(e.target.value)}
-                  className="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-white placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                  className="w-full px-2 py-1 bg-slate-100 border border-slate-300 rounded text-xs text-slate-900 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
                 />
               </div>
             </div>
@@ -635,7 +635,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                 placeholder="e.g. 2000"
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
-                className="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-white placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                className="w-full px-2 py-1 bg-slate-100 border border-slate-300 rounded text-xs text-slate-900 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
               />
             </div>
             <div>
@@ -645,7 +645,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                 placeholder="e.g. fatigue, routine checkup"
                 value={symptoms}
                 onChange={(e) => setSymptoms(e.target.value)}
-                className="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-white placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                className="w-full px-2 py-1 bg-slate-100 border border-slate-300 rounded text-xs text-slate-900 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
               />
             </div>
           </div>
@@ -655,7 +655,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
       {/* Chat + Preview split */}
       <div className="flex-1 flex overflow-hidden">
         {/* Chat Area */}
-        <div className={cn("flex flex-col", suggestion ? "w-1/2 border-r border-slate-800" : "w-full")}>
+        <div className={cn("flex flex-col", suggestion ? "w-1/2 border-r border-slate-200" : "w-full")}>
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.map((msg) => (
@@ -670,14 +670,14 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                     "max-w-[80%] px-3 py-2 rounded-lg text-sm",
                     msg.role === "user"
                       ? "bg-blue-600 text-white rounded-br-sm"
-                      : "bg-slate-800 text-slate-200 rounded-bl-sm"
+                      : "bg-slate-100 text-slate-200 rounded-bl-sm"
                   )}
                 >
                   {msg.content}
                 </div>
                 {msg.role === "user" && (
-                  <div className="shrink-0 w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center">
-                    <User className="h-4 w-4 text-slate-400" />
+                  <div className="shrink-0 w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center">
+                    <User className="h-4 w-4 text-slate-500" />
                   </div>
                 )}
               </div>
@@ -687,7 +687,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                 <div className="w-7 h-7 rounded-full bg-blue-600/20 flex items-center justify-center">
                   <Bot className="h-4 w-4 text-blue-400" />
                 </div>
-                <div className="bg-slate-800 rounded-lg px-4 py-2">
+                <div className="bg-slate-100 rounded-lg px-4 py-2">
                   <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />
                 </div>
               </div>
@@ -701,7 +701,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
               <button
                 key={p}
                 onClick={() => sendMessage(p)}
-                className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded-full border border-slate-700 transition-colors"
+                className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 rounded-full border border-slate-300 transition-colors"
               >
                 {p}
               </button>
@@ -709,7 +709,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
           </div>
 
           {/* Input Bar */}
-          <div className="p-3 border-t border-slate-800">
+          <div className="p-3 border-t border-slate-200">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -722,12 +722,12 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                   }
                 }}
                 placeholder="Describe the package you want to build..."
-                className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                className="flex-1 px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               />
               <button
                 onClick={() => sendMessage(inputText)}
                 disabled={chatMut.isPending || !inputText.trim()}
-                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg transition-colors"
+                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-500 text-white rounded-lg transition-colors"
               >
                 <Send className="h-4 w-4" />
               </button>
@@ -738,7 +738,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
         {/* Package Preview */}
         {suggestion && (
           <div className="w-1/2 overflow-y-auto p-4 space-y-4">
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-blue-400" />
               Package Preview
             </h3>
@@ -749,7 +749,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
               <input
                 value={previewName}
                 onChange={(e) => setPreviewName(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
               />
             </div>
 
@@ -759,7 +759,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
               <select
                 value={previewCategory}
                 onChange={(e) => setPreviewCategory(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>{c}</option>
@@ -774,7 +774,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                 <select
                   value={previewGender}
                   onChange={(e) => setPreviewGender(e.target.value)}
-                  className="w-full px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                  className="w-full px-2 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
                 >
                   {GENDERS.map((g) => (
                     <option key={g} value={g}>{g}</option>
@@ -787,7 +787,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                   type="number"
                   value={previewAgeMin}
                   onChange={(e) => setPreviewAgeMin(e.target.value)}
-                  className="w-full px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                  className="w-full px-2 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
                 />
               </div>
               <div>
@@ -796,7 +796,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                   type="number"
                   value={previewAgeMax}
                   onChange={(e) => setPreviewAgeMax(e.target.value)}
-                  className="w-full px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                  className="w-full px-2 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
                 />
               </div>
             </div>
@@ -820,10 +820,10 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                     placeholder="Search tests..."
                     value={testSearchQuery}
                     onChange={(e) => setTestSearchQuery(e.target.value)}
-                    className="w-full px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                    className="w-full px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
                   />
                   {searchedTests.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg max-h-40 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-slate-100 border border-slate-300 rounded-lg max-h-40 overflow-y-auto">
                       {searchedTests.map((t) => (
                         <button
                           key={t.id}
@@ -833,11 +833,11 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                             }
                             setTestSearchQuery("");
                           }}
-                          className="w-full text-left px-3 py-2 hover:bg-slate-700 text-xs text-white border-b border-slate-700/50 last:border-0"
+                          className="w-full text-left px-3 py-2 hover:bg-slate-200 text-xs text-slate-900 border-b border-slate-300/50 last:border-0"
                         >
                           <span className="font-medium">{t.name}</span>
                           <span className="text-slate-500 ml-2">{t.code}</span>
-                          <span className="text-slate-400 float-right">{formatCurrency(t.price)}</span>
+                          <span className="text-slate-500 float-right">{formatCurrency(t.price)}</span>
                         </button>
                       ))}
                     </div>
@@ -847,7 +847,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
 
               <div className="flex flex-wrap gap-1.5">
                 {previewTests.map((t) => (
-                  <span key={t.id} className="flex items-center gap-1 px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-slate-300">
+                  <span key={t.id} className="flex items-center gap-1 px-2 py-1 bg-slate-100 border border-slate-300 rounded text-xs text-slate-700">
                     {t.name}
                     <button
                       onClick={() => setPreviewTests((prev) => prev.filter((pt) => pt.id !== t.id))}
@@ -864,7 +864,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-500">MRP Total</span>
-                <span className="text-white font-medium">{formatCurrency(mrpTotal)}</span>
+                <span className="text-slate-900 font-medium">{formatCurrency(mrpTotal)}</span>
               </div>
               <div>
                 <label className="text-xs text-slate-500 mb-1 block">Package Price</label>
@@ -872,7 +872,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                   type="number"
                   value={previewPrice}
                   onChange={(e) => setPreviewPrice(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                  className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
                 />
               </div>
               {mrpTotal > 0 && previewPrice && Number(previewPrice) < mrpTotal && (
@@ -889,7 +889,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                   type="number"
                   value={previewCorpPrice}
                   onChange={(e) => setPreviewCorpPrice(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                  className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
                 />
               </div>
             </div>
@@ -901,7 +901,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
                 value={previewBrochure}
                 onChange={(e) => setPreviewBrochure(e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40 resize-none"
+                className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40 resize-none"
               />
             </div>
 
@@ -909,7 +909,7 @@ function AIBuilderTab({ onPackageSaved }: { onPackageSaved: () => void }) {
             <button
               onClick={() => saveMut.mutate()}
               disabled={saveMut.isPending}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:text-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
             >
               {saveMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}
               Save Package
@@ -1045,11 +1045,11 @@ function ManualBuilderTab({
   return (
     <div className="h-full overflow-y-auto p-5 space-y-5">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-white">
+        <h3 className="text-sm font-semibold text-slate-900">
           {editingPackage ? "Edit Package" : "Create New Package"}
         </h3>
         {editingPackage && (
-          <button onClick={onCancel} className="text-xs text-slate-400 hover:text-white transition-colors">
+          <button onClick={onCancel} className="text-xs text-slate-500 hover:text-slate-900 transition-colors">
             Cancel
           </button>
         )}
@@ -1062,7 +1062,7 @@ function ManualBuilderTab({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Complete Blood Profile"
-          className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
         />
       </div>
 
@@ -1072,7 +1072,7 @@ function ManualBuilderTab({
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
         >
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>{c}</option>
@@ -1087,7 +1087,7 @@ function ManualBuilderTab({
           <select
             value={gender}
             onChange={(e) => setGender(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
           >
             {GENDERS.map((g) => (
               <option key={g} value={g}>{g}</option>
@@ -1101,7 +1101,7 @@ function ManualBuilderTab({
             value={ageMin}
             onChange={(e) => setAgeMin(e.target.value)}
             placeholder="0"
-            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
           />
         </div>
         <div>
@@ -1111,7 +1111,7 @@ function ManualBuilderTab({
             value={ageMax}
             onChange={(e) => setAgeMax(e.target.value)}
             placeholder="99"
-            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
           />
         </div>
       </div>
@@ -1130,10 +1130,10 @@ function ManualBuilderTab({
             }}
             onFocus={() => setShowSearchDropdown(true)}
             placeholder="Search tests by name or code..."
-            className="w-full pl-9 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            className="w-full pl-9 pr-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
           />
           {showSearchDropdown && searchResults.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg max-h-48 overflow-y-auto shadow-xl">
+            <div className="absolute z-10 w-full mt-1 bg-slate-100 border border-slate-300 rounded-lg max-h-48 overflow-y-auto shadow-xl">
               {searchResults.map((t) => {
                 const alreadyAdded = selectedTests.some((s) => s.id === t.id);
                 return (
@@ -1146,16 +1146,16 @@ function ManualBuilderTab({
                       setShowSearchDropdown(false);
                     }}
                     className={cn(
-                      "w-full text-left px-3 py-2 text-xs border-b border-slate-700/50 last:border-0",
+                      "w-full text-left px-3 py-2 text-xs border-b border-slate-300/50 last:border-0",
                       alreadyAdded
                         ? "text-slate-600 cursor-not-allowed"
-                        : "text-white hover:bg-slate-700"
+                        : "text-slate-900 hover:bg-slate-200"
                     )}
                   >
                     <span className="font-medium">{t.name}</span>
                     <span className="text-slate-500 ml-2">{t.code}</span>
                     {t.department && <span className="text-slate-600 ml-2">({t.department})</span>}
-                    <span className="text-slate-400 float-right">{formatCurrency(t.price)}</span>
+                    <span className="text-slate-500 float-right">{formatCurrency(t.price)}</span>
                     {alreadyAdded && <span className="text-slate-600 float-right mr-2">(added)</span>}
                   </button>
                 );
@@ -1171,13 +1171,13 @@ function ManualBuilderTab({
           <label className="text-xs text-slate-500 mb-2 block">Selected Tests ({selectedTests.length})</label>
           <div className="space-y-1 max-h-48 overflow-y-auto">
             {selectedTests.map((t) => (
-              <div key={t.id} className="flex items-center justify-between px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg">
+              <div key={t.id} className="flex items-center justify-between px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-lg">
                 <div className="flex items-center gap-2 min-w-0">
                   <Beaker className="h-3.5 w-3.5 text-slate-500 shrink-0" />
-                  <span className="text-xs text-white truncate">{t.name}</span>
+                  <span className="text-xs text-slate-900 truncate">{t.name}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs text-slate-400">{formatCurrency(t.price)}</span>
+                  <span className="text-xs text-slate-500">{formatCurrency(t.price)}</span>
                   <button
                     onClick={() => setSelectedTests((prev) => prev.filter((s) => s.id !== t.id))}
                     className="text-slate-500 hover:text-red-400 transition-colors"
@@ -1192,10 +1192,10 @@ function ManualBuilderTab({
       )}
 
       {/* Pricing */}
-      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700 space-y-3">
+      <div className="p-3 bg-slate-100/50 rounded-lg border border-slate-300 space-y-3">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-slate-400">MRP Total</span>
-          <span className="text-white font-semibold">{formatCurrency(mrpTotal)}</span>
+          <span className="text-slate-500">MRP Total</span>
+          <span className="text-slate-900 font-semibold">{formatCurrency(mrpTotal)}</span>
         </div>
         <div>
           <label className="text-xs text-slate-500 mb-1 block">Package Price</label>
@@ -1204,7 +1204,7 @@ function ManualBuilderTab({
             value={packagePrice}
             onChange={(e) => setPackagePrice(e.target.value)}
             placeholder="Enter offer price"
-            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+            className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
           />
         </div>
         {mrpTotal > 0 && packagePrice && Number(packagePrice) < mrpTotal && (
@@ -1222,7 +1222,7 @@ function ManualBuilderTab({
             value={corpPrice}
             onChange={(e) => setCorpPrice(e.target.value)}
             placeholder="Special corporate pricing"
-            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+            className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
           />
         </div>
       </div>
@@ -1235,7 +1235,7 @@ function ManualBuilderTab({
             type="date"
             value={validFrom}
             onChange={(e) => setValidFrom(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 [color-scheme:dark]"
+            className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/40 [color-scheme:dark]"
           />
         </div>
         <div>
@@ -1244,7 +1244,7 @@ function ManualBuilderTab({
             type="date"
             value={validTo}
             onChange={(e) => setValidTo(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 [color-scheme:dark]"
+            className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/40 [color-scheme:dark]"
           />
         </div>
       </div>
@@ -1257,18 +1257,18 @@ function ManualBuilderTab({
           onChange={(e) => setPrepInstructions(e.target.value)}
           rows={3}
           placeholder="e.g. 12 hours fasting required, avoid alcohol 24 hours before..."
-          className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 resize-none"
+          className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 resize-none"
         />
       </div>
 
       {/* Fasting Toggle */}
       <div className="flex items-center justify-between">
-        <label className="text-sm text-slate-300">Fasting Required</label>
+        <label className="text-sm text-slate-700">Fasting Required</label>
         <button
           onClick={() => setFastingRequired(!fastingRequired)}
           className={cn(
             "w-10 h-5 rounded-full transition-colors relative",
-            fastingRequired ? "bg-blue-600" : "bg-slate-700"
+            fastingRequired ? "bg-blue-600" : "bg-slate-200"
           )}
         >
           <div
@@ -1284,7 +1284,7 @@ function ManualBuilderTab({
       <button
         onClick={() => saveMut.mutate()}
         disabled={saveMut.isPending || !name.trim()}
-        className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:text-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
       >
         {saveMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}
         {editingPackage ? "Update Package" : "Save Package"}

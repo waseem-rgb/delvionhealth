@@ -95,7 +95,11 @@ export class OrdersService {
     const [patient, branch] = await Promise.all([
       this.prisma.patient.findFirst({
         where: { id: dto.patientId, tenantId, isActive: true },
-        select: { id: true, firstName: true, lastName: true, mrn: true },
+        select: {
+          id: true, firstName: true, lastName: true, mrn: true,
+          reportDeliveryMode: true, preferredChannel: true,
+          reportMobile: true, reportEmail: true,
+        },
       }),
       this.prisma.tenantBranch.findFirst({
         where: { id: dto.branchId, tenantId, isActive: true },
@@ -195,6 +199,11 @@ export class OrdersService {
           collectionType: (dto.collectionType ?? "WALK_IN") as never,
           billedAt: new Date(),
           ...(dto.organizationId && { organizationId: dto.organizationId }),
+          // Inherit delivery preferences from patient (can be overridden per order)
+          reportDeliveryMode: patient.reportDeliveryMode ?? "MANUAL",
+          preferredChannel: patient.preferredChannel ?? [],
+          ...(patient.reportMobile && { reportMobile: patient.reportMobile }),
+          ...(patient.reportEmail && { reportEmail: patient.reportEmail }),
           items: { create: orderItemsData },
         },
         include: {

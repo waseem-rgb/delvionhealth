@@ -212,6 +212,15 @@ export class TestCatalogController {
     return { tests };
   }
 
+  // POST /test-catalog/classify-investigation-types
+  @Post("classify-investigation-types")
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.LAB_MANAGER)
+  @ApiOperation({ summary: "Auto-classify tests as pathology vs imaging/investigation using name patterns" })
+  classifyInvestigationTypes(@CurrentUser() user: JwtPayload) {
+    return this.testCatalogService.classifyInvestigationTypes(user.tenantId);
+  }
+
   // POST /test-catalog/seed-parameters
   @Post("seed-parameters")
   @UseGuards(RolesGuard)
@@ -219,6 +228,13 @@ export class TestCatalogController {
   @ApiOperation({ summary: "Seed standard report parameters for common tests" })
   seedParameters(@CurrentUser() user: JwtPayload) {
     return this.testCatalogService.seedReportParameters(user.tenantId);
+  }
+
+  // GET /test-catalog/parameter-stats
+  @Get("parameter-stats")
+  @ApiOperation({ summary: "Get parameter seeding stats (counts by category, completion %)" })
+  getParameterStats(@CurrentUser() user: JwtPayload) {
+    return this.testCatalogService.getParameterStats(user.tenantId);
   }
 
   // ─── Profile / Panel Endpoints ──────────────────────────────────

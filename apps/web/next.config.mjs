@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   transpilePackages: ["@delvion/ui", "@delvion/types"],
   images: {
     remotePatterns: [
@@ -7,6 +8,11 @@ const nextConfig = {
         protocol: "http",
         hostname: "localhost",
         port: "9000",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: process.env.MINIO_PUBLIC_HOST ?? "minio.delvionhealth.com",
         pathname: "/**",
       },
     ],

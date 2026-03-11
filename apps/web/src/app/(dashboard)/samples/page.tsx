@@ -20,6 +20,7 @@ import {
   X,
   ChevronRight,
   AlertCircle,
+  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import { DataTable } from "@/components/tables/DataTable";
@@ -46,6 +47,7 @@ interface Sample {
   createdAt: string;
   notes?: string | null;
   order: {
+    id: string;
     orderNumber: string;
     priority: string;
     createdAt: string;
@@ -66,7 +68,7 @@ interface SampleCounts {
   rejected: number;
 }
 
-type ModalType = "collect" | "move" | "reject" | "custody" | null;
+type ModalType = "collect" | "move" | "reject" | "custody" | "outsource" | null;
 
 const KANBAN_COLUMNS: { key: string; label: string; status: string }[] = [
   { key: "PENDING_COLLECTION", label: "Pending Collection", status: "PENDING_COLLECTION" },
@@ -261,8 +263,14 @@ function buildColumns(onAction: (s: Sample, type: ModalType) => void): ColumnDef
           >
             Custody
           </button>
-          <Link href={`/samples/${row.original.id}`} className="text-xs text-[#1B4F8A] hover:underline font-medium">
-            View
+          <button
+            onClick={() => onAction(row.original, "outsource")}
+            className="text-xs text-orange-600 hover:underline font-medium"
+          >
+            Outsource
+          </button>
+          <Link href={`/operations/result-entry/${row.original.order.id}`} className="text-xs text-[#1B4F8A] hover:underline font-medium">
+            Enter Results
           </Link>
         </div>
       ),
@@ -328,6 +336,41 @@ function ActionModal({
         });
     }
   }, [modalType, sample.id]);
+
+  if (modalType === "outsource") {
+    return (
+      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm">
+          <div className="flex items-center justify-between p-4 border-b border-slate-100">
+            <h3 className="font-semibold text-slate-900">Outsource Sample</h3>
+            <button onClick={onClose}><X size={18} /></button>
+          </div>
+          <div className="p-4 space-y-3">
+            <div className="text-sm text-slate-600">
+              <p><span className="font-mono font-semibold">{sample.barcodeId}</span> — {sample.order.patient.firstName} {sample.order.patient.lastName}</p>
+              <p className="text-xs text-slate-400 mt-1">{sample.order._count.items} test(s) · Order {sample.order.orderNumber}</p>
+            </div>
+            <p className="text-xs text-slate-500">
+              This sample will be dispatched to a reference laboratory. Manage outsourcing details on the Outsourcing page.
+            </p>
+          </div>
+          <div className="flex gap-2 p-4 border-t border-slate-100">
+            <button onClick={onClose} className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">
+              Cancel
+            </button>
+            <Link
+              href={`/outsourcing?sample=${sample.id}&order=${sample.order.id}`}
+              onClick={onClose}
+              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700"
+            >
+              <ExternalLink size={14} />
+              Go to Outsourcing
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (modalType === "custody") {
     return (

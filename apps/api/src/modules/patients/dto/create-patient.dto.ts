@@ -147,4 +147,35 @@ export class CreatePatientDto {
   @IsOptional()
   @IsString()
   referringDoctorId?: string;
+
+  @ApiPropertyOptional({ description: "Report delivery mode: AUTO, MANUAL, DOWNLOAD", example: "AUTO" })
+  @IsOptional()
+  @IsString()
+  reportDeliveryMode?: string;
+
+  @ApiPropertyOptional({ description: "Preferred delivery channels: WHATSAPP, EMAIL, SMS", type: [String] })
+  @IsOptional()
+  preferredChannel?: string[];
+
+  @ApiPropertyOptional({ description: "Mobile for report delivery (if different from primary)" })
+  @IsOptional()
+  @IsString()
+  reportMobile?: string;
+
+  @ApiPropertyOptional({ description: "Email for report delivery (if different from primary)" })
+  @IsOptional()
+  @IsEmail()
+  reportEmail?: string;
+
+  @ApiPropertyOptional({ description: "WhatsApp opt-in", example: true })
+  @IsOptional()
+  whatsappOptIn?: boolean;
+
+  @ApiPropertyOptional({ description: "Email opt-in", example: true })
+  @IsOptional()
+  emailOptIn?: boolean;
+
+  @ApiPropertyOptional({ description: "SMS opt-in", example: true })
+  @IsOptional()
+  smsOptIn?: boolean;
 }

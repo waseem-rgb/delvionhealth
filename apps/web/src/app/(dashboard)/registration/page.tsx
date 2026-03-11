@@ -180,6 +180,14 @@ interface RegistrationForm {
   patientCategory: string;
   allergies: string;
   chiefComplaint: string;
+  reportDeliveryMode: "AUTO" | "MANUAL" | "DOWNLOAD";
+  preferredChannels: string[];
+  reportMobile: string;
+  reportEmail: string;
+  reportLanguage: string;
+  whatsappOptIn: boolean;
+  emailOptIn: boolean;
+  smsOptIn: boolean;
 }
 
 const EMPTY_FORM: RegistrationForm = {
@@ -209,6 +217,14 @@ const EMPTY_FORM: RegistrationForm = {
   patientCategory: "",
   allergies: "",
   chiefComplaint: "",
+  reportDeliveryMode: "MANUAL",
+  preferredChannels: ["WHATSAPP"],
+  reportMobile: "",
+  reportEmail: "",
+  reportLanguage: "ENGLISH",
+  whatsappOptIn: true,
+  emailOptIn: true,
+  smsOptIn: false,
 };
 
 const DESIGNATIONS: Designation[] = ["Mr.", "Mrs.", "Ms.", "Dr.", "Baby"];
@@ -794,6 +810,7 @@ export default function RegistrationPage() {
   const [createdInvoiceId, setCreatedInvoiceId] = useState<string | null>(null);
   const [orderCreating, setOrderCreating] = useState(false);
   const [createdToken, setCreatedToken] = useState<string | null>(null);
+  const [investigationTokens, setInvestigationTokens] = useState<Array<{ id?: string; tokenDisplay: string; departmentName?: string; investigationType?: string }>>([]);
   const [whatsAppSent, setWhatsAppSent] = useState(false);
 
   // -- Top section state --
@@ -1112,6 +1129,27 @@ export default function RegistrationPage() {
         // Token generation is non-blocking
       }
 
+      // Auto-issue investigation tokens for non-pathology tests
+      try {
+        const nonPathologyTests = selectedTests.filter(
+          (t) => (t as unknown as { investigationType?: string }).investigationType &&
+                 (t as unknown as { investigationType?: string }).investigationType !== "PATHOLOGY"
+        );
+        if (nonPathologyTests.length > 0) {
+          const invTokenRes = await api.post<{ data: Array<{ tokenDisplay: string; departmentName?: string; investigationType?: string }> }>("/front-desk/queue/issue-investigation", {
+            orderId: order.id,
+            patientName: form.fullName,
+            patientId: registeredPatientId,
+            phone: form.phone,
+            orderItems: nonPathologyTests.map((t) => ({ testCatalogId: t.id })),
+          });
+          const invTokens = invTokenRes.data?.data ?? invTokenRes.data ?? [];
+          setInvestigationTokens(Array.isArray(invTokens) ? invTokens : []);
+        }
+      } catch {
+        // Investigation token generation is non-blocking
+      }
+
       // Auto-send WhatsApp notification
       if (form.phone) {
         try {
@@ -1329,6 +1367,7 @@ export default function RegistrationPage() {
     setOrderNumber(null);
     setCreatedInvoiceId(null);
     setCreatedToken(null);
+    setInvestigationTokens([]);
     setWhatsAppSent(false);
     resetForm();
     toast.success("Ready for next registration");
@@ -1368,6 +1407,14 @@ export default function RegistrationPage() {
     if (form.rateListId) payload.rateListId = form.rateListId;
     if (form.organizationId) payload.organizationId = form.organizationId;
     if (form.referralDoctorId) payload.referralDoctorId = form.referralDoctorId;
+    payload.reportDeliveryMode = form.reportDeliveryMode || "MANUAL";
+    payload.preferredChannel = form.preferredChannels ?? [];
+    if (form.reportMobile) payload.reportMobile = form.reportMobile;
+    if (form.reportEmail) payload.reportEmail = form.reportEmail;
+    payload.reportLanguage = form.reportLanguage || "ENGLISH";
+    payload.whatsappOptIn = form.whatsappOptIn;
+    payload.emailOptIn = form.emailOptIn;
+    payload.smsOptIn = form.smsOptIn;
 
     if (selectedPatient) {
       // Existing patient — update instead of create
@@ -2018,6 +2065,63 @@ export default function RegistrationPage() {
                     className={inputCls}
                   />
                 </div>
+              </div>
+
+              {/* Row 9: Report Delivery Preference */}
+              <div>
+                <label className={labelCls}>Report Delivery Preference</label>
+                <div className="flex gap-2 mt-1">
+                  {(["AUTO", "MANUAL", "DOWNLOAD"] as const).map((mode) => {
+                    const labels: Record<string, string> = { AUTO: "⚡ Auto-Send", MANUAL: "👤 Manual", DOWNLOAD: "⬇ Download" };
+                    const descriptions: Record<string, string> = {
+                      AUTO: "Send automatically on approval",
+                      MANUAL: "Staff sends manually",
+                      DOWNLOAD: "Walk-in download only",
+                    };
+                    const isActive = form.reportDeliveryMode === mode;
+                    return (
+                      <button key={mode} type="button" onClick={() => updateForm("reportDeliveryMode", mode)}
+                        className={cn("flex-1 flex flex-col items-center gap-0.5 p-2.5 rounded-lg border-2 text-xs font-medium transition-all",
+                          isActive ? "border-[#1B4F8A] bg-[#1B4F8A]/5 text-[#1B4F8A]" : "border-slate-200 bg-white text-slate-500 hover:border-slate-300")}>
+                        <span className="font-semibold">{labels[mode]}</span>
+                        <span className={cn("text-[10px] leading-tight text-center", isActive ? "text-[#1B4F8A]/70" : "text-slate-400")}>{descriptions[mode]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Channels */}
+                <div className="mt-2 flex gap-2">
+                  {["WHATSAPP", "EMAIL", "SMS"].map((ch) => {
+                    const selected = (form.preferredChannels ?? []).includes(ch);
+                    const icons: Record<string, string> = { WHATSAPP: "💬", EMAIL: "✉️", SMS: "📱" };
+                    return (
+                      <button key={ch} type="button"
+                        onClick={() => {
+                          const current = form.preferredChannels ?? [];
+                          updateForm("preferredChannels", selected ? current.filter((c) => c !== ch) : [...current, ch]);
+                        }}
+                        className={cn("flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded border text-xs font-medium transition",
+                          selected ? "border-teal-500 bg-teal-50 text-teal-700" : "border-slate-200 bg-white text-slate-400 hover:border-slate-300")}>
+                        <span>{icons[ch]}</span> {ch.charAt(0) + ch.slice(1).toLowerCase()}
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Report Mobile — same as phone */}
+                <div className="mt-2 flex items-center gap-2">
+                  <input type="checkbox" id="reportMobileSame" checked={!form.reportMobile}
+                    onChange={(e) => updateForm("reportMobile", e.target.checked ? "" : form.phone)}
+                    className="w-3.5 h-3.5 accent-teal-600" />
+                  <label htmlFor="reportMobileSame" className="text-xs text-slate-500">Report mobile same as phone</label>
+                </div>
+                {form.reportMobile !== "" && (
+                  <input value={form.reportMobile} onChange={(e) => updateForm("reportMobile", e.target.value)}
+                    placeholder="Report mobile number" className={cn(inputCls, "mt-1 text-xs py-1.5")} />
+                )}
+                {(form.preferredChannels ?? []).includes("EMAIL") && (
+                  <input value={form.reportEmail} onChange={(e) => updateForm("reportEmail", e.target.value)}
+                    placeholder="Report email address" className={cn(inputCls, "mt-1 text-xs py-1.5")} />
+                )}
               </div>
             </div>
 
@@ -2770,9 +2874,32 @@ export default function RegistrationPage() {
             <p className="text-xs font-semibold uppercase tracking-[3px] opacity-70 mb-1">Registration Complete</p>
             {createdToken && (
               <div className="mb-3">
-                <p className="text-xs uppercase tracking-widest opacity-60 mb-1">Token Number</p>
+                <p className="text-xs uppercase tracking-widest opacity-60 mb-1">Lab Token</p>
                 <div className="inline-block bg-white/20 rounded-xl px-8 py-3">
                   <p className="text-4xl font-black tracking-[0.3em] font-mono">{createdToken}</p>
+                </div>
+              </div>
+            )}
+            {investigationTokens.length > 0 && (
+              <div className="mt-3 mb-1">
+                <p className="text-xs uppercase tracking-widest opacity-60 mb-2">Department Tokens</p>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  {investigationTokens.map((t, i) => (
+                    <div key={i} className="bg-white/20 rounded-xl px-5 py-2 text-center">
+                      <p className="text-2xl font-black font-mono tracking-[0.2em]">{t.tokenDisplay}</p>
+                      <p className="text-xs opacity-70 mt-0.5">{t.departmentName ?? t.investigationType}</p>
+                      {t.id && (
+                        <a
+                          href={`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1"}/front-desk/queue/${t.id}/pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1.5 inline-block text-xs bg-white/20 hover:bg-white/30 rounded-full px-3 py-0.5 transition"
+                        >
+                          📄 Print Slip
+                        </a>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

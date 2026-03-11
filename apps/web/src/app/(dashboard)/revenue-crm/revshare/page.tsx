@@ -122,17 +122,17 @@ export default function RevSharePage() {
   // ── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
+    <div className="min-h-screen bg-slate-50 p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Rev Share</h1>
-        <p className="text-slate-400">
+        <h1 className="text-2xl font-bold text-slate-900">Rev Share</h1>
+        <p className="text-slate-500">
           Track and manage rev share for doctors and sales reps
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 flex gap-1 rounded-lg border border-slate-800 bg-slate-900 p-1 w-fit">
+      <div className="mb-6 flex gap-1 rounded-lg border border-slate-200 bg-white p-1 w-fit">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           return (
@@ -142,7 +142,7 @@ export default function RevSharePage() {
               className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === tab.key
                   ? "bg-blue-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -159,11 +159,11 @@ export default function RevSharePage() {
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="h-24 animate-pulse rounded-xl bg-slate-900"
+                className="h-24 animate-pulse rounded-xl bg-white"
               />
             ))}
           </div>
-          <div className="h-64 animate-pulse rounded-xl bg-slate-900" />
+          <div className="h-64 animate-pulse rounded-xl bg-white" />
         </div>
       )}
 
@@ -183,7 +183,7 @@ export default function RevSharePage() {
             <select
               value={month}
               onChange={(e) => setMonth(Number(e.target.value))}
-              className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+              className="rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
             >
               {Array.from({ length: 12 }, (_, i) => (
                 <option key={i + 1} value={i + 1}>
@@ -196,7 +196,7 @@ export default function RevSharePage() {
             <select
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}
-              className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+              className="rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
             >
               {Array.from({ length: 5 }, (_, i) => {
                 const y = now.getFullYear() - 2 + i;
@@ -211,17 +211,17 @@ export default function RevSharePage() {
 
           {/* Header Stats */}
           <div className="mb-6 grid grid-cols-3 gap-4">
-            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-              <div className="flex items-center gap-2 text-sm text-slate-400">
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <div className="flex items-center gap-2 text-sm text-slate-500">
                 <TrendingUp className="h-4 w-4" />
                 Total Earned
               </div>
-              <p className="mt-1 text-xl font-bold text-white">
+              <p className="mt-1 text-xl font-bold text-slate-900">
                 {fmt(totalEarned)}
               </p>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-              <div className="flex items-center gap-2 text-sm text-slate-400">
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <div className="flex items-center gap-2 text-sm text-slate-500">
                 <CheckCircle2 className="h-4 w-4 text-green-400" />
                 Paid
               </div>
@@ -229,8 +229,8 @@ export default function RevSharePage() {
                 {fmt(totalPaid)}
               </p>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-              <div className="flex items-center gap-2 text-sm text-slate-400">
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <div className="flex items-center gap-2 text-sm text-slate-500">
                 <Clock className="h-4 w-4 text-yellow-400" />
                 Pending
               </div>
@@ -242,33 +242,33 @@ export default function RevSharePage() {
 
           {/* Table */}
           {ledger.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-slate-800 bg-slate-900 py-20">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white py-20">
               <DollarSign className="mb-4 h-12 w-12 text-slate-600" />
-              <p className="text-lg font-medium text-slate-400">
+              <p className="text-lg font-medium text-slate-500">
                 No data found
               </p>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-xl border border-slate-800">
+            <div className="overflow-hidden rounded-xl border border-slate-200">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-slate-800 bg-slate-900">
-                    <th className="px-4 py-3 text-left text-sm font-medium text-slate-400">
+                  <tr className="border-b border-slate-200 bg-white">
+                    <th className="px-4 py-3 text-left text-sm font-medium text-slate-500">
                       {activeTab === "DOCTOR" ? "Doctor" : "Sales Rep"}
                     </th>
-                    <th className="px-4 py-3 text-right text-sm font-medium text-slate-400">
+                    <th className="px-4 py-3 text-right text-sm font-medium text-slate-500">
                       Revenue Generated
                     </th>
-                    <th className="px-4 py-3 text-right text-sm font-medium text-slate-400">
+                    <th className="px-4 py-3 text-right text-sm font-medium text-slate-500">
                       Rev Share %
                     </th>
-                    <th className="px-4 py-3 text-right text-sm font-medium text-slate-400">
+                    <th className="px-4 py-3 text-right text-sm font-medium text-slate-500">
                       Amount Earned
                     </th>
-                    <th className="px-4 py-3 text-center text-sm font-medium text-slate-400">
+                    <th className="px-4 py-3 text-center text-sm font-medium text-slate-500">
                       Status
                     </th>
-                    <th className="px-4 py-3 text-center text-sm font-medium text-slate-400">
+                    <th className="px-4 py-3 text-center text-sm font-medium text-slate-500">
                       Action
                     </th>
                   </tr>
@@ -277,23 +277,23 @@ export default function RevSharePage() {
                   {ledger.map((entry) => (
                     <tr
                       key={entry.id}
-                      className="border-b border-slate-800/50 bg-slate-900/50 hover:bg-slate-800/50"
+                      className="border-b border-slate-200/50 bg-white hover:bg-slate-100/50"
                     >
-                      <td className="px-4 py-3 text-sm text-white">
+                      <td className="px-4 py-3 text-sm text-slate-900">
                         {entry.entityName}
                       </td>
-                      <td className="px-4 py-3 text-right text-sm text-slate-300">
+                      <td className="px-4 py-3 text-right text-sm text-slate-700">
                         {fmt(entry.revenueGenerated)}
                       </td>
-                      <td className="px-4 py-3 text-right text-sm text-slate-300">
+                      <td className="px-4 py-3 text-right text-sm text-slate-700">
                         {entry.revSharePercent}%
                       </td>
-                      <td className="px-4 py-3 text-right text-sm font-medium text-white">
+                      <td className="px-4 py-3 text-right text-sm font-medium text-slate-900">
                         {fmt(entry.amountEarned)}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span
-                          className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[entry.status] ?? "bg-slate-700 text-slate-300"}`}
+                          className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[entry.status] ?? "bg-slate-200 text-slate-700"}`}
                         >
                           {entry.status}
                         </span>
@@ -322,9 +322,9 @@ export default function RevSharePage() {
       {!isLoading && !isError && activeTab === "SUMMARY" && (
         <>
           {summary.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-slate-800 bg-slate-900 py-20">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white py-20">
               <BarChart3 className="mb-4 h-12 w-12 text-slate-600" />
-              <p className="text-lg font-medium text-slate-400">
+              <p className="text-lg font-medium text-slate-500">
                 No data found
               </p>
             </div>
@@ -333,38 +333,38 @@ export default function RevSharePage() {
               {summary.map((s) => (
                 <div
                   key={s.entityType}
-                  className="rounded-xl border border-slate-800 bg-slate-900 p-6"
+                  className="rounded-xl border border-slate-200 bg-white p-6"
                 >
-                  <h3 className="mb-4 text-lg font-semibold text-white">
+                  <h3 className="mb-4 text-lg font-semibold text-slate-900">
                     {s.entityType === "DOCTOR" ? "Doctors" : "Sales Reps"}
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-slate-400">Total Revenue</p>
-                      <p className="text-lg font-bold text-white">
+                      <p className="text-sm text-slate-500">Total Revenue</p>
+                      <p className="text-lg font-bold text-slate-900">
                         {fmt(s.totalRevenue)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-400">Total Earned</p>
-                      <p className="text-lg font-bold text-white">
+                      <p className="text-sm text-slate-500">Total Earned</p>
+                      <p className="text-lg font-bold text-slate-900">
                         {fmt(s.totalEarned)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-400">Paid</p>
+                      <p className="text-sm text-slate-500">Paid</p>
                       <p className="text-lg font-bold text-green-400">
                         {fmt(s.totalPaid)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-400">Pending</p>
+                      <p className="text-sm text-slate-500">Pending</p>
                       <p className="text-lg font-bold text-yellow-400">
                         {fmt(s.totalPending)}
                       </p>
                     </div>
                   </div>
-                  <div className="mt-4 border-t border-slate-800 pt-3">
+                  <div className="mt-4 border-t border-slate-200 pt-3">
                     <p className="text-sm text-slate-500">
                       {s.count}{" "}
                       {s.entityType === "DOCTOR" ? "doctors" : "sales reps"}

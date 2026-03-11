@@ -60,14 +60,14 @@ function numberToWords(n: number): string {
 
 function statusColor(s: string) {
   switch (s?.toUpperCase()) {
-    case "PAID": return "bg-green-500/20 text-green-400 border-green-500/30";
-    case "PENDING": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-    case "OVERDUE": return "bg-red-500/20 text-red-400 border-red-500/30";
-    case "WAIVED": return "bg-slate-500/20 text-slate-400 border-slate-500/30";
-    case "APPROVED": return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-    case "POSTED": return "bg-teal-500/20 text-teal-400 border-teal-500/30";
-    case "DRAFT": return "bg-orange-500/20 text-orange-400 border-orange-500/30";
-    default: return "bg-slate-500/20 text-slate-400 border-slate-500/30";
+    case "PAID": return "bg-green-100 text-green-700 border-green-200";
+    case "PENDING": return "bg-yellow-100 text-yellow-700 border-yellow-200";
+    case "OVERDUE": return "bg-red-100 text-red-700 border-red-200";
+    case "WAIVED": return "bg-slate-100 text-slate-600 border-slate-200";
+    case "APPROVED": return "bg-blue-100 text-blue-700 border-blue-200";
+    case "POSTED": return "bg-teal-100 text-teal-700 border-teal-200";
+    case "DRAFT": return "bg-orange-100 text-orange-700 border-orange-200";
+    default: return "bg-slate-100 text-slate-600 border-slate-200";
   }
 }
 
@@ -87,18 +87,18 @@ export default function StatutoryCompliancePage() {
   const tabIcons = [CalendarDays, Banknote, FileText, Shield, Users];
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50 p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Statutory Compliance & Payroll</h1>
-        <p className="text-slate-400 text-sm mt-1">Manage payroll runs, TDS, PF, ESIC, and compliance obligations</p>
+        <h1 className="text-2xl font-bold text-slate-900">Statutory Compliance & Payroll</h1>
+        <p className="text-slate-500 text-sm mt-1">Manage payroll runs, TDS, PF, ESIC, and compliance obligations</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-900 rounded-xl p-1 border border-slate-800 w-fit">
+      <div className="flex gap-1 bg-white rounded-xl p-1 border border-slate-200 w-fit">
         {TABS.map((t, i) => {
           const Icon = tabIcons[i];
           return (
-            <button key={t} onClick={() => setTab(t)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? "bg-teal-500/20 text-teal-400 border border-teal-500/30" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}>
+            <button key={t} onClick={() => setTab(t)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? "bg-teal-500/20 text-teal-600 border border-teal-500/30" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"}`}>
               <Icon size={16} />{t}
             </button>
           );
@@ -183,10 +183,10 @@ function ComplianceCalendarTab() {
   return (
     <div className="space-y-6">
       {/* Month Navigation */}
-      <div className="flex items-center justify-between bg-slate-900 rounded-xl p-4 border border-slate-800">
-        <button onClick={prev} className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"><ChevronLeft size={20} /></button>
-        <h2 className="text-lg font-semibold text-white">{MONTHS[month - 1]} {year}</h2>
-        <button onClick={next} className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"><ChevronRight size={20} /></button>
+      <div className="flex items-center justify-between bg-white rounded-xl p-4 border border-slate-200">
+        <button onClick={prev} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors"><ChevronLeft size={20} /></button>
+        <h2 className="text-lg font-semibold text-slate-900">{MONTHS[month - 1]} {year}</h2>
+        <button onClick={next} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors"><ChevronRight size={20} /></button>
       </div>
 
       {loading ? (
@@ -194,16 +194,16 @@ function ComplianceCalendarTab() {
       ) : (
         <>
           {/* Calendar Grid */}
-          <div className="bg-slate-900 rounded-xl border border-slate-800 p-4">
+          <div className="bg-white rounded-xl border border-slate-200 p-4">
             <div className="grid grid-cols-7 gap-1 mb-2">
               {DAYS.map(d => <div key={d} className="text-center text-xs font-medium text-slate-500 py-1">{d}</div>)}
             </div>
             <div className="grid grid-cols-7 gap-1">
               {cells.map((day, i) => (
-                <div key={i} className={`min-h-[72px] rounded-lg p-2 ${day ? "bg-slate-800/50 hover:bg-slate-800 transition-colors" : ""}`}>
+                <div key={i} className={`min-h-[72px] rounded-lg p-2 ${day ? "bg-white border border-slate-200 hover:bg-slate-50 transition-colors" : ""}`}>
                   {day && (
                     <>
-                      <span className="text-xs text-slate-400">{day}</span>
+                      <span className="text-xs text-slate-500">{day}</span>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {(dueDatesByDay[day] || []).map((it: any, j: number) => (
                           <span key={j} className={`w-2 h-2 rounded-full ${calendarDotColor(it.dueDate, it.status)}`} title={`${it.obligationType} — ${it.status}`} />
@@ -214,7 +214,7 @@ function ComplianceCalendarTab() {
                 </div>
               ))}
             </div>
-            <div className="flex gap-4 mt-3 text-xs text-slate-400">
+            <div className="flex gap-4 mt-3 text-xs text-slate-500">
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> Overdue</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-500" /> Due Soon</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Paid</span>
@@ -223,14 +223,14 @@ function ComplianceCalendarTab() {
           </div>
 
           {/* List View */}
-          <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-            <div className="p-4 border-b border-slate-800"><h3 className="text-white font-semibold">Obligations</h3></div>
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="p-4 border-b border-slate-200"><h3 className="text-slate-900 font-semibold">Obligations</h3></div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-800">
+                  <tr className="border-b border-slate-200">
                     {["Obligation Type","Period","Amount","Due Date","Status","Actions"].map(h => (
-                      <th key={h} className="text-left px-4 py-3 text-slate-400 font-medium">{h}</th>
+                      <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -238,15 +238,15 @@ function ComplianceCalendarTab() {
                   {items.length === 0 ? (
                     <tr><td colSpan={6} className="text-center py-10 text-slate-500">No obligations for this period</td></tr>
                   ) : items.map((it: any) => (
-                    <tr key={it.id} className="border-b border-slate-800/50 hover:bg-slate-800/30">
-                      <td className="px-4 py-3 text-white">{it.obligationType}</td>
-                      <td className="px-4 py-3 text-slate-300">{it.period}</td>
-                      <td className="px-4 py-3 text-white font-medium">{formatCurrency(it.amount || 0)}</td>
-                      <td className="px-4 py-3 text-slate-300">{formatDate(it.dueDate)}</td>
+                    <tr key={it.id} className="border-b border-slate-100 hover:bg-slate-50">
+                      <td className="px-4 py-3 text-slate-900">{it.obligationType}</td>
+                      <td className="px-4 py-3 text-slate-700">{it.period}</td>
+                      <td className="px-4 py-3 text-slate-900 font-medium">{formatCurrency(it.amount || 0)}</td>
+                      <td className="px-4 py-3 text-slate-700">{formatDate(it.dueDate)}</td>
                       <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColor(it.status)}`}>{it.status}</span></td>
                       <td className="px-4 py-3">
                         {it.status !== "PAID" && it.status !== "WAIVED" && (
-                          <button onClick={() => { setPayModal(it); setPayForm(f => ({ ...f, amount: String(it.amount || "") })); }} className="px-3 py-1.5 bg-teal-500/20 text-teal-400 rounded-lg text-xs font-medium hover:bg-teal-500/30 transition-colors">Record Payment</button>
+                          <button onClick={() => { setPayModal(it); setPayForm(f => ({ ...f, amount: String(it.amount || "") })); }} className="px-3 py-1.5 bg-teal-500/20 text-teal-600 rounded-lg text-xs font-medium hover:bg-teal-500/30 transition-colors">Record Payment</button>
                         )}
                       </td>
                     </tr>
@@ -260,35 +260,35 @@ function ComplianceCalendarTab() {
 
       {/* Payment Modal */}
       {payModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setPayModal(null)}>
-          <div className="bg-slate-900 rounded-xl border border-slate-800 w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setPayModal(null)}>
+          <div className="bg-white border border-slate-200 rounded-xl w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-white font-semibold text-lg">Record Payment</h3>
-              <button onClick={() => setPayModal(null)} className="text-slate-400 hover:text-white"><X size={20} /></button>
+              <h3 className="text-slate-900 font-semibold text-lg">Record Payment</h3>
+              <button onClick={() => setPayModal(null)} className="text-slate-500 hover:text-slate-900"><X size={20} /></button>
             </div>
-            <p className="text-slate-400 text-sm">{payModal.obligationType} — {payModal.period}</p>
+            <p className="text-slate-500 text-sm">{payModal.obligationType} — {payModal.period}</p>
             <div className="space-y-3">
               <div>
-                <label className="text-sm text-slate-400 block mb-1">Challan Number</label>
-                <input value={payForm.challanNumber} onChange={e => setPayForm(f => ({ ...f, challanNumber: e.target.value }))} className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-500" />
+                <label className="text-sm text-slate-500 block mb-1">Challan Number</label>
+                <input value={payForm.challanNumber} onChange={e => setPayForm(f => ({ ...f, challanNumber: e.target.value }))} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-teal-500" />
               </div>
               <div>
-                <label className="text-sm text-slate-400 block mb-1">Payment Date</label>
-                <input type="date" value={payForm.paymentDate} onChange={e => setPayForm(f => ({ ...f, paymentDate: e.target.value }))} className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-500" />
+                <label className="text-sm text-slate-500 block mb-1">Payment Date</label>
+                <input type="date" value={payForm.paymentDate} onChange={e => setPayForm(f => ({ ...f, paymentDate: e.target.value }))} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-teal-500" />
               </div>
               <div>
-                <label className="text-sm text-slate-400 block mb-1">Payment Mode</label>
-                <select value={payForm.paymentMode} onChange={e => setPayForm(f => ({ ...f, paymentMode: e.target.value }))} className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-500">
+                <label className="text-sm text-slate-500 block mb-1">Payment Mode</label>
+                <select value={payForm.paymentMode} onChange={e => setPayForm(f => ({ ...f, paymentMode: e.target.value }))} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 text-sm focus:outline-none focus:border-teal-500">
                   <option value="NEFT">NEFT</option><option value="RTGS">RTGS</option><option value="CHEQUE">Cheque</option><option value="CASH">Cash</option><option value="UPI">UPI</option>
                 </select>
               </div>
               <div>
-                <label className="text-sm text-slate-400 block mb-1">Amount</label>
-                <input type="number" value={payForm.amount} onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))} className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-500" />
+                <label className="text-sm text-slate-500 block mb-1">Amount</label>
+                <input type="number" value={payForm.amount} onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-teal-500" />
               </div>
             </div>
             <div className="flex gap-3 pt-2">
-              <button onClick={() => setPayModal(null)} className="flex-1 px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm hover:bg-slate-700 transition-colors">Cancel</button>
+              <button onClick={() => setPayModal(null)} className="flex-1 px-4 py-2 bg-white hover:bg-slate-50 text-slate-600 rounded-lg text-sm border border-slate-200 transition-colors">Cancel</button>
               <button onClick={recordPayment} disabled={saving} className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-500 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                 {saving ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />} Save
               </button>
@@ -377,16 +377,16 @@ function PayrollTab() {
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div className="flex items-center gap-4 bg-slate-900 rounded-xl p-4 border border-slate-800 flex-wrap">
+      <div className="flex items-center gap-4 bg-white rounded-xl p-4 border border-slate-200 flex-wrap">
         <div className="flex items-center gap-2">
-          <label className="text-sm text-slate-400">Month:</label>
-          <select value={month} onChange={e => setMonth(+e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-500">
+          <label className="text-sm text-slate-500">Month:</label>
+          <select value={month} onChange={e => setMonth(+e.target.value)} className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 text-sm focus:outline-none focus:border-teal-500">
             {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
           </select>
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-sm text-slate-400">Year:</label>
-          <select value={year} onChange={e => setYear(+e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-500">
+          <label className="text-sm text-slate-500">Year:</label>
+          <select value={year} onChange={e => setYear(+e.target.value)} className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 text-sm focus:outline-none focus:border-teal-500">
             {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
@@ -402,26 +402,26 @@ function PayrollTab() {
           {/* Summary Cards */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
-              { label: "Total Gross", value: totals.gross, icon: IndianRupee, color: "text-emerald-400" },
-              { label: "Total Deductions", value: totals.deductions, icon: TrendingUp, color: "text-red-400" },
-              { label: "Total Net", value: totals.net, icon: Banknote, color: "text-teal-400" },
-              { label: "Total TDS", value: totals.tds, icon: FileText, color: "text-orange-400" },
-              { label: "Total PF", value: totals.pf, icon: Shield, color: "text-blue-400" },
-              { label: "Total ESIC", value: totals.esic, icon: Users, color: "text-violet-400" },
+              { label: "Total Gross", value: totals.gross, icon: IndianRupee, color: "text-emerald-500" },
+              { label: "Total Deductions", value: totals.deductions, icon: TrendingUp, color: "text-red-500" },
+              { label: "Total Net", value: totals.net, icon: Banknote, color: "text-teal-600" },
+              { label: "Total TDS", value: totals.tds, icon: FileText, color: "text-orange-500" },
+              { label: "Total PF", value: totals.pf, icon: Shield, color: "text-blue-500" },
+              { label: "Total ESIC", value: totals.esic, icon: Users, color: "text-violet-500" },
             ].map(c => (
-              <div key={c.label} className="bg-slate-900 rounded-xl border border-slate-800 p-4">
+              <div key={c.label} className="bg-white rounded-xl border border-slate-200 p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <c.icon size={16} className={c.color} />
-                  <span className="text-xs text-slate-400">{c.label}</span>
+                  <span className="text-xs text-slate-500">{c.label}</span>
                 </div>
-                <p className="text-white font-semibold text-lg">{formatCurrency(c.value)}</p>
+                <p className="text-slate-900 font-semibold text-lg">{formatCurrency(c.value)}</p>
               </div>
             ))}
           </div>
 
           {/* Status & Actions */}
-          <div className="flex items-center gap-3 bg-slate-900 rounded-xl p-4 border border-slate-800">
-            <span className="text-sm text-slate-400">Status:</span>
+          <div className="flex items-center gap-3 bg-white rounded-xl p-4 border border-slate-200">
+            <span className="text-sm text-slate-500">Status:</span>
             <span className={`px-3 py-1 rounded-full text-xs font-medium border ${statusColor(run.status)}`}>{run.status}</span>
             <div className="ml-auto flex gap-3">
               {run.status === "DRAFT" && (
@@ -438,55 +438,55 @@ function PayrollTab() {
           </div>
 
           {/* Payroll Table */}
-          <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-800">
+                  <tr className="border-b border-slate-200">
                     {["Employee","Code","Basic","HRA","Other","Gross","PF(Emp)","ESIC(Emp)","PT","TDS","LOP Days","LOP Ded.","Total Ded.","Net Salary",""].map(h => (
-                      <th key={h} className="text-left px-3 py-3 text-slate-400 font-medium text-xs whitespace-nowrap">{h}</th>
+                      <th key={h} className="text-left px-3 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {lines.map((l: any) => (
-                    <tr key={l.id || l.employeeId} className="border-b border-slate-800/50 hover:bg-slate-800/30">
-                      <td className="px-3 py-2.5 text-white text-xs whitespace-nowrap">{l.employeeName || l.employee?.name || "—"}</td>
-                      <td className="px-3 py-2.5 text-slate-300 text-xs">{l.employeeCode || l.employee?.code || "—"}</td>
-                      <td className="px-3 py-2.5 text-white text-xs">{formatCurrency(l.basicSalary || 0)}</td>
-                      <td className="px-3 py-2.5 text-white text-xs">{formatCurrency(l.hra || 0)}</td>
-                      <td className="px-3 py-2.5 text-white text-xs">{formatCurrency(l.otherAllowances || 0)}</td>
-                      <td className="px-3 py-2.5 text-emerald-400 font-medium text-xs">{formatCurrency(l.grossSalary || 0)}</td>
-                      <td className="px-3 py-2.5 text-red-400 text-xs">{formatCurrency(l.pfEmployee || 0)}</td>
-                      <td className="px-3 py-2.5 text-red-400 text-xs">{formatCurrency(l.esicEmployee || 0)}</td>
-                      <td className="px-3 py-2.5 text-red-400 text-xs">{formatCurrency(l.pt || 0)}</td>
-                      <td className="px-3 py-2.5 text-red-400 text-xs">{formatCurrency(l.tds || 0)}</td>
+                    <tr key={l.id || l.employeeId} className="border-b border-slate-100 hover:bg-slate-50">
+                      <td className="px-3 py-2.5 text-slate-900 text-xs whitespace-nowrap">{l.employeeName || l.employee?.name || "—"}</td>
+                      <td className="px-3 py-2.5 text-slate-700 text-xs">{l.employeeCode || l.employee?.code || "—"}</td>
+                      <td className="px-3 py-2.5 text-slate-900 text-xs">{formatCurrency(l.basicSalary || 0)}</td>
+                      <td className="px-3 py-2.5 text-slate-900 text-xs">{formatCurrency(l.hra || 0)}</td>
+                      <td className="px-3 py-2.5 text-slate-900 text-xs">{formatCurrency(l.otherAllowances || 0)}</td>
+                      <td className="px-3 py-2.5 text-emerald-600 font-medium text-xs">{formatCurrency(l.grossSalary || 0)}</td>
+                      <td className="px-3 py-2.5 text-red-600 text-xs">{formatCurrency(l.pfEmployee || 0)}</td>
+                      <td className="px-3 py-2.5 text-red-600 text-xs">{formatCurrency(l.esicEmployee || 0)}</td>
+                      <td className="px-3 py-2.5 text-red-600 text-xs">{formatCurrency(l.pt || 0)}</td>
+                      <td className="px-3 py-2.5 text-red-600 text-xs">{formatCurrency(l.tds || 0)}</td>
                       <td className="px-3 py-2.5 text-xs">
                         <input
                           type="number"
                           min={0}
                           value={lopEdits[l.employeeId] ?? l.lopDays ?? 0}
                           onChange={e => setLopEdits(prev => ({ ...prev, [l.employeeId]: +e.target.value }))}
-                          className="w-14 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-teal-500"
+                          className="w-14 bg-white border border-slate-300 rounded px-2 py-1 text-slate-900 text-xs focus:outline-none focus:border-teal-500"
                         />
                       </td>
-                      <td className="px-3 py-2.5 text-red-400 text-xs">{formatCurrency(l.lopDeduction || 0)}</td>
-                      <td className="px-3 py-2.5 text-red-400 font-medium text-xs">{formatCurrency(l.totalDeductions || 0)}</td>
-                      <td className="px-3 py-2.5 text-teal-400 font-semibold text-xs">{formatCurrency(l.netSalary || 0)}</td>
+                      <td className="px-3 py-2.5 text-red-600 text-xs">{formatCurrency(l.lopDeduction || 0)}</td>
+                      <td className="px-3 py-2.5 text-red-600 font-medium text-xs">{formatCurrency(l.totalDeductions || 0)}</td>
+                      <td className="px-3 py-2.5 text-teal-600 font-semibold text-xs">{formatCurrency(l.netSalary || 0)}</td>
                       <td className="px-3 py-2.5">
-                        <button onClick={() => viewPayslip(l.employeeId)} className="px-2 py-1 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 hover:text-white transition-colors">Payslip</button>
+                        <button onClick={() => viewPayslip(l.employeeId)} className="px-2 py-1 bg-white hover:bg-slate-50 text-slate-600 rounded text-xs border border-slate-200 hover:text-slate-900 transition-colors">Payslip</button>
                       </td>
                     </tr>
                   ))}
                   {lines.length > 0 && (
-                    <tr className="bg-slate-800/50 font-semibold">
-                      <td className="px-3 py-3 text-white text-xs" colSpan={5}>TOTALS</td>
-                      <td className="px-3 py-3 text-emerald-400 text-xs">{formatCurrency(totals.gross)}</td>
-                      <td className="px-3 py-3 text-red-400 text-xs">{formatCurrency(totals.pf)}</td>
-                      <td className="px-3 py-3 text-red-400 text-xs">{formatCurrency(totals.esic)}</td>
+                    <tr className="bg-slate-100 font-semibold">
+                      <td className="px-3 py-3 text-slate-900 text-xs" colSpan={5}>TOTALS</td>
+                      <td className="px-3 py-3 text-emerald-600 text-xs">{formatCurrency(totals.gross)}</td>
+                      <td className="px-3 py-3 text-red-600 text-xs">{formatCurrency(totals.pf)}</td>
+                      <td className="px-3 py-3 text-red-600 text-xs">{formatCurrency(totals.esic)}</td>
                       <td colSpan={4} />
-                      <td className="px-3 py-3 text-red-400 text-xs">{formatCurrency(totals.deductions)}</td>
-                      <td className="px-3 py-3 text-teal-400 text-xs">{formatCurrency(totals.net)}</td>
+                      <td className="px-3 py-3 text-red-600 text-xs">{formatCurrency(totals.deductions)}</td>
+                      <td className="px-3 py-3 text-teal-600 text-xs">{formatCurrency(totals.net)}</td>
                       <td />
                     </tr>
                   )}
@@ -497,9 +497,9 @@ function PayrollTab() {
           </div>
         </>
       ) : (
-        <div className="bg-slate-900 rounded-xl border border-slate-800 p-12 text-center">
-          <Banknote size={40} className="mx-auto text-slate-600 mb-3" />
-          <p className="text-slate-400">Select month and year, then click &quot;Generate Payroll&quot; to start</p>
+        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+          <Banknote size={40} className="mx-auto text-slate-500 mb-3" />
+          <p className="text-slate-500">Select month and year, then click &quot;Generate Payroll&quot; to start</p>
         </div>
       )}
 
@@ -533,24 +533,24 @@ function PayslipModal({ payslip, onClose }: { payslip: any; onClose: () => void 
   const netSalary = payslip.netSalary || (totalEarnings - totalDeductions);
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="p-8 print:p-4" id="payslip-print">
           {/* Header */}
           <div className="text-center border-b-2 border-gray-300 pb-4 mb-6">
             <h2 className="text-xl font-bold text-gray-900">{payslip.companyName || "DELViON Health Pvt. Ltd."}</h2>
-            <p className="text-sm text-gray-500 mt-1">SALARY SLIP</p>
-            <p className="text-xs text-gray-400 mt-1">{MONTHS[(payslip.month || 1) - 1]} {payslip.year || new Date().getFullYear()}</p>
+            <p className="text-sm text-slate-400 mt-1">SALARY SLIP</p>
+            <p className="text-xs text-slate-500 mt-1">{MONTHS[(payslip.month || 1) - 1]} {payslip.year || new Date().getFullYear()}</p>
           </div>
 
           {/* Employee Details */}
           <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
-            <div><span className="text-gray-500">Employee Name: </span><span className="font-medium text-gray-900">{payslip.employeeName || "—"}</span></div>
-            <div><span className="text-gray-500">Employee Code: </span><span className="font-medium text-gray-900">{payslip.employeeCode || "—"}</span></div>
-            <div><span className="text-gray-500">Designation: </span><span className="font-medium text-gray-900">{payslip.designation || "—"}</span></div>
-            <div><span className="text-gray-500">PAN: </span><span className="font-medium text-gray-900">{payslip.pan || "—"}</span></div>
-            <div><span className="text-gray-500">PF No: </span><span className="font-medium text-gray-900">{payslip.pfNumber || "—"}</span></div>
-            <div><span className="text-gray-500">Days Worked: </span><span className="font-medium text-gray-900">{payslip.daysWorked ?? "—"}</span></div>
+            <div><span className="text-slate-400">Employee Name: </span><span className="font-medium text-gray-900">{payslip.employeeName || "—"}</span></div>
+            <div><span className="text-slate-400">Employee Code: </span><span className="font-medium text-gray-900">{payslip.employeeCode || "—"}</span></div>
+            <div><span className="text-slate-400">Designation: </span><span className="font-medium text-gray-900">{payslip.designation || "—"}</span></div>
+            <div><span className="text-slate-400">PAN: </span><span className="font-medium text-gray-900">{payslip.pan || "—"}</span></div>
+            <div><span className="text-slate-400">PF No: </span><span className="font-medium text-gray-900">{payslip.pfNumber || "—"}</span></div>
+            <div><span className="text-slate-400">Days Worked: </span><span className="font-medium text-gray-900">{payslip.daysWorked ?? "—"}</span></div>
           </div>
 
           {/* Earnings & Deductions */}
@@ -595,17 +595,17 @@ function PayslipModal({ payslip, onClose }: { payslip: any; onClose: () => void 
               <span className="text-gray-700 font-semibold">NET SALARY</span>
               <span className="text-xl font-bold text-gray-900">{formatCurrency(netSalary)}</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Rupees {numberToWords(netSalary)} Only</p>
+            <p className="text-xs text-slate-400 mt-1">Rupees {numberToWords(netSalary)} Only</p>
           </div>
 
           {/* Footer */}
-          <p className="text-center text-xs text-gray-400 italic">Computer generated salary slip — no signature required</p>
+          <p className="text-center text-xs text-slate-500 italic">Computer generated salary slip — no signature required</p>
         </div>
 
         {/* Actions */}
         <div className="flex justify-end gap-3 p-4 border-t border-gray-200">
           <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm">Close</button>
-          <button onClick={() => window.print()} className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 flex items-center gap-2">
+          <button onClick={() => window.print()} className="px-4 py-2 bg-white text-slate-900 rounded-lg text-sm font-medium hover:bg-slate-100 flex items-center gap-2">
             <Printer size={16} /> Print
           </button>
         </div>
@@ -660,23 +660,23 @@ function TDSTab() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {Object.entries(bySection).map(([section, data]) => (
-          <div key={section} className="bg-slate-900 rounded-xl border border-slate-800 p-5">
-            <p className="text-sm text-slate-400 mb-1">{section}</p>
-            <p className="text-xl font-bold text-white">{formatCurrency(data.total)}</p>
+          <div key={section} className="bg-white rounded-xl border border-slate-200 p-5">
+            <p className="text-sm text-slate-500 mb-1">{section}</p>
+            <p className="text-xl font-bold text-slate-900">{formatCurrency(data.total)}</p>
             <p className="text-xs text-slate-500 mt-1">{data.count} entries</p>
           </div>
         ))}
       </div>
 
       {/* Monthly Breakdown */}
-      <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-        <div className="p-4 border-b border-slate-800"><h3 className="text-white font-semibold">TDS Deductions — Monthly Breakdown</h3></div>
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="p-4 border-b border-slate-200"><h3 className="text-slate-900 font-semibold">TDS Deductions — Monthly Breakdown</h3></div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-800">
+              <tr className="border-b border-slate-200">
                 {["Type","Period","Amount","Due Date","Status","Challan No"].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-slate-400 font-medium">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -684,13 +684,13 @@ function TDSTab() {
               {tdsItems.length === 0 ? (
                 <tr><td colSpan={6} className="text-center py-10 text-slate-500">No TDS data available</td></tr>
               ) : tdsItems.map((t: any, i: number) => (
-                <tr key={t.id || i} className="border-b border-slate-800/50 hover:bg-slate-800/30">
-                  <td className="px-4 py-3 text-white">{t.obligationType || t.type}</td>
-                  <td className="px-4 py-3 text-slate-300">{t.period}</td>
-                  <td className="px-4 py-3 text-white font-medium">{formatCurrency(t.amount || 0)}</td>
-                  <td className="px-4 py-3 text-slate-300">{formatDate(t.dueDate)}</td>
+                <tr key={t.id || i} className="border-b border-slate-100 hover:bg-slate-50">
+                  <td className="px-4 py-3 text-slate-900">{t.obligationType || t.type}</td>
+                  <td className="px-4 py-3 text-slate-700">{t.period}</td>
+                  <td className="px-4 py-3 text-slate-900 font-medium">{formatCurrency(t.amount || 0)}</td>
+                  <td className="px-4 py-3 text-slate-700">{formatDate(t.dueDate)}</td>
                   <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColor(t.status)}`}>{t.status}</span></td>
-                  <td className="px-4 py-3 text-slate-300">{t.challanNumber || "—"}</td>
+                  <td className="px-4 py-3 text-slate-700">{t.challanNumber || "—"}</td>
                 </tr>
               ))}
             </tbody>
@@ -745,31 +745,31 @@ function PFESICTab() {
     <div className="space-y-6">
       {/* PF Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Shield size={18} className="text-blue-400" /> Provident Fund Summary</h3>
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h3 className="text-slate-900 font-semibold mb-4 flex items-center gap-2"><Shield size={18} className="text-blue-500" /> Provident Fund Summary</h3>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <p className="text-xs text-slate-400 mb-1">Employee Contribution</p>
-              <p className="text-lg font-bold text-white">{formatCurrency(pfTotalEmp)}</p>
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-xs text-slate-500 mb-1">Employee Contribution</p>
+              <p className="text-lg font-bold text-slate-900">{formatCurrency(pfTotalEmp)}</p>
             </div>
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <p className="text-xs text-slate-400 mb-1">Employer Contribution</p>
-              <p className="text-lg font-bold text-white">{formatCurrency(pfTotalEr)}</p>
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-xs text-slate-500 mb-1">Employer Contribution</p>
+              <p className="text-lg font-bold text-slate-900">{formatCurrency(pfTotalEr)}</p>
             </div>
           </div>
           <p className="text-xs text-slate-500 mt-3">{pfEmployees.length} employees enrolled</p>
         </div>
 
-        <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Shield size={18} className="text-violet-400" /> ESIC Summary</h3>
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h3 className="text-slate-900 font-semibold mb-4 flex items-center gap-2"><Shield size={18} className="text-violet-500" /> ESIC Summary</h3>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <p className="text-xs text-slate-400 mb-1">Employee Contribution</p>
-              <p className="text-lg font-bold text-white">{formatCurrency(esicTotalEmp)}</p>
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-xs text-slate-500 mb-1">Employee Contribution</p>
+              <p className="text-lg font-bold text-slate-900">{formatCurrency(esicTotalEmp)}</p>
             </div>
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <p className="text-xs text-slate-400 mb-1">Employer Contribution</p>
-              <p className="text-lg font-bold text-white">{formatCurrency(esicTotalEr)}</p>
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-xs text-slate-500 mb-1">Employer Contribution</p>
+              <p className="text-lg font-bold text-slate-900">{formatCurrency(esicTotalEr)}</p>
             </div>
           </div>
           <p className="text-xs text-slate-500 mt-3">{esicEmployees.length} employees enrolled</p>
@@ -777,14 +777,14 @@ function PFESICTab() {
       </div>
 
       {/* Monthly Trend */}
-      <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-        <div className="p-4 border-b border-slate-800"><h3 className="text-white font-semibold">Monthly Payments</h3></div>
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="p-4 border-b border-slate-200"><h3 className="text-slate-900 font-semibold">Monthly Payments</h3></div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-800">
+              <tr className="border-b border-slate-200">
                 {["Type","Period","Amount","Due Date","Status","Challan No"].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-slate-400 font-medium">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -792,13 +792,13 @@ function PFESICTab() {
               {[...pfPayments, ...esicPayments].length === 0 ? (
                 <tr><td colSpan={6} className="text-center py-10 text-slate-500">No PF/ESIC data available</td></tr>
               ) : [...pfPayments, ...esicPayments].map((p: any, i: number) => (
-                <tr key={p.id || i} className="border-b border-slate-800/50 hover:bg-slate-800/30">
-                  <td className="px-4 py-3 text-white">{p.obligationType || p.type}</td>
-                  <td className="px-4 py-3 text-slate-300">{p.period}</td>
-                  <td className="px-4 py-3 text-white font-medium">{formatCurrency(p.amount || 0)}</td>
-                  <td className="px-4 py-3 text-slate-300">{formatDate(p.dueDate)}</td>
+                <tr key={p.id || i} className="border-b border-slate-100 hover:bg-slate-50">
+                  <td className="px-4 py-3 text-slate-900">{p.obligationType || p.type}</td>
+                  <td className="px-4 py-3 text-slate-700">{p.period}</td>
+                  <td className="px-4 py-3 text-slate-900 font-medium">{formatCurrency(p.amount || 0)}</td>
+                  <td className="px-4 py-3 text-slate-700">{formatDate(p.dueDate)}</td>
                   <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColor(p.status)}`}>{p.status}</span></td>
-                  <td className="px-4 py-3 text-slate-300">{p.challanNumber || "—"}</td>
+                  <td className="px-4 py-3 text-slate-700">{p.challanNumber || "—"}</td>
                 </tr>
               ))}
             </tbody>
@@ -808,24 +808,24 @@ function PFESICTab() {
 
       {/* Enrolled Employees */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-          <div className="p-4 border-b border-slate-800"><h3 className="text-white font-semibold text-sm">PF Enrolled Employees ({pfEmployees.length})</h3></div>
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div className="p-4 border-b border-slate-200"><h3 className="text-slate-900 font-semibold text-sm">PF Enrolled Employees ({pfEmployees.length})</h3></div>
           <div className="max-h-60 overflow-y-auto">
             {pfEmployees.length === 0 ? <p className="p-4 text-slate-500 text-sm">No employees enrolled</p> : pfEmployees.map((e: any, i: number) => (
-              <div key={e.id || i} className="flex items-center justify-between px-4 py-2.5 border-b border-slate-800/50">
-                <span className="text-white text-sm">{e.name || `${e.firstName} ${e.lastName}`}</span>
-                <span className="text-slate-400 text-xs">{e.code || e.employeeCode}</span>
+              <div key={e.id || i} className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100">
+                <span className="text-slate-900 text-sm">{e.name || `${e.firstName} ${e.lastName}`}</span>
+                <span className="text-slate-500 text-xs">{e.code || e.employeeCode}</span>
               </div>
             ))}
           </div>
         </div>
-        <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-          <div className="p-4 border-b border-slate-800"><h3 className="text-white font-semibold text-sm">ESIC Enrolled Employees ({esicEmployees.length})</h3></div>
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div className="p-4 border-b border-slate-200"><h3 className="text-slate-900 font-semibold text-sm">ESIC Enrolled Employees ({esicEmployees.length})</h3></div>
           <div className="max-h-60 overflow-y-auto">
             {esicEmployees.length === 0 ? <p className="p-4 text-slate-500 text-sm">No employees enrolled</p> : esicEmployees.map((e: any, i: number) => (
-              <div key={e.id || i} className="flex items-center justify-between px-4 py-2.5 border-b border-slate-800/50">
-                <span className="text-white text-sm">{e.name || `${e.firstName} ${e.lastName}`}</span>
-                <span className="text-slate-400 text-xs">{e.code || e.employeeCode}</span>
+              <div key={e.id || i} className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100">
+                <span className="text-slate-900 text-sm">{e.name || `${e.firstName} ${e.lastName}`}</span>
+                <span className="text-slate-500 text-xs">{e.code || e.employeeCode}</span>
               </div>
             ))}
           </div>
@@ -908,17 +908,17 @@ function EmployeesTab() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-          <h3 className="text-white font-semibold">Employee Salary Structures</h3>
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+          <h3 className="text-slate-900 font-semibold">Employee Salary Structures</h3>
           <span className="text-xs text-slate-500">{employees.length} employees</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-800">
+              <tr className="border-b border-slate-200">
                 {["Employee Name","Code","Designation","Basic","HRA","Gross","PF","ESIC","PT","Actions"].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-slate-400 font-medium text-xs">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -929,18 +929,18 @@ function EmployeesTab() {
                 const ss = e.salaryStructure || {};
                 const gross = (ss.basicSalary || 0) + (ss.hra || 0) + (ss.conveyanceAllowance || 0) + (ss.medicalAllowance || 0) + (ss.specialAllowance || 0) + (ss.otherAllowances || 0);
                 return (
-                  <tr key={e.id} className="border-b border-slate-800/50 hover:bg-slate-800/30">
-                    <td className="px-4 py-3 text-white">{e.name || `${e.firstName || ""} ${e.lastName || ""}`.trim()}</td>
-                    <td className="px-4 py-3 text-slate-300">{e.code || e.employeeCode || "—"}</td>
-                    <td className="px-4 py-3 text-slate-300">{e.designation || "—"}</td>
-                    <td className="px-4 py-3 text-white">{ss.basicSalary ? formatCurrency(ss.basicSalary) : "—"}</td>
-                    <td className="px-4 py-3 text-white">{ss.hra ? formatCurrency(ss.hra) : "—"}</td>
-                    <td className="px-4 py-3 text-emerald-400 font-medium">{gross ? formatCurrency(gross) : "—"}</td>
-                    <td className="px-4 py-3">{(ss.pfApplicable || e.pfApplicable) ? <CheckCircle2 size={16} className="text-green-400" /> : <span className="text-slate-600">—</span>}</td>
-                    <td className="px-4 py-3">{(ss.esicApplicable || e.esicApplicable) ? <CheckCircle2 size={16} className="text-green-400" /> : <span className="text-slate-600">—</span>}</td>
-                    <td className="px-4 py-3">{(ss.ptApplicable || e.ptApplicable) ? <CheckCircle2 size={16} className="text-green-400" /> : <span className="text-slate-600">—</span>}</td>
+                  <tr key={e.id} className="border-b border-slate-100 hover:bg-slate-50">
+                    <td className="px-4 py-3 text-slate-900">{e.name || `${e.firstName || ""} ${e.lastName || ""}`.trim()}</td>
+                    <td className="px-4 py-3 text-slate-700">{e.code || e.employeeCode || "—"}</td>
+                    <td className="px-4 py-3 text-slate-700">{e.designation || "—"}</td>
+                    <td className="px-4 py-3 text-slate-900">{ss.basicSalary ? formatCurrency(ss.basicSalary) : "—"}</td>
+                    <td className="px-4 py-3 text-slate-900">{ss.hra ? formatCurrency(ss.hra) : "—"}</td>
+                    <td className="px-4 py-3 text-emerald-600 font-medium">{gross ? formatCurrency(gross) : "—"}</td>
+                    <td className="px-4 py-3">{(ss.pfApplicable || e.pfApplicable) ? <CheckCircle2 size={16} className="text-green-500" /> : <span className="text-slate-500">—</span>}</td>
+                    <td className="px-4 py-3">{(ss.esicApplicable || e.esicApplicable) ? <CheckCircle2 size={16} className="text-green-500" /> : <span className="text-slate-500">—</span>}</td>
+                    <td className="px-4 py-3">{(ss.ptApplicable || e.ptApplicable) ? <CheckCircle2 size={16} className="text-green-500" /> : <span className="text-slate-500">—</span>}</td>
                     <td className="px-4 py-3">
-                      <button onClick={() => openModal(e)} className="px-3 py-1.5 bg-teal-500/20 text-teal-400 rounded-lg text-xs font-medium hover:bg-teal-500/30 transition-colors flex items-center gap-1">
+                      <button onClick={() => openModal(e)} className="px-3 py-1.5 bg-teal-500/20 text-teal-600 rounded-lg text-xs font-medium hover:bg-teal-500/30 transition-colors flex items-center gap-1">
                         <Plus size={14} /> {ss.basicSalary ? "Update" : "Add"}
                       </button>
                     </td>
@@ -954,18 +954,18 @@ function EmployeesTab() {
 
       {/* Salary Structure Modal */}
       {modal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="bg-slate-900 rounded-xl border border-slate-800 w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setModal(null)}>
+          <div className="bg-white border border-slate-200 rounded-xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-white font-semibold text-lg">Salary Structure</h3>
-              <button onClick={() => setModal(null)} className="text-slate-400 hover:text-white"><X size={20} /></button>
+              <h3 className="text-slate-900 font-semibold text-lg">Salary Structure</h3>
+              <button onClick={() => setModal(null)} className="text-slate-500 hover:text-slate-900"><X size={20} /></button>
             </div>
-            <p className="text-slate-400 text-sm">{modal.name || `${modal.firstName || ""} ${modal.lastName || ""}`} — {modal.code || modal.employeeCode}</p>
+            <p className="text-slate-500 text-sm">{modal.name || `${modal.firstName || ""} ${modal.lastName || ""}`} — {modal.code || modal.employeeCode}</p>
 
             <div className="space-y-3">
               <div>
-                <label className="text-sm text-slate-400 block mb-1">Effective From</label>
-                <input type="date" value={form.effectiveFrom} onChange={e => setForm(f => ({ ...f, effectiveFrom: e.target.value }))} className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-500" />
+                <label className="text-sm text-slate-500 block mb-1">Effective From</label>
+                <input type="date" value={form.effectiveFrom} onChange={e => setForm(f => ({ ...f, effectiveFrom: e.target.value }))} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-teal-500" />
               </div>
               {[
                 { key: "basicSalary", label: "Basic Salary" },
@@ -976,15 +976,15 @@ function EmployeesTab() {
                 { key: "otherAllowances", label: "Other Allowances" },
               ].map(({ key, label }) => (
                 <div key={key}>
-                  <label className="text-sm text-slate-400 block mb-1">{label}</label>
-                  <input type="number" value={(form as any)[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-500" placeholder="0" />
+                  <label className="text-sm text-slate-500 block mb-1">{label}</label>
+                  <input type="number" value={(form as any)[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-teal-500" placeholder="0" />
                 </div>
               ))}
 
               {/* Auto-calc gross */}
-              <div className="bg-slate-800/50 rounded-lg p-3 flex justify-between">
-                <span className="text-slate-400 text-sm">Gross Salary (auto)</span>
-                <span className="text-teal-400 font-semibold">{formatCurrency(grossCalc)}</span>
+              <div className="bg-slate-50 rounded-lg p-3 flex justify-between">
+                <span className="text-slate-500 text-sm">Gross Salary (auto)</span>
+                <span className="text-teal-600 font-semibold">{formatCurrency(grossCalc)}</span>
               </div>
 
               {/* Toggles */}
@@ -997,18 +997,18 @@ function EmployeesTab() {
                   <label key={key} className="flex items-center gap-2 cursor-pointer">
                     <div
                       onClick={() => setForm(f => ({ ...f, [key]: !(f as any)[key] }))}
-                      className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${(form as any)[key] ? "bg-teal-500" : "bg-slate-700"}`}
+                      className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${(form as any)[key] ? "bg-teal-500" : "bg-slate-300"}`}
                     >
                       <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${(form as any)[key] ? "translate-x-[18px]" : "translate-x-0.5"}`} />
                     </div>
-                    <span className="text-sm text-slate-300">{label}</span>
+                    <span className="text-sm text-slate-700">{label}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button onClick={() => setModal(null)} className="flex-1 px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm hover:bg-slate-700 transition-colors">Cancel</button>
+              <button onClick={() => setModal(null)} className="flex-1 px-4 py-2 bg-white hover:bg-slate-50 text-slate-600 rounded-lg text-sm border border-slate-200 transition-colors">Cancel</button>
               <button onClick={saveSalary} disabled={saving} className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-500 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                 {saving ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />} Save
               </button>

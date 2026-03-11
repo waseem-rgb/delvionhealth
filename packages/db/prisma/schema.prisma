@@ -3,7 +3,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  output          = "../../../apps/api/node_modules/.prisma/client"
+  output          = "../../../node_modules/.prisma/client"
   previewFeatures = ["fullTextSearch"]
 }
 
@@ -591,9 +591,31 @@ model Tenant {
   patientSegments     PatientSegment[]
   customQuotes        CustomQuote[]
   aiPackageSessions   AIPackageSession[]
+  testReportTemplates TestReportTemplate[]
   salaryStructures    SalaryStructure[]
   payrollLines        PayrollLine[]
   statutoryPayments   StatutoryPayment[]
+
+  // Marketing CRM
+  marketingLeads       MarketingLead[]
+  marketingLeadLists   MarketingLeadList[]
+  contentStudioItems   ContentStudioItem[]
+  repeatTestCandidates RepeatTestCandidate[]
+
+  // SOP Management
+  sops                SOP[]
+  sopGenerationJobs   SOPGenerationJob[]
+
+  // Quality Forms (AI-generated)
+  formSubmissions     FormSubmission[]
+  formGenerationJobs  FormGenerationJob[]
+
+  // Departments
+  departments         Department[]
+
+  // Non-Pathology Reporting
+  nonPathTemplates    NonPathReportTemplate[]
+  nonPathReports      NonPathReport[]
 
   @@map("tenants")
 }
@@ -686,6 +708,10 @@ model User {
   approvedReports        LabReport[]  @relation("ReportApprovedBy")
   rejectedReports        LabReport[]  @relation("ReportRejectedBy")
 
+  // Order approval relations
+  approvedOrders         Order[]  @relation("OrderApprovedBy")
+  resultRejectedOrders   Order[]  @relation("OrderResultRejectedBy")
+
   statementUploads   BankStatementUpload[] @relation("StatementUploadedBy")
 
   @@unique([tenantId, email])
@@ -734,10 +760,21 @@ model Patient {
   familyProfilesAsMember  FamilyProfile[]       @relation("FamilyMember")
   standingOrders          StandingOrder[]
   paymentPlans            PatientPaymentPlan[]
+  nonPathReports          NonPathReport[]
 
   // Phase G2: Merge patients
   mergedIntoId  String?
   mergedAt      DateTime?
+
+  // Report delivery preference
+  reportDeliveryMode  String?  @default("MANUAL")
+  preferredChannel    String[] @default([])
+  reportMobile        String?
+  reportEmail         String?
+  reportLanguage      String   @default("ENGLISH")
+  whatsappOptIn       Boolean  @default(true)
+  emailOptIn          Boolean  @default(true)
+  smsOptIn            Boolean  @default(true)
 
   @@unique([tenantId, mrn])
   @@index([tenantId])
@@ -811,6 +848,22 @@ model Order {
   b2bLineItems      B2BInvoiceLineItem[]
   outsourcedSamples OutsourcedSample[]
   discountApproval  DiscountApproval?
+  statusHistory     OrderStatusHistory[]
+  nonPathReports    NonPathReport[]
+
+  // Approval tracking
+  approvedById        String?
+  approvedBy          User?    @relation("OrderApprovedBy", fields: [approvedById], references: [id])
+  resultRejectedById  String?
+  resultRejectedBy    User?    @relation("OrderResultRejectedBy", fields: [resultRejectedById], references: [id])
+  resultRejectionReason String?
+
+  // Report delivery
+  reportDeliveryMode  String?  @default("MANUAL")
+  preferredChannel    String[] @default([])
+  reportMobile        String?
+  reportEmail         String?
+  deliveryOverridden  Boolean  @default(false)
 
   @@unique([tenantId, orderNumber])
   @@index([tenantId])
@@ -837,6 +890,20 @@ model OrderItem {
 
   @@index([orderId])
   @@map("order_items")
+}
+
+model OrderStatusHistory {
+  id          String   @id @default(cuid())
+  orderId     String
+  status      OrderStatus
+  changedById String?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  order     Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_status_history")
 }
 
 model TestCatalog {
@@ -873,6 +940,13 @@ model TestCatalog {
   templateLastEditedById String?
   templateLastEditedAt   DateTime?
 
+  // Investigation / Imaging classification
+  investigationType    String   @default("PATHOLOGY")
+  investigationCategory String? // X-RAY | CT | MRI | USG | DOPPLER | MOLECULAR | GENETIC
+  requiresDoctor       Boolean  @default(false)
+  avgDurationMinutes   Int      @default(15)
+  departmentCode       String?
+
   tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   orderItems       OrderItem[]
   referenceRanges  ReferenceRange[]
@@ -883,6 +957,7 @@ model TestCatalog {
   reportParameters ReportParameter[]
   reportSettings   ReportSetting[]
   testNotes        TestNote[]
+  nonPathReports   NonPathReport[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -1359,10 +1434,145 @@ model Campaign {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  messageBody       String?   @db.Text
+  subject           String?
+  mediaUrl          String?
+  ctaText           String?
+  ctaUrl            String?
+  targetType        String    @default("ALL_PATIENTS")
+  targetLeadListId  String?
+  scheduledAt       DateTime?
+  timezone          String    @default("Asia/Kolkata")
+  totalRecipients   Int       @default(0)
+  delivered         Int       @default(0)
+  opened            Int       @default(0)
+  clicked           Int       @default(0)
+  converted         Int       @default(0)
+  sent              Int       @default(0)
+  revenue           Decimal   @default(0) @db.Decimal(15,2)
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  campaignLeads CampaignLead[]
 
   @@index([tenantId])
   @@map("campaigns")
+}
+
+model CampaignLead {
+  id          String    @id @default(cuid())
+  campaignId  String
+  leadId      String?
+  patientId   String?
+  mobile      String
+  email       String?
+  name        String?
+  status      String    @default("PENDING")
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  openedAt    DateTime?
+  clickedAt   DateTime?
+  convertedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("campaign_leads")
+}
+
+model MarketingLead {
+  id              String    @id @default(cuid())
+  tenantId        String
+  leadListId      String?
+  firstName       String?
+  lastName        String?
+  mobile          String
+  email           String?
+  age             Int?
+  gender          String?
+  city            String?
+  pincode         String?
+  tags            String[]  @default([])
+  patientId       String?
+  status          String    @default("NEW")
+  source          String?
+  lastContactedAt DateTime?
+  convertedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  leadList MarketingLeadList? @relation(fields: [leadListId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("marketing_leads")
+}
+
+model MarketingLeadList {
+  id             String    @id @default(cuid())
+  tenantId       String
+  name           String
+  source         String    @default("EXCEL_UPLOAD")
+  totalCount     Int       @default(0)
+  validCount     Int       @default(0)
+  convertedCount Int       @default(0)
+  uploadedAt     DateTime  @default(now())
+  uploadedBy     String
+
+  tenant Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  leads  MarketingLead[]
+
+  @@index([tenantId])
+  @@map("marketing_lead_lists")
+}
+
+model ContentStudioItem {
+  id            String    @id @default(cuid())
+  tenantId      String
+  title         String
+  type          String
+  channel       String[]
+  content       String    @db.Text
+  imageUrl      String?
+  videoUrl      String?
+  hashtags      String[]  @default([])
+  isAiGenerated Boolean   @default(false)
+  scheduledAt   DateTime?
+  publishedAt   DateTime?
+  status        String    @default("DRAFT")
+  engagements   Json      @default("{}")
+  createdBy     String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("content_studio_items")
+}
+
+model RepeatTestCandidate {
+  id              String    @id @default(cuid())
+  tenantId        String
+  patientId       String
+  testId          String?
+  testName        String
+  lastTestDate    DateTime
+  recommendedDate DateTime
+  daysOverdue     Int       @default(0)
+  priority        String    @default("MEDIUM")
+  contacted       Boolean   @default(false)
+  converted       Boolean   @default(false)
+  aiReason        String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, priority])
+  @@map("repeat_test_candidates")
 }
 
 model Territory {
@@ -3843,22 +4053,33 @@ model ComplianceCert {
 model QualityForm {
   id          String    @id @default(cuid())
   tenantId    String
-  formCode    String    // e.g. "MGT-01", "TECH-23"
+  formCode    String    // e.g. "MGT-01", "TECH-23", "DH/TECH/FR/01"
   name        String
   category    String?   // Audit, NCR, Training, Maintenance, IQC, EQUAS, Safety, etc.
   type        String    @default("TECHNICAL") // MANAGEMENT, TECHNICAL
   frequency   String?   // Daily, Weekly, Monthly, Annual, Per Event, Per Batch
   automation  String?   @default("High") // Auto, Auto/IoT, Auto-compile, Auto-remind, High, Medium, Low
   description String?   @db.Text
-  fields      Json?     // JSON schema for form fields
+  fields      Json?     // JSON schema for form fields (legacy)
   isActive    Boolean   @default(true)
   sortOrder   Int       @default(0)
   createdById String?
+  // New fields for AI-generated forms
+  title           String?
+  department      String   @default("LAB")
+  standards       String[] @default([])
+  formSchema      Json?    // AI-generated section/field schema for online filling
+  isAiGenerated   Boolean  @default(false)
+  isCustomized    Boolean  @default(false)
+  status          String   @default("ACTIVE")  // ACTIVE | ARCHIVED | DRAFT
+  version         String   @default("1.0")
+  sourceDocNo     String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  tenant  Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  entries QualityFormEntry[]
+  tenant      Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  entries     QualityFormEntry[]
+  submissions FormSubmission[]
 
   @@unique([tenantId, formCode])
   @@index([tenantId])
@@ -3886,6 +4107,53 @@ model QualityFormEntry {
   @@index([tenantId])
   @@index([tenantId, formId, createdAt])
   @@map("quality_form_entries")
+}
+
+model FormSubmission {
+  id              String   @id @default(cuid())
+  tenantId        String
+  formId          String
+  formCode        String
+  formTitle       String
+  submittedData   Json
+  submittedBy     String
+  submittedByName String
+  submittedAt     DateTime @default(now())
+  status          String   @default("SUBMITTED")  // SUBMITTED | VERIFIED | REJECTED | PENDING_REVIEW
+  verifiedBy      String?
+  verifiedAt      DateTime?
+  notes           String?
+  month           Int?
+  year            Int?
+  periodLabel     String?
+
+  form   QualityForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  tenant Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([formId])
+  @@index([tenantId, formId])
+  @@map("form_submissions")
+}
+
+model FormGenerationJob {
+  id              String    @id @default(cuid())
+  tenantId        String
+  status          String    @default("NOT_STARTED")  // NOT_STARTED | RUNNING | COMPLETED | FAILED
+  totalPlanned    Int       @default(0)
+  totalGenerated  Int       @default(0)
+  totalFailed     Int       @default(0)
+  currentForm     String?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  failedItems     Json      @default("[]")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("form_generation_jobs")
 }
 
 // ─── MARKETING MODULE ─────────────────────────────────────────────────────
@@ -4159,8 +4427,65 @@ model QueueToken {
   waitMinutes   Int?
   createdAt     DateTime  @default(now())
 
+  // Investigation / department fields
+  departmentCode     String?
+  departmentName     String?
+  investigationType  String?
+  doctorId           String?
+  doctorName         String?
+  roomNumber         String?
+  tokenSlipSent      Boolean   @default(false)
+  phone              String?
+
   @@index([tenantId, date, status])
+  @@index([tenantId, departmentCode, date])
   @@map("queue_tokens")
+}
+
+// ─────────────────────────────────────────────
+// DEPARTMENTS (Imaging / Investigation)
+// ─────────────────────────────────────────────
+
+model Department {
+  id                 String    @id @default(cuid())
+  tenantId           String
+  code               String
+  name               String
+  shortCode          String
+  roomNumbers        String[]  @default([])
+  currentTokenCount  Int       @default(0)
+  avgDurationMinutes Int       @default(15)
+  isActive           Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  tenant Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  staff  DepartmentStaff[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("departments")
+}
+
+model DepartmentStaff {
+  id               String    @id @default(cuid())
+  tenantId         String
+  departmentId     String
+  userId           String?
+  staffName        String
+  role             String    @default("TECHNICIAN")
+  isAvailable      Boolean   @default(true)
+  availableFrom    String?
+  availableTo      String?
+  avgPatientMins   Int       @default(10)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@index([departmentId])
+  @@index([tenantId])
+  @@map("department_staff")
 }
 
 // ─────────────────────────────────────────────
@@ -4712,4 +5037,210 @@ model AIPackageSession {
 
   @@index([tenantId])
   @@map("ai_package_sessions")
+}
+
+model TestReportTemplate {
+  id                   String    @id @default(cuid())
+  tenantId             String
+  tenant               Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  testId               String
+  testName             String
+  testCode             String
+  headerHtml           String?   @db.Text
+  footerHtml           String?   @db.Text
+  referenceRanges      Json      @default("[]")
+  supplementaryNotes   String?   @db.Text
+  methodology          String?
+  specimenRequirement  String?
+  patientPreparation   String?
+  clinicalSignificance String?   @db.Text
+  isAiGenerated        Boolean   @default(true)
+  isCustomized         Boolean   @default(false)
+  aiGeneratedAt        DateTime?
+  lastEditedAt         DateTime?
+  lastEditedBy         String?
+  status               String    @default("PENDING")
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@unique([tenantId, testId])
+  @@map("test_report_templates")
+}
+
+// ─────────────────────────────────────────────
+// SOP MANAGEMENT
+// ─────────────────────────────────────────────
+
+model SOP {
+  id               String       @id @default(cuid())
+  tenantId         String
+  sopNumber        String
+  title            String
+  department       String
+  category         String       @default("CLINICAL")
+  standard         String[]     @default([])
+  version          String       @default("1.0")
+  status           String       @default("DRAFT")
+  content          String       @db.Text
+  objective        String?      @db.Text
+  scope            String?      @db.Text
+  responsibility   String?      @db.Text
+  procedure        String?      @db.Text
+  references       String?      @db.Text
+  relatedDocuments String[]     @default([])
+  reviewFrequency  Int          @default(12)
+  nextReviewDate   DateTime?
+  approvedBy       String?
+  approvedAt       DateTime?
+  isAiGenerated    Boolean      @default(true)
+  isCustomized     Boolean      @default(false)
+  aiGeneratedAt    DateTime?
+  lastEditedAt     DateTime?
+  lastEditedBy     String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  versions SOPVersion[]
+
+  @@unique([tenantId, sopNumber])
+  @@index([tenantId])
+  @@index([tenantId, department])
+  @@index([tenantId, status])
+  @@map("sops")
+}
+
+model SOPVersion {
+  id         String   @id @default(cuid())
+  sopId      String
+  version    String
+  content    String   @db.Text
+  changedBy  String?
+  changeNote String?
+  createdAt  DateTime @default(now())
+
+  sop SOP @relation(fields: [sopId], references: [id], onDelete: Cascade)
+
+  @@index([sopId])
+  @@map("sop_versions")
+}
+
+model SOPGenerationJob {
+  id             String    @id @default(cuid())
+  tenantId       String
+  status         String    @default("NOT_STARTED")
+  totalPlanned   Int       @default(0)
+  totalGenerated Int       @default(0)
+  totalFailed    Int       @default(0)
+  currentBatch   String?
+  currentDept    String?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  failedItems    Json      @default("[]")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("sop_generation_jobs")
+}
+
+// ── Non-Pathology Reporting ──────────────────────────────────────────────────
+
+enum NonPathReportStatus {
+  DRAFT
+  PENDING_VERIFICATION
+  VERIFIED
+  DISPATCHED
+}
+
+model NonPathReportTemplate {
+  id               String   @id @default(cuid())
+  tenantId         String
+  investigationType String  // X-RAY | CT | MRI | USG | DOPPLER | MOLECULAR | GENETIC
+  testType         String?  // specific sub-type e.g. "CT Brain", "USG Whole Abdomen"
+  templateName     String
+  methodology      String
+  sections         Json     // array of ReportSection objects
+  isDefault        Boolean  @default(false)
+  isActive         Boolean  @default(true)
+  createdBy        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tenant  Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  reports NonPathReport[]
+
+  @@index([tenantId])
+  @@index([tenantId, investigationType])
+  @@map("non_path_report_templates")
+}
+
+model NonPathReport {
+  id                String               @id @default(cuid())
+  tenantId          String
+  orderId           String
+  patientId         String
+  orderItemId       String?              // links to OrderItem
+  testCatalogId     String?
+  investigationType String               // X-RAY | CT | MRI | USG | DOPPLER | MOLECULAR | GENETIC
+  testName          String
+  testCode          String?
+  methodology       String
+
+  templateId        String?
+
+  // Report content
+  technique         String?              @db.Text
+  clinicalHistory   String?              @db.Text
+  sectionData       Json?                // doctor-filled values per section
+  findings          String?              @db.Text
+  impression        String?              @db.Text
+  recommendation    String?              @db.Text
+
+  // Imaging details
+  imageCount        Int?
+  contrast          Boolean              @default(false)
+  contrastDose      String?
+  equipmentUsed     String?
+
+  // Doctor / Radiologist
+  reportedById      String?
+  reportedByName    String?
+  reportedByDesig   String?
+  reportedAt        DateTime?
+
+  // Verification
+  verifiedById      String?
+  verifiedByName    String?
+  verifiedAt        DateTime?
+  verifierComment   String?
+
+  // Status
+  status            NonPathReportStatus  @default(DRAFT)
+
+  // PDF
+  pdfPath           String?
+  pdfGeneratedAt    DateTime?
+
+  // Merge tracking
+  mergedWithPathology Boolean @default(false)
+  mergedPdfPath       String?
+  mergedAt            DateTime?
+
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  tenant      Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order       Order                  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  patient     Patient                @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  template    NonPathReportTemplate? @relation(fields: [templateId], references: [id])
+  testCatalog TestCatalog?           @relation(fields: [testCatalogId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, orderId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, investigationType, status])
+  @@map("non_path_reports")
 }

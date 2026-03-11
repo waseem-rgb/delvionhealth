@@ -3,13 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Plus, Eye } from "lucide-react";
+import { Plus, Eye, CheckCircle2, Circle } from "lucide-react";
 import { DataTable } from "@/components/tables/DataTable";
-import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PriorityBadge } from "@/components/shared/PriorityBadge";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { DateRangePicker, type DateRange } from "@/components/shared/DateRangePicker";
-import { formatDate, formatCurrency } from "@/lib/utils";
+import { formatDate, formatCurrency, cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 
@@ -33,6 +32,7 @@ interface Order {
   patient: OrderPatient;
   branch: { id: string; name: string } | null;
   _count: { items: number };
+  reportDeliveryMode?: string;
 }
 
 interface QueryResponse {
@@ -74,6 +74,61 @@ const SOURCE_LABELS: Record<string, string> = {
   CAMP: "Camp",
   OUTSOURCE_RECEIVED: "Outsource",
 };
+
+// ── Pipeline Stepper ──────────────────────────────────────────────────────────
+
+const PIPELINE_STAGES = [
+  { key: "REGISTERED", label: "Reg", statuses: ["PENDING", "CONFIRMED", "PENDING_COLLECTION"] },
+  { key: "COLLECTED", label: "Collect", statuses: ["SAMPLE_COLLECTED", "RECEIVED"] },
+  { key: "LAB", label: "Lab", statuses: ["PENDING_PROCESSING", "IN_PROCESSING"] },
+  { key: "APPROVAL", label: "Approval", statuses: ["PENDING_APPROVAL", "RESULTED"] },
+  { key: "REPORTED", label: "Reported", statuses: ["APPROVED", "REPORTED", "DISPATCHED", "DELIVERED"] },
+];
+
+function getStageIndex(status: string): number {
+  for (let i = PIPELINE_STAGES.length - 1; i >= 0; i--) {
+    if (PIPELINE_STAGES[i].statuses.includes(status)) return i;
+  }
+  return 0;
+}
+
+function PipelineStepper({ status }: { status: string }) {
+  const currentIdx = getStageIndex(status);
+  const isCancelled = status === "CANCELLED";
+
+  if (isCancelled) {
+    return (
+      <span className="text-xs text-red-500 font-medium bg-red-50 px-2 py-0.5 rounded-full">Cancelled</span>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-0.5">
+      {PIPELINE_STAGES.map((stage, idx) => {
+        const done = idx < currentIdx;
+        const active = idx === currentIdx;
+        return (
+          <div key={stage.key} className="flex items-center">
+            <div
+              title={stage.label}
+              className={cn(
+                "flex items-center justify-center rounded-full text-[9px] font-bold transition-colors",
+                done ? "w-4 h-4 bg-teal-500 text-white" :
+                active ? "w-4 h-4 bg-[#1B4F8A] text-white ring-2 ring-[#1B4F8A]/30" :
+                "w-4 h-4 bg-slate-100 text-slate-400"
+              )}
+            >
+              {done ? "✓" : idx + 1}
+            </div>
+            {idx < PIPELINE_STAGES.length - 1 && (
+              <div className={cn("w-5 h-px", done ? "bg-teal-400" : "bg-slate-200")} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -163,8 +218,19 @@ export default function OrdersPage() {
     },
     {
       id: "status",
-      header: "Status",
-      cell: ({ row }) => <StatusBadge status={row.original.status} />,
+      header: "Pipeline",
+      cell: ({ row }) => <PipelineStepper status={row.original.status} />,
+    },
+    {
+      id: "delivery",
+      header: "Delivery",
+      cell: ({ row }) => {
+        const mode = row.original.reportDeliveryMode;
+        if (!mode || mode === "MANUAL") return <span className="text-xs text-slate-400">👤 Manual</span>;
+        if (mode === "AUTO") return <span className="text-xs text-emerald-600 font-medium">⚡ Auto</span>;
+        if (mode === "DOWNLOAD") return <span className="text-xs text-blue-600 font-medium">⬇ DL</span>;
+        return null;
+      },
     },
     {
       id: "amount",

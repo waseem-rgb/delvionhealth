@@ -170,6 +170,13 @@ export class PatientsService {
           insuranceId: dto.insuranceId,
           referringDoctorId: dto.referringDoctorId,
           branchId,
+          ...(dto.reportDeliveryMode && { reportDeliveryMode: dto.reportDeliveryMode }),
+          ...(dto.preferredChannel && { preferredChannel: dto.preferredChannel }),
+          ...(dto.reportMobile && { reportMobile: dto.reportMobile }),
+          ...(dto.reportEmail && { reportEmail: dto.reportEmail }),
+          ...(dto.whatsappOptIn !== undefined && { whatsappOptIn: dto.whatsappOptIn }),
+          ...(dto.emailOptIn !== undefined && { emailOptIn: dto.emailOptIn }),
+          ...(dto.smsOptIn !== undefined && { smsOptIn: dto.smsOptIn }),
         },
         include: {
           branch: { select: { id: true, name: true } },

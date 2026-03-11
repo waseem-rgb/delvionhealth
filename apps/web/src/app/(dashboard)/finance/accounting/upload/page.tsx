@@ -195,21 +195,21 @@ export default function BankUploadPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
+    <div className="min-h-screen bg-slate-50 p-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Upload Bank Statement</h1>
-        <p className="text-slate-400">Upload CSV or Excel bank statements for AI-powered categorization</p>
+        <h1 className="text-2xl font-bold text-slate-900">Upload Bank Statement</h1>
+        <p className="text-slate-500">Upload CSV or Excel bank statements for AI-powered categorization</p>
       </div>
 
       {/* Bank Selector + Upload Zone */}
       {!uploadId && (
         <div className="space-y-6">
           <div className="max-w-md">
-            <label className="block text-sm font-medium text-slate-400 mb-2">Select Bank Account</label>
+            <label className="block text-sm font-medium text-slate-500 mb-2">Select Bank Account</label>
             <select
               value={selectedBank}
               onChange={(e) => setSelectedBank(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-white focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2.5 text-slate-900 focus:border-blue-500 focus:outline-none"
             >
               <option value="">Choose bank account...</option>
               {banks.map((b) => (
@@ -225,8 +225,8 @@ export default function BankUploadPage() {
               dragActive
                 ? "border-blue-500 bg-blue-500/10"
                 : selectedBank
-                ? "border-slate-700 bg-slate-900 hover:border-slate-600"
-                : "border-slate-800 bg-slate-900/50 opacity-50 cursor-not-allowed"
+                ? "border-slate-300 bg-white hover:border-slate-600"
+                : "border-slate-200 bg-white opacity-50 cursor-not-allowed"
             }`}
             onDragOver={(e) => { e.preventDefault(); if (selectedBank) setDragActive(true); }}
             onDragLeave={() => setDragActive(false)}
@@ -235,17 +235,17 @@ export default function BankUploadPage() {
             {uploadMutation.isPending ? (
               <div className="flex flex-col items-center">
                 <Loader2 className="h-12 w-12 text-blue-400 animate-spin mb-4" />
-                <p className="text-white font-medium">Uploading & parsing...</p>
+                <p className="text-slate-900 font-medium">Uploading & parsing...</p>
               </div>
             ) : (
               <>
                 <FileSpreadsheet className="mx-auto h-12 w-12 text-slate-500 mb-4" />
-                <p className="text-white font-medium mb-1">Drag & drop your bank statement here</p>
+                <p className="text-slate-900 font-medium mb-1">Drag & drop your bank statement here</p>
                 <p className="text-sm text-slate-500 mb-4">CSV or Excel (.xlsx), max 10MB</p>
                 <label className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium ${
                   selectedBank
                     ? "bg-blue-600 text-white cursor-pointer hover:bg-blue-700"
-                    : "bg-slate-800 text-slate-500 cursor-not-allowed"
+                    : "bg-slate-100 text-slate-500 cursor-not-allowed"
                 }`}>
                   <Upload className="h-4 w-4" />
                   Browse Files
@@ -267,7 +267,7 @@ export default function BankUploadPage() {
       {uploadId && loadingUpload && (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 text-blue-400 animate-spin" />
-          <p className="ml-3 text-slate-400">Loading statement data...</p>
+          <p className="ml-3 text-slate-500">Loading statement data...</p>
         </div>
       )}
 
@@ -275,20 +275,20 @@ export default function BankUploadPage() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-              <p className="text-sm text-slate-400">Total Rows</p>
-              <p className="text-2xl font-bold text-white">{totalRows}</p>
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <p className="text-sm text-slate-500">Total Rows</p>
+              <p className="text-2xl font-bold text-slate-900">{totalRows}</p>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-              <p className="text-sm text-slate-400">AI Matched</p>
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <p className="text-sm text-slate-500">AI Matched</p>
               <p className="text-2xl font-bold text-green-400">{matchPct}%</p>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-              <p className="text-sm text-slate-400">Confirmed</p>
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <p className="text-sm text-slate-500">Confirmed</p>
               <p className="text-2xl font-bold text-emerald-400">{confirmedRows}/{totalRows}</p>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-              <p className="text-sm text-slate-400">Unmatched</p>
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <p className="text-sm text-slate-500">Unmatched</p>
               <p className="text-2xl font-bold text-red-400">{unmatchedRows}</p>
             </div>
           </div>
@@ -311,7 +311,7 @@ export default function BankUploadPage() {
             </button>
             <button
               onClick={() => { setUploadId(null); }}
-              className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-400 hover:text-white"
+              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-900"
             >
               Upload Another
             </button>
@@ -323,7 +323,7 @@ export default function BankUploadPage() {
               <span>{confirmedRows} of {totalRows} rows confirmed</span>
               <span>{totalRows > 0 ? Math.round((confirmedRows / totalRows) * 100) : 0}%</span>
             </div>
-            <div className="h-2 rounded-full bg-slate-800">
+            <div className="h-2 rounded-full bg-slate-100">
               <div
                 className="h-2 rounded-full bg-emerald-500 transition-all"
                 style={{ width: `${totalRows > 0 ? (confirmedRows / totalRows) * 100 : 0}%` }}
@@ -332,27 +332,27 @@ export default function BankUploadPage() {
           </div>
 
           {/* Transaction Table */}
-          <div className="overflow-hidden rounded-xl border border-slate-800">
+          <div className="overflow-hidden rounded-xl border border-slate-200">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Date</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Narration</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-400">Debit</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-400">Credit</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Suggested Ledger</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Confidence</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Status</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Action</th>
+                <tr className="border-b border-slate-200 bg-white">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Date</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Narration</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-500">Debit</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-500">Credit</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Suggested Ledger</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-500">Confidence</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-500">Status</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-500">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {lines.map((line) => (
-                  <tr key={line.id} className="border-b border-slate-800/50 bg-slate-900/50 hover:bg-slate-800/50">
-                    <td className="px-4 py-3 text-sm text-slate-300 whitespace-nowrap">
+                  <tr key={line.id} className="border-b border-slate-200/50 bg-white hover:bg-slate-100/50">
+                    <td className="px-4 py-3 text-sm text-slate-700 whitespace-nowrap">
                       {new Date(line.txnDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
                     </td>
-                    <td className="px-4 py-3 text-sm text-white max-w-xs truncate" title={line.narration}>
+                    <td className="px-4 py-3 text-sm text-slate-900 max-w-xs truncate" title={line.narration}>
                       {line.narration}
                     </td>
                     <td className="px-4 py-3 text-sm text-right text-red-400">
@@ -361,19 +361,19 @@ export default function BankUploadPage() {
                     <td className="px-4 py-3 text-sm text-right text-green-400">
                       {line.credit > 0 ? fmtPaise(line.credit) : ""}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-300">
+                    <td className="px-4 py-3 text-sm text-slate-700">
                       {editingRow === line.id ? (
                         <div className="relative">
                           <Search className="absolute left-2 top-2 h-3.5 w-3.5 text-slate-500" />
                           <input
                             value={ledgerSearch}
                             onChange={(e) => setLedgerSearch(e.target.value)}
-                            className="w-full rounded border border-slate-600 bg-slate-800 pl-7 pr-2 py-1.5 text-xs text-white focus:outline-none"
+                            className="w-full rounded border border-slate-600 bg-slate-100 pl-7 pr-2 py-1.5 text-xs text-slate-900 focus:outline-none"
                             placeholder="Search ledger..."
                             autoFocus
                           />
                           {ledgerSearch && (
-                            <div className="absolute z-10 mt-1 max-h-40 w-64 overflow-y-auto rounded border border-slate-700 bg-slate-800 shadow-lg">
+                            <div className="absolute z-10 mt-1 max-h-40 w-64 overflow-y-auto rounded border border-slate-300 bg-slate-100 shadow-lg">
                               {filteredLedgers.slice(0, 10).map((l) => (
                                 <button
                                   key={l.id}
@@ -381,7 +381,7 @@ export default function BankUploadPage() {
                                     confirmMutation.mutate({ lineId: line.id, ledgerId: l.id });
                                     setLedgerSearch("");
                                   }}
-                                  className="block w-full px-3 py-1.5 text-left text-xs text-slate-300 hover:bg-slate-700"
+                                  className="block w-full px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-200"
                                 >
                                   {l.code} — {l.name}
                                 </button>
@@ -401,7 +401,7 @@ export default function BankUploadPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`text-xs font-medium ${STATUS_COLORS[line.status] ?? "text-slate-400"}`}>
+                      <span className={`text-xs font-medium ${STATUS_COLORS[line.status] ?? "text-slate-500"}`}>
                         {line.status === "AI_MATCHED" ? "Matched" : line.status === "CONFIRMED" ? "Confirmed" : line.status}
                       </span>
                     </td>

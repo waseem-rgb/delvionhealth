@@ -298,7 +298,11 @@ export class ApprovalService {
   ) {
     const order = await this.prisma.order.findFirst({
       where: { id: orderId, tenantId },
-      select: { id: true, status: true, orderNumber: true },
+      select: {
+        id: true, status: true, orderNumber: true, reportDeliveryMode: true,
+        preferredChannel: true, reportMobile: true, reportEmail: true,
+        patient: { select: { firstName: true, lastName: true, mrn: true, phone: true, email: true } },
+      },
     });
 
     if (!order) {
@@ -360,6 +364,55 @@ export class ApprovalService {
       this.logger.error(
         `Failed to auto-generate report for order ${order.orderNumber}: ${err instanceof Error ? err.message : err}`,
       );
+    }
+
+    // Auto-delivery: if reportDeliveryMode is AUTO, trigger non-blocking
+    if (order.reportDeliveryMode === "AUTO") {
+      setImmediate(async () => {
+        try {
+          const phone = order.reportMobile || order.patient?.phone;
+          const email = order.reportEmail || order.patient?.email;
+          const channels = ((order.preferredChannel ?? []) as string[]);
+          const deliveryChannels = channels.length > 0 ? channels : ["WHATSAPP"];
+
+          // Log delivery attempts
+          const logEntries: Array<{ channel: string; recipient: string }> = [];
+          if (deliveryChannels.includes("WHATSAPP") && phone) {
+            logEntries.push({ channel: "WHATSAPP", recipient: phone });
+          }
+          if (deliveryChannels.includes("EMAIL") && email) {
+            logEntries.push({ channel: "EMAIL", recipient: email });
+          }
+          if (deliveryChannels.includes("SMS") && phone) {
+            logEntries.push({ channel: "SMS", recipient: phone });
+          }
+
+          // Create notification log entries
+          for (const entry of logEntries) {
+            await this.prisma.notificationLog.create({
+              data: {
+                tenantId,
+                orderId,
+                channel: entry.channel,
+                type: "REPORT_READY",
+                recipient: entry.recipient,
+                message: `Auto-delivery of report for order ${order.orderNumber}`,
+                status: "PENDING",
+              },
+            });
+          }
+
+          // Mark as DISPATCHED
+          await this.prisma.order.update({
+            where: { id: orderId },
+            data: { status: OrderStatus.DISPATCHED, dispatchedAt: new Date() },
+          });
+
+          this.logger.log(`Auto-delivery queued for order ${order.orderNumber} via ${deliveryChannels.join(", ")}`);
+        } catch (err) {
+          this.logger.error(`Auto-delivery failed for order ${order.orderNumber}: ${err instanceof Error ? err.message : err}`);
+        }
+      });
     }
 
     // Sync referring doctor stats (marketing module)

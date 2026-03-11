@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
+import { seedChartOfAccounts } from "./seeds/chart-of-accounts.seed";
 
 @Injectable()
 export class FinanceService {
@@ -343,5 +344,11 @@ export class FinanceService {
   // Keep existing findAll for backward compat
   async findAll(tenantId: string): Promise<unknown[]> {
     return this.getAccounts(tenantId);
+  }
+
+  async seedChartOfAccounts(tenantId: string) {
+    await seedChartOfAccounts(this.prisma as any, tenantId);
+    const count = await this.prisma.gLAccount.count({ where: { tenantId } });
+    return { message: "Chart of accounts seeded successfully", count };
   }
 }

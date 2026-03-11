@@ -176,6 +176,13 @@ export class FinanceController {
     return this.financeService.autoReconcile(user.tenantId, bankAccountId);
   }
 
+  // Seed chart of accounts
+  @Post("seed/chart-of-accounts")
+  @ApiOperation({ summary: "Seed chart of accounts for tenant" })
+  seedChartOfAccounts(@CurrentUser() user: JwtPayload) {
+    return this.financeService.seedChartOfAccounts(user.tenantId);
+  }
+
   // Keep backward-compat
   @Get()
   @ApiOperation({ summary: "List GL accounts (alias)" })

@@ -24,11 +24,11 @@ export default function B2CROIPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
+    <div className="min-h-screen bg-slate-50 p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">B2C ROI</h1>
-        <p className="text-slate-400">
+        <h1 className="text-2xl font-bold text-slate-900">B2C ROI</h1>
+        <p className="text-slate-500">
           Track return on investment across B2C campaigns and marketing channels
         </p>
       </div>
@@ -65,27 +65,27 @@ export default function B2CROIPage() {
           return (
             <div
               key={card.label}
-              className="rounded-xl border border-slate-800 bg-slate-900 p-4"
+              className="rounded-xl border border-slate-200 bg-white p-4"
             >
-              <div className="flex items-center gap-2 text-sm text-slate-400">
+              <div className="flex items-center gap-2 text-sm text-slate-500">
                 <Icon className={`h-4 w-4 ${card.color}`} />
                 {card.label}
               </div>
-              <p className="mt-1 text-xl font-bold text-white">{card.value}</p>
+              <p className="mt-1 text-xl font-bold text-slate-900">{card.value}</p>
             </div>
           );
         })}
       </div>
 
       {/* Table structure */}
-      <div className="overflow-x-auto rounded-xl border border-slate-800">
+      <div className="overflow-x-auto rounded-xl border border-slate-200">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-800 bg-slate-900">
+            <tr className="border-b border-slate-200 bg-white">
               {columns.map((col) => (
                 <th
                   key={col}
-                  className="px-4 py-3 text-left text-sm font-medium text-slate-400"
+                  className="px-4 py-3 text-left text-sm font-medium text-slate-500"
                 >
                   {col}
                 </th>
@@ -98,7 +98,7 @@ export default function B2CROIPage() {
               <td colSpan={columns.length}>
                 <div className="flex flex-col items-center justify-center py-20">
                   <Megaphone className="mb-4 h-12 w-12 text-slate-600" />
-                  <p className="text-lg font-medium text-slate-400">
+                  <p className="text-lg font-medium text-slate-500">
                     No data found
                   </p>
                   <p className="mt-1 text-sm text-slate-500">
@@ -134,10 +134,10 @@ export default function B2CROIPage() {
           return (
             <div
               key={item.title}
-              className="rounded-xl border border-slate-800 bg-slate-900 p-5"
+              className="rounded-xl border border-slate-200 bg-white p-5"
             >
               <Icon className="mb-3 h-8 w-8 text-slate-600" />
-              <h3 className="text-sm font-semibold text-white">{item.title}</h3>
+              <h3 className="text-sm font-semibold text-slate-900">{item.title}</h3>
               <p className="mt-1 text-xs text-slate-500">{item.desc}</p>
             </div>
           );

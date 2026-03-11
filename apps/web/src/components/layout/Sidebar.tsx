@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn, getInitials, getAvatarColor } from "@/lib/utils";
@@ -12,19 +12,16 @@ import {
   ClipboardList,
   Calendar,
   FlaskConical,
-  Microscope,
   BarChart3,
   Cpu,
   FileText,
   TrendingUp,
   Stethoscope,
   Megaphone,
-  Map,
   Receipt,
   Shield,
   BookOpen,
   ShoppingCart,
-  UserCheck,
   Clock,
   Banknote,
   CalendarDays,
@@ -35,43 +32,28 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   LogOut,
   Coins,
-  Target,
   HeartPulse,
   CheckSquare,
-  Send,
-  Upload,
-  Building2,
   FileSpreadsheet,
   GitMerge,
-  Percent,
   ClipboardCheck,
   ScrollText,
   ExternalLink,
-  ClipboardPen,
   ScanBarcode,
   Cog,
   ShieldCheck,
-  LayoutGrid,
   ClipboardPlus,
   TestTubes,
-  Handshake,
-  DollarSign,
-  Wallet,
   BookOpenCheck,
-  Award,
   Tent,
   HeartHandshake,
   Scale,
   Truck,
   GraduationCap,
   Bot,
-  UserPlus,
-  Gift,
-  Repeat,
-  Sparkles,
-  Package,
   Home,
   Hash,
   FileOutput,
@@ -79,17 +61,21 @@ import {
   Search,
   Monitor,
   PieChart,
-  Ticket,
-  UsersRound,
   Hospital,
+  Microscope,
+  Radio,
+  Dna,
   Briefcase,
   Landmark,
   Smartphone,
   GitBranch,
   BadgeDollarSign,
   BarChart,
-  Wrench,
-  IndianRupee,
+  Palette,
+  RotateCcw,
+  Filter,
+  Upload,
+  ArrowLeftRight,
 } from "lucide-react";
 
 interface NavItem {
@@ -106,21 +92,23 @@ interface NavGroup {
 }
 
 const SECTION_COLORS: Record<string, string> = {
-  Overview: "text-slate-400/80",
-  "Front Desk": "text-teal-400/90",
-  "Lab Operations": "text-blue-400/90",
-  "Reports & Billing": "text-violet-400/90",
-  "Revenue CRM": "text-emerald-400/90",
-  B2C: "text-slate-400/70",
-  B2B: "text-slate-400/70",
-  Finance: "text-orange-400/90",
-  "HR & Admin": "text-pink-400/90",
-  "Quality & Compliance": "text-cyan-400/90",
-  "Corporate & Wellness": "text-emerald-400/90",
-  Marketing: "text-rose-400/90",
-  Settings: "text-slate-400/80",
+  Overview: "text-sky-400",
+  "Front Desk": "text-teal-400",
+  "Lab Operations": "text-blue-400",
+  "Reports & Billing": "text-violet-400",
+  "Revenue CRM": "text-emerald-400",
+  B2C: "text-slate-400",
+  B2B: "text-slate-400",
+  Finance: "text-orange-400",
+  Instruments: "text-cyan-400",
+  "HR & Admin": "text-pink-400",
+  "Quality & Compliance": "text-lime-400",
+  "Corporate & Wellness": "text-green-400",
+  "Imaging & Investigations": "text-purple-400",
+  Settings: "text-indigo-400",
 };
 
+// These appear as sub-labels under Revenue CRM, not independent section headings
 const SUB_SECTIONS = new Set(["B2C", "B2B"]);
 
 const NAV_GROUPS: NavGroup[] = [
@@ -141,6 +129,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: "Appointments", href: "/appointments", icon: Calendar },
       { label: "Home Collection", href: "/front-desk/home-collection", icon: Home },
       { label: "Queue & Tokens", href: "/front-desk/queue", icon: Hash },
+      { label: "Queue Display", href: "/front-desk/queue-display", icon: Monitor },
       { label: "Orders", href: "/orders", icon: ShoppingCart },
       { label: "Reports Delivery", href: "/front-desk/reports", icon: FileOutput },
       { label: "Phleb Schedule", href: "/front-desk/phleb-schedule", icon: Syringe },
@@ -148,15 +137,30 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: "Imaging & Investigations",
+    roles: [Role.LAB_TECHNICIAN, Role.PATHOLOGIST, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
+    items: [
+      { label: "Overview", href: "/imaging", icon: PieChart },
+      { label: "X-Ray Worklist", href: "/imaging/xray", icon: Activity },
+      { label: "CT Scan Worklist", href: "/imaging/ct", icon: Microscope },
+      { label: "MRI Worklist", href: "/imaging/mri", icon: Radio },
+      { label: "Ultrasound Worklist", href: "/imaging/usg", icon: HeartPulse },
+      { label: "Doppler Worklist", href: "/imaging/doppler", icon: BarChart },
+      { label: "Molecular Reports", href: "/imaging/molecular", icon: FlaskConical },
+      { label: "Genetics Reports", href: "/imaging/genetics", icon: Dna },
+      { label: "Report Templates", href: "/imaging/templates", icon: BookOpenCheck },
+      { label: "Verify Queue", href: "/imaging/verify", icon: ShieldCheck },
+    ],
+  },
+  {
     label: "Lab Operations",
     roles: [Role.FRONT_DESK, Role.LAB_TECHNICIAN, Role.PATHOLOGIST, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
     items: [
-      { label: "Accession", href: "/accession", icon: ScanBarcode },
+      { label: "Worklist", href: "/accession", icon: ScanBarcode },
       { label: "Samples", href: "/samples", icon: TestTubes },
-      { label: "Results", href: "/results", icon: FlaskConical },
-      { label: "Instruments", href: "/instruments", icon: Cpu },
-      { label: "Approvals", href: "/approvals", icon: CheckSquare },
       { label: "Operations", href: "/operations", icon: Cog },
+      { label: "Approval", href: "/approvals", icon: CheckSquare },
+      { label: "Results", href: "/results", icon: FlaskConical },
       { label: "Outsourcing", href: "/outsourcing", icon: ExternalLink },
     ],
   },
@@ -164,7 +168,6 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Reports & Billing",
     roles: [Role.PATHOLOGIST, Role.LAB_MANAGER, Role.FINANCE_EXECUTIVE, Role.FIELD_SALES_REP, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
     items: [
-      { label: "Reports", href: "/reports", icon: FileText },
       { label: "MIS Reports", href: "/reports/mis", icon: FileSpreadsheet },
       { label: "Invoices & Payments", href: "/billing", icon: Receipt },
       { label: "Insurance", href: "/billing/insurance", icon: Shield },
@@ -181,11 +184,13 @@ const NAV_GROUPS: NavGroup[] = [
     label: "B2C",
     roles: [Role.FIELD_SALES_REP, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
     items: [
-      { label: "Digital Campaigns", href: "/revenue-crm/campaigns", icon: Megaphone },
+      { label: "Campaigns", href: "/revenue-crm/campaigns", icon: Megaphone },
+      { label: "Content Studio", href: "/revenue-crm/content-studio", icon: Palette },
+      { label: "Lead Management", href: "/revenue-crm/leads", icon: Users },
+      { label: "Repeat Analytics", href: "/revenue-crm/repeat-analytics", icon: RotateCcw },
+      { label: "Patient Segments", href: "/revenue-crm/segments", icon: Filter },
       { label: "Health Camps", href: "/revenue-crm/camps", icon: Tent },
-      { label: "Coupons & Offers", href: "/revenue-crm/coupons", icon: Ticket },
-      { label: "Patient Segments", href: "/revenue-crm/segments", icon: UsersRound },
-      { label: "B2C ROI", href: "/revenue-crm/b2c-roi", icon: TrendingUp },
+      { label: "ROI Dashboard", href: "/revenue-crm/roi", icon: TrendingUp },
     ],
   },
   {
@@ -208,12 +213,24 @@ const NAV_GROUPS: NavGroup[] = [
     roles: [Role.FINANCE_EXECUTIVE, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
     items: [
       { label: "Finance Overview", href: "/finance", icon: LayoutDashboard },
+      { label: "Upload Statement", href: "/finance/accounting/upload", icon: Upload },
+      { label: "Transactions", href: "/finance/accounting/transactions", icon: ArrowLeftRight },
+      { label: "Ledgers", href: "/finance/accounting/ledgers", icon: BookOpenCheck },
+      { label: "Journal Entries", href: "/finance/accounting/journals", icon: ScrollText },
       { label: "Receivables", href: "/finance/receivables", icon: Coins },
-      { label: "Accounting", href: "/finance/accounting", icon: BookOpenCheck },
       { label: "Procurement", href: "/finance/procurement", icon: Truck },
       { label: "Statutory & Payroll", href: "/finance/statutory", icon: Shield },
-      { label: "Reports & Statements", href: "/finance/reports", icon: FileSpreadsheet },
-      { label: "Bank Reconciliation", href: "/finance/reconciliation", icon: GitMerge },
+      { label: "Reports", href: "/finance/reports", icon: FileSpreadsheet },
+    ],
+  },
+  {
+    label: "Instruments",
+    roles: [Role.LAB_TECHNICIAN, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
+    items: [
+      { label: "Overview", href: "/instruments", icon: Cpu },
+      { label: "Interfaces", href: "/instruments/interfaces", icon: Plug },
+      { label: "CPT Codes", href: "/instruments/cpt-codes", icon: Hash },
+      { label: "Status Monitor", href: "/instruments/status", icon: Activity },
     ],
   },
   {
@@ -251,49 +268,30 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: "Marketing",
-    roles: [Role.FIELD_SALES_REP, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
-    items: [
-      { label: "Overview", href: "/marketing", icon: TrendingUp },
-      { label: "Packages & Offers", href: "/marketing/packages", icon: Package },
-      { label: "Patient Recall", href: "/marketing/recall", icon: Repeat },
-      { label: "Content Studio", href: "/marketing/content", icon: Sparkles },
-    ],
-  },
-  {
     label: "Settings",
     roles: [Role.TENANT_ADMIN, Role.SUPER_ADMIN, Role.IT_ADMIN],
     items: [
       { label: "Settings", href: "/settings", icon: Settings },
+      { label: "Departments", href: "/settings/departments", icon: Hospital },
       { label: "Doctors", href: "/settings/doctors", icon: Stethoscope },
       { label: "Report Settings", href: "/settings/report-settings", icon: FileText },
+      { label: "Bill Settings", href: "/settings/bill-settings", icon: Receipt },
+      { label: "Invoice Settings", href: "/settings/invoice-settings", icon: ScrollText },
+      { label: "Test Mapping", href: "/settings/test-mapping", icon: GitMerge },
       { label: "Rate Lists", href: "/settings/rate-lists", icon: FileSpreadsheet },
-      { label: "Report Templates", href: "/settings/report-templates", icon: ScrollText },
       { label: "Integrations", href: "/integrations", icon: Plug },
       { label: "API Keys", href: "/integrations/api-keys", icon: Key },
       { label: "FHIR Explorer", href: "/integrations/fhir", icon: HeartPulse },
       { label: "Voice Agent", href: "/settings/voice-agent", icon: Bot },
-      { label: "Instruments & CPT", href: "/settings/instruments", icon: Wrench },
-      { label: "Margin Dashboard", href: "/settings/margin-dashboard", icon: IndianRupee },
     ],
   },
 ];
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
-
-  useEffect(() => {
-    const stored = localStorage.getItem("delvion_sidebar_collapsed");
-    if (stored === "true") setCollapsed(true);
-  }, []);
-
-  const handleToggle = () => {
-    const next = !collapsed;
-    setCollapsed(next);
-    localStorage.setItem("delvion_sidebar_collapsed", String(next));
-  };
 
   const userRole = user?.role as Role | undefined;
   const visibleGroups = NAV_GROUPS.filter((group) => {
@@ -301,6 +299,55 @@ export function Sidebar() {
     if (!userRole) return false;
     return group.roles.includes(userRole);
   });
+
+  // Determine which group contains the active route
+  const activeGroupLabel = visibleGroups.find((group) =>
+    group.items.some((item) => {
+      const exactMatchPaths = new Set(["/dashboard", "/finance", "/instruments"]);
+      return exactMatchPaths.has(item.href)
+        ? pathname === item.href
+        : pathname.startsWith(item.href);
+    })
+  )?.label;
+
+  // On mount: restore sidebar collapsed state; always start with only active section open
+  useEffect(() => {
+    const stored = localStorage.getItem("delvion_sidebar_collapsed");
+    if (stored === "true") setCollapsed(true);
+    // Remove stale stored expansion state — always derive from active route
+    localStorage.removeItem("delvion_sidebar_expanded_sections");
+    setExpandedSections(activeGroupLabel ? new Set([activeGroupLabel]) : new Set());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-expand the section of the active route when pathname changes
+  useEffect(() => {
+    if (activeGroupLabel) {
+      setExpandedSections((prev) => {
+        if (prev.has(activeGroupLabel)) return prev;
+        const next = new Set(prev);
+        next.add(activeGroupLabel);
+        return next;
+      });
+    }
+  }, [activeGroupLabel]);
+
+  const toggleSection = useCallback((label: string) => {
+    setExpandedSections((prev) => {
+      if (prev.has(label)) {
+        const next = new Set(prev);
+        next.delete(label);
+        return next;
+      }
+      return new Set([label]); // accordion: close all others
+    });
+  }, []);
+
+  const handleToggle = () => {
+    const next = !collapsed;
+    setCollapsed(next);
+    localStorage.setItem("delvion_sidebar_collapsed", String(next));
+  };
 
   const fullName = user ? `${user.firstName} ${user.lastName}` : "";
   const initials = user ? getInitials(user.firstName, user.lastName) : "?";
@@ -338,70 +385,103 @@ export function Sidebar() {
       </button>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
-        {visibleGroups.map((group, idx) => (
-          <div key={group.label}>
-            {!collapsed && (
-              <>
-                {/* Separator before every section except the first */}
-                {idx > 0 && !SUB_SECTIONS.has(group.label) && (
-                  <div className="mx-3 mb-3 mt-1 border-t border-white/[0.08]" />
-                )}
-                {SUB_SECTIONS.has(group.label) ? (
-                  /* Sub-section pill label (B2C / B2B) */
-                  <div className="px-4 mt-3 mb-1">
-                    <span className="text-[9px] font-semibold tracking-[0.2em] uppercase text-slate-500 bg-slate-700/50 px-2 py-0.5 rounded">
-                      {group.label}
-                    </span>
-                  </div>
-                ) : (
-                  /* Section heading with colored label */
-                  <div className="px-4 mb-2 flex items-center gap-2">
-                    <span className={`text-[10px] font-bold tracking-[0.15em] uppercase ${SECTION_COLORS[group.label] ?? "text-slate-400/80"}`}>
-                      {group.label}
-                    </span>
-                    <div className="flex-1 h-px bg-white/[0.06]" />
-                  </div>
-                )}
-              </>
-            )}
-            <div className="space-y-0.5">
-              {group.items.map((item) => {
-                const isActive =
-                  item.href === "/dashboard" || item.href === "/finance"
-                    ? pathname === item.href
-                    : pathname.startsWith(item.href);
+      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+        {visibleGroups.map((group, idx) => {
+          const isSubSection = SUB_SECTIONS.has(group.label);
+          const parentLabel = isSubSection ? "Revenue CRM" : group.label;
+          const isExpanded = collapsed || expandedSections.has(parentLabel);
+          const hasActive = group.items.some((item) => {
+            const exactMatchPaths = new Set(["/dashboard", "/finance", "/instruments"]);
+            return exactMatchPaths.has(item.href)
+              ? pathname === item.href
+              : pathname.startsWith(item.href);
+          });
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    title={collapsed ? item.label : undefined}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-150 group",
-                      collapsed ? "justify-center" : "",
-                      isActive
-                        ? "bg-[#0D7E8A]/15 text-white border-l-[3px] border-[#0D7E8A] pl-[9px]"
-                        : "text-slate-400 hover:text-white hover:bg-white/5"
-                    )}
-                  >
-                    <item.icon size={18} className="flex-shrink-0" />
-                    {!collapsed && (
-                      <>
-                        <span className="text-sm font-medium truncate flex-1">{item.label}</span>
-                        {item.badge != null && item.badge > 0 && (
-                          <span className="ml-auto bg-[#0D7E8A] text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
-                            {item.badge > 99 ? "99+" : item.badge}
-                          </span>
+          return (
+            <div key={group.label}>
+              {!collapsed && (
+                <>
+                  {/* Separator before sections (not sub-sections, not first) */}
+                  {idx > 0 && !isSubSection && (
+                    <div className="mx-3 mb-1 mt-2 border-t border-white/[0.08]" />
+                  )}
+
+                  {isSubSection ? (
+                    /* Sub-section pill label (B2C / B2B) — always visible within Revenue CRM */
+                    <div className="px-4 mt-3 mb-1">
+                      <span className="text-[9px] font-semibold tracking-[0.2em] uppercase text-slate-500 bg-slate-700/50 px-2 py-0.5 rounded">
+                        {group.label}
+                      </span>
+                    </div>
+                  ) : (
+                    /* Clickable section heading */
+                    <button
+                      onClick={() => toggleSection(group.label)}
+                      className={cn(
+                        "w-full flex items-center gap-2 px-4 py-1.5 rounded-lg transition-colors group",
+                        "hover:bg-white/[0.04]",
+                      )}
+                    >
+                      <span className={cn(
+                        "text-[11px] font-extrabold tracking-[0.18em] uppercase flex-1 text-left",
+                        SECTION_COLORS[group.label] ?? "text-sky-400",
+                        !hasActive && "opacity-60",
+                      )}>
+                        {group.label}
+                      </span>
+                      <ChevronDown
+                        size={11}
+                        className={cn(
+                          "text-slate-600 group-hover:text-slate-400 transition-transform duration-200 flex-shrink-0",
+                          isExpanded ? "rotate-0" : "-rotate-90"
                         )}
-                      </>
-                    )}
-                  </Link>
-                );
-              })}
+                      />
+                    </button>
+                  )}
+                </>
+              )}
+
+              {/* Items — hidden when collapsed (per section) unless sidebar itself is icon-mode */}
+              {isExpanded && (
+                <div className="space-y-0.5 mt-0.5">
+                  {group.items.map((item) => {
+                    const exactMatchPaths = new Set(["/dashboard", "/finance", "/instruments"]);
+                    const isActive = exactMatchPaths.has(item.href)
+                      ? pathname === item.href
+                      : pathname.startsWith(item.href);
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        title={collapsed ? item.label : undefined}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-150 group",
+                          collapsed ? "justify-center" : "",
+                          isActive
+                            ? "bg-[#0D7E8A]/15 text-white border-l-[3px] border-[#0D7E8A] pl-[9px]"
+                            : "text-slate-400 hover:text-white hover:bg-white/5"
+                        )}
+                      >
+                        <item.icon size={18} className="flex-shrink-0" />
+                        {!collapsed && (
+                          <>
+                            <span className="text-sm font-medium truncate flex-1">{item.label}</span>
+                            {item.badge != null && item.badge > 0 && (
+                              <span className="ml-auto bg-[#0D7E8A] text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
+                                {item.badge > 99 ? "99+" : item.badge}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </nav>
 
       {/* User area */}

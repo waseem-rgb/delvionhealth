@@ -170,7 +170,7 @@ export default function RateListsPage() {
   const { data: allTests, isLoading: testsLoading } = useQuery({
     queryKey: ["test-catalog-all"],
     queryFn: async () => {
-      const res = await api.get<{ data: { data: TestCatalogItem[] } }>("/test-catalog?limit=1000");
+      const res = await api.get<{ data: { data: TestCatalogItem[] } }>("/test-catalog?limit=5000");
       const raw = res.data.data;
       return Array.isArray(raw) ? raw : (raw as { data: TestCatalogItem[] }).data ?? [];
     },
@@ -654,7 +654,7 @@ export default function RateListsPage() {
         {/* Table */}
         {listsLoading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 size={24} className="animate-spin text-slate-400" />
+            <Loader2 size={24} className="animate-spin text-slate-500" />
           </div>
         ) : (
           <div className="bg-white rounded-xl card-shadow overflow-hidden">
@@ -730,7 +730,7 @@ export default function RateListsPage() {
                     <td className="px-4 py-3 relative">
                       <button
                         onClick={() => setActionMenuId(actionMenuId === list.id ? null : list.id)}
-                        className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                        className="p-1.5 rounded-md text-slate-500 hover:text-slate-600 hover:bg-slate-100"
                       >
                         <MoreVertical size={14} />
                       </button>
@@ -786,7 +786,7 @@ export default function RateListsPage() {
                 ))}
                 {(rateLists ?? []).length === 0 && (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-slate-400 text-sm">
+                    <td colSpan={6} className="text-center py-12 text-slate-500 text-sm">
                       No rate lists found. Click &quot;Create New&quot; to add one.
                     </td>
                   </tr>
@@ -860,7 +860,7 @@ export default function RateListsPage() {
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors",
                   testDeptFilter === dept
-                    ? "bg-[#1B4F8A] text-white"
+                    ? "bg-[#1B4F8A] text-slate-900"
                     : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
                 )}
               >
@@ -870,7 +870,7 @@ export default function RateListsPage() {
           </div>
           <div className="flex-1 min-w-[200px]">
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 value={testSearch}
                 onChange={(e) => { setTestSearch(e.target.value); setCatalogPage(1); }}
@@ -884,7 +884,7 @@ export default function RateListsPage() {
         {/* Table */}
         {testsLoading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 size={24} className="animate-spin text-slate-400" />
+            <Loader2 size={24} className="animate-spin text-slate-500" />
           </div>
         ) : (
           <div className="bg-white rounded-xl card-shadow overflow-hidden">
@@ -908,14 +908,14 @@ export default function RateListsPage() {
                   {paginatedTests.map((test) => (
                     <tr key={test.id} className="hover:bg-slate-50/50 group">
                       <td className="px-4 py-2.5 text-xs font-mono text-slate-500">{test.code}</td>
-                      <td className="px-4 py-2.5 text-xs text-slate-500">{test.type || test.department || <span className="text-slate-300">&mdash;</span>}</td>
+                      <td className="px-4 py-2.5 text-xs text-slate-500">{test.type || test.department || <span className="text-slate-700">&mdash;</span>}</td>
                       <td className="px-4 py-2.5 text-sm text-slate-900 max-w-[280px] truncate">{test.name}</td>
-                      <td className="px-4 py-2.5 text-xs text-slate-500">{test.methodology || <span className="text-slate-300">&mdash;</span>}</td>
+                      <td className="px-4 py-2.5 text-xs text-slate-500">{test.methodology || <span className="text-slate-700">&mdash;</span>}</td>
                       <td className="px-4 py-2.5">
                         {test.sampleType ? (
                           <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-medium">{test.sampleType}</span>
                         ) : (
-                          <span className="text-xs text-slate-300">&mdash;</span>
+                          <span className="text-xs text-slate-700">&mdash;</span>
                         )}
                       </td>
                       <td className="px-4 py-2.5 text-xs text-slate-500">{test.turnaroundHours}h</td>
@@ -932,7 +932,7 @@ export default function RateListsPage() {
                             className="w-24 px-2 py-1 border border-teal-400 rounded text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
                           />
                         ) : savingCell === `${test.id}-price` ? (
-                          <span className="text-slate-400">saving…</span>
+                          <span className="text-slate-500">saving…</span>
                         ) : savedCell === `${test.id}-price` ? (
                           <span className="text-emerald-600 flex items-center gap-1"><CheckCircle2 size={12} /> saved</span>
                         ) : (
@@ -954,12 +954,12 @@ export default function RateListsPage() {
                             className="w-24 px-2 py-1 border border-teal-400 rounded text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
                           />
                         ) : savingCell === `${test.id}-b2bPrice` ? (
-                          <span className="text-slate-400">saving…</span>
+                          <span className="text-slate-500">saving…</span>
                         ) : savedCell === `${test.id}-b2bPrice` ? (
                           <span className="text-emerald-600 flex items-center gap-1"><CheckCircle2 size={12} /> saved</span>
                         ) : (
                           <span className="cursor-pointer hover:text-teal-600 hover:underline" onClick={() => setEditingCell({ testId: test.id, field: "b2bPrice", value: String(Number(test.b2bPrice) || 0) })} title="Click to edit">
-                            {test.b2bPrice ? formatCurrency(Number(test.b2bPrice)) : <span className="text-slate-300 cursor-pointer hover:text-teal-400">+ B2B</span>}
+                            {test.b2bPrice ? formatCurrency(Number(test.b2bPrice)) : <span className="text-slate-700 cursor-pointer hover:text-teal-400">+ B2B</span>}
                           </span>
                         )}
                       </td>
@@ -976,24 +976,24 @@ export default function RateListsPage() {
                             className="w-24 px-2 py-1 border border-teal-400 rounded text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
                           />
                         ) : savingCell === `${test.id}-cogs` ? (
-                          <span className="text-slate-400">saving…</span>
+                          <span className="text-slate-500">saving…</span>
                         ) : savedCell === `${test.id}-cogs` ? (
                           <span className="text-emerald-600 flex items-center gap-1"><CheckCircle2 size={12} /> saved</span>
                         ) : (
                           <span className="cursor-pointer hover:text-teal-600 hover:underline" onClick={() => setEditingCell({ testId: test.id, field: "cogs", value: String(Number(test.cogs) || 0) })} title="Click to edit">
-                            {test.cogs ? formatCurrency(Number(test.cogs)) : <span className="text-slate-300 cursor-pointer hover:text-teal-400">+ COGS</span>}
+                            {test.cogs ? formatCurrency(Number(test.cogs)) : <span className="text-slate-700 cursor-pointer hover:text-teal-400">+ COGS</span>}
                           </span>
                         )}
                       </td>
                       <td className="px-4 py-2.5 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => router.push(`/settings/test-catalog/${test.id}/report`)} className="p-1.5 rounded-md text-slate-400 hover:text-violet-600 hover:bg-violet-50" title="Report Builder">
+                          <button onClick={() => router.push(`/settings/test-catalog/${test.id}/report`)} className="p-1.5 rounded-md text-slate-500 hover:text-violet-600 hover:bg-violet-50" title="Report Builder">
                             <FileText size={14} />
                           </button>
-                          <button onClick={() => setEditingTest(test)} className="p-1.5 rounded-md text-slate-400 hover:text-[#0D7E8A] hover:bg-[#0D7E8A]/10" title="Edit test">
+                          <button onClick={() => setEditingTest(test)} className="p-1.5 rounded-md text-slate-500 hover:text-[#0D7E8A] hover:bg-[#0D7E8A]/10" title="Edit test">
                             <Edit2 size={14} />
                           </button>
-                          <button onClick={() => setShowDeleteConfirm(test.id)} className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50" title="Delete test">
+                          <button onClick={() => setShowDeleteConfirm(test.id)} className="p-1.5 rounded-md text-slate-500 hover:text-red-600 hover:bg-red-50" title="Delete test">
                             <Trash2 size={14} />
                           </button>
                         </div>
@@ -1001,7 +1001,7 @@ export default function RateListsPage() {
                     </tr>
                   ))}
                   {filteredTests.length === 0 && (
-                    <tr><td colSpan={10} className="text-center py-12 text-slate-400 text-sm">No tests found.</td></tr>
+                    <tr><td colSpan={10} className="text-center py-12 text-slate-500 text-sm">No tests found.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -1026,9 +1026,9 @@ export default function RateListsPage() {
                     }, [])
                     .map((p, i) =>
                       p === "..." ? (
-                        <span key={`d${i}`} className="px-1 text-xs text-slate-400">...</span>
+                        <span key={`d${i}`} className="px-1 text-xs text-slate-500">...</span>
                       ) : (
-                        <button key={p} onClick={() => setCatalogPage(p as number)} className={cn("w-8 h-8 rounded-md text-xs font-medium", catalogPage === p ? "bg-[#1B4F8A] text-white" : "border border-slate-200 text-slate-600 hover:bg-white")}>
+                        <button key={p} onClick={() => setCatalogPage(p as number)} className={cn("w-8 h-8 rounded-md text-xs font-medium", catalogPage === p ? "bg-[#1B4F8A] text-slate-900" : "border border-slate-200 text-slate-600 hover:bg-white")}>
                           {p}
                         </button>
                       )
@@ -1164,7 +1164,7 @@ export default function RateListsPage() {
               )}
             </div>
             <div className="flex justify-end p-4 border-t border-slate-100">
-              <button onClick={() => { setShowImportResult(false); setImportResult(null); }} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800">
+              <button onClick={() => { setShowImportResult(false); setImportResult(null); }} className="px-4 py-2 bg-white text-slate-900 rounded-lg text-sm font-medium hover:bg-slate-100">
                 Close
               </button>
             </div>
@@ -1188,7 +1188,7 @@ export default function RateListsPage() {
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-slate-100">
               <h3 className="font-semibold text-slate-900 text-lg">Add Profile</h3>
-              <button onClick={() => setShowAddProfileModal(false)} className="p-1.5 rounded-md text-slate-400 hover:bg-slate-100"><X size={16} /></button>
+              <button onClick={() => setShowAddProfileModal(false)} className="p-1.5 rounded-md text-slate-500 hover:bg-slate-100"><X size={16} /></button>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -1253,7 +1253,7 @@ export default function RateListsPage() {
                         className="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center justify-between text-sm"
                       >
                         <span className="text-slate-800">{t.name}</span>
-                        <span className="text-xs text-slate-400 ml-2">{formatCurrency(t.price)}</span>
+                        <span className="text-xs text-slate-500 ml-2">{formatCurrency(t.price)}</span>
                       </button>
                     ))}
                   </div>
@@ -1341,7 +1341,7 @@ export default function RateListsPage() {
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="font-semibold text-slate-900">Choose Type Of List</h3>
-              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
+              <button onClick={() => setShowCreateModal(false)} className="text-slate-500 hover:text-slate-600"><X size={18} /></button>
             </div>
             <div className="p-4 space-y-3">
               {LIST_TYPE_OPTIONS.map((opt) => (
@@ -1360,7 +1360,7 @@ export default function RateListsPage() {
               ))}
             </div>
             <div className="p-4 border-t">
-              <button onClick={() => setStep(2)} className="w-full px-4 py-2.5 bg-[#0D7E8A] text-white rounded-lg text-sm font-medium hover:bg-[#0a6b75]">
+              <button onClick={() => setStep(2)} className="w-full px-4 py-2.5 bg-[#0D7E8A] text-slate-900 rounded-lg text-sm font-medium hover:bg-[#0a6b75]">
                 Confirm and Continue
               </button>
             </div>
@@ -1374,7 +1374,7 @@ export default function RateListsPage() {
         <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
           <div className="flex items-center justify-between p-4 border-b">
             <h3 className="font-semibold text-slate-900">Add New List</h3>
-            <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
+            <button onClick={() => setShowCreateModal(false)} className="text-slate-500 hover:text-slate-600"><X size={18} /></button>
           </div>
           <div className="p-4 space-y-4">
             <div>
@@ -1410,14 +1410,14 @@ export default function RateListsPage() {
                 <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 text-sm">
                   <FileSpreadsheet size={14} className="text-emerald-600" />
                   <span className="flex-1 truncate text-slate-700">{excelFile.name}</span>
-                  <button type="button" onClick={() => { setExcelFile(null); if (excelInputRef.current) excelInputRef.current.value = ""; }} className="text-slate-400 hover:text-red-500"><X size={14} /></button>
+                  <button type="button" onClick={() => { setExcelFile(null); if (excelInputRef.current) excelInputRef.current.value = ""; }} className="text-slate-500 hover:text-red-500"><X size={14} /></button>
                 </div>
               ) : (
                 <button type="button" onClick={() => excelInputRef.current?.click()} className="w-full border border-dashed border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:border-[#0D7E8A] hover:text-[#0D7E8A] transition-colors flex items-center justify-center gap-2">
                   <FileSpreadsheet size={14} /> Choose .xlsx file
                 </button>
               )}
-              <p className="text-[10px] text-slate-400 mt-1">Excel should have columns: Test Code, Price. Prices will be matched by test code.</p>
+              <p className="text-[10px] text-slate-500 mt-1">Excel should have columns: Test Code, Price. Prices will be matched by test code.</p>
             </div>
           </div>
           <div className="flex gap-2 p-4 border-t">
@@ -1425,7 +1425,7 @@ export default function RateListsPage() {
             <button
               disabled={!name.trim() || createMutation.isPending}
               onClick={() => createMutation.mutate({ name: name.trim(), listType: selectedType, startDate: startDate || undefined, endDate: endDate || undefined, copiedFromId: copiedFromId || undefined, excelFile: excelFile || undefined })}
-              className="flex-1 px-4 py-2 bg-[#0D7E8A] text-white rounded-lg text-sm font-medium hover:bg-[#0a6b75] disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 bg-[#0D7E8A] text-slate-900 rounded-lg text-sm font-medium hover:bg-[#0a6b75] disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {createMutation.isPending && <Loader2 size={14} className="animate-spin" />} Add
             </button>
@@ -1473,7 +1473,7 @@ export default function RateListsPage() {
         <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">
           <div className="flex items-center justify-between p-4 border-b">
             <h3 className="font-semibold text-slate-900">Add Test to Catalog</h3>
-            <button onClick={() => setShowAddTestModal(false)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
+            <button onClick={() => setShowAddTestModal(false)} className="text-slate-500 hover:text-slate-600"><X size={18} /></button>
           </div>
           <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
             <div className="grid grid-cols-2 gap-3">
@@ -1551,7 +1551,7 @@ export default function RateListsPage() {
           </div>
           <div className="flex gap-2 p-4 border-t">
             <button onClick={() => setShowAddTestModal(false)} className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">Cancel</button>
-            <button disabled={!form.name.trim() || addTestMut.isPending} onClick={() => addTestMut.mutate()} className="flex-1 px-4 py-2 bg-[#0D7E8A] text-white rounded-lg text-sm font-medium hover:bg-[#0a6b75] disabled:opacity-50 flex items-center justify-center gap-2">
+            <button disabled={!form.name.trim() || addTestMut.isPending} onClick={() => addTestMut.mutate()} className="flex-1 px-4 py-2 bg-[#0D7E8A] text-slate-900 rounded-lg text-sm font-medium hover:bg-[#0a6b75] disabled:opacity-50 flex items-center justify-center gap-2">
               {addTestMut.isPending && <Loader2 size={14} className="animate-spin" />} Add Test
             </button>
           </div>
@@ -1580,7 +1580,7 @@ export default function RateListsPage() {
         <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">
           <div className="flex items-center justify-between p-4 border-b">
             <h3 className="font-semibold text-slate-900">Edit Test</h3>
-            <button onClick={() => setEditingTest(null)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
+            <button onClick={() => setEditingTest(null)} className="text-slate-500 hover:text-slate-600"><X size={18} /></button>
           </div>
           <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
             <div className="grid grid-cols-2 gap-3">
@@ -1622,7 +1622,7 @@ export default function RateListsPage() {
                 schedule: form.schedule.trim() || null, turnaroundHours: form.turnaroundHours,
                 price: form.price, b2bPrice: form.b2bPrice || null, cogs: form.cogs || null,
               } });
-            }} className="flex-1 px-4 py-2 bg-[#0D7E8A] text-white rounded-lg text-sm font-medium hover:bg-[#0a6b75] disabled:opacity-50 flex items-center justify-center gap-2">
+            }} className="flex-1 px-4 py-2 bg-[#0D7E8A] text-slate-900 rounded-lg text-sm font-medium hover:bg-[#0a6b75] disabled:opacity-50 flex items-center justify-center gap-2">
               {updateTestMutation.isPending && <Loader2 size={14} className="animate-spin" />} Save Changes
             </button>
           </div>
@@ -1643,7 +1643,7 @@ export default function RateListsPage() {
               <h3 className="font-semibold text-slate-900">Import Preview (EXCEL)</h3>
               <p className="text-xs text-slate-500 mt-0.5">{importable.length} tests to import, {parsedTests.length - importable.length} skipped</p>
             </div>
-            <button onClick={() => { setShowImportModal(false); setParsedTests([]); }} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
+            <button onClick={() => { setShowImportModal(false); setParsedTests([]); }} className="text-slate-500 hover:text-slate-600"><X size={18} /></button>
           </div>
           <div className="flex-1 overflow-auto">
             <table className="w-full text-sm">
@@ -1662,7 +1662,7 @@ export default function RateListsPage() {
               <tbody className="divide-y divide-slate-100">
                 {parsedTests.map((t, i) => (
                   <tr key={i} className={cn(t.status === "skip" ? "opacity-40 bg-slate-50" : "")}>
-                    <td className="px-3 py-1.5 text-xs text-slate-400">{i + 1}</td>
+                    <td className="px-3 py-1.5 text-xs text-slate-500">{i + 1}</td>
                     <td className="px-3 py-1.5 text-xs font-mono">{t.code}</td>
                     <td className="px-3 py-1.5 text-xs">{t.name}</td>
                     <td className="px-3 py-1.5 text-xs">{t.department}</td>
@@ -1674,7 +1674,7 @@ export default function RateListsPage() {
                       </span>
                     </td>
                     <td className="px-3 py-1.5">
-                      <button onClick={() => toggleSkip(i)} className={cn("w-5 h-5 rounded border flex items-center justify-center", t.status === "skip" ? "border-slate-300" : "border-[#0D7E8A] bg-[#0D7E8A] text-white")}>
+                      <button onClick={() => toggleSkip(i)} className={cn("w-5 h-5 rounded border flex items-center justify-center", t.status === "skip" ? "border-slate-300" : "border-[#0D7E8A] bg-[#0D7E8A] text-slate-900")}>
                         {t.status !== "skip" && <Check size={12} />}
                       </button>
                     </td>
@@ -1685,7 +1685,7 @@ export default function RateListsPage() {
           </div>
           <div className="flex gap-2 p-4 border-t shrink-0">
             <button onClick={() => { setShowImportModal(false); setParsedTests([]); }} className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">Cancel</button>
-            <button disabled={importable.length === 0 || importMutation.isPending} onClick={() => importMutation.mutate(parsedTests)} className="flex-1 px-4 py-2 bg-[#0D7E8A] text-white rounded-lg text-sm font-medium hover:bg-[#0a6b75] disabled:opacity-50 flex items-center justify-center gap-2">
+            <button disabled={importable.length === 0 || importMutation.isPending} onClick={() => importMutation.mutate(parsedTests)} className="flex-1 px-4 py-2 bg-[#0D7E8A] text-slate-900 rounded-lg text-sm font-medium hover:bg-[#0a6b75] disabled:opacity-50 flex items-center justify-center gap-2">
               {importMutation.isPending && <Loader2 size={14} className="animate-spin" />}
               Import {importable.length} Tests
             </button>

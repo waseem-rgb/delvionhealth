@@ -420,7 +420,7 @@ export default function FrontDeskPage() {
                     <p className="text-sm font-medium text-slate-900 truncate mt-0.5">
                       {reg.patient ? `${reg.patient.firstName} ${reg.patient.lastName}` : "Unknown"}
                     </p>
-                    <p className="text-xs text-slate-500 truncate mt-0.5">{reg.tests.join(", ")}</p>
+                    <p className="text-xs text-slate-500 truncate mt-0.5">{(reg.tests ?? []).join(", ")}</p>
                   </div>
                 </div>
               ))}
@@ -451,7 +451,7 @@ export default function FrontDeskPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
                         <span className="text-xs font-semibold text-slate-600">
-                          {phleb.phlebName.charAt(0).toUpperCase()}
+                          {(phleb.phlebName ?? "?").charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <div>

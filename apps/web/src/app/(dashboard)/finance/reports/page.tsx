@@ -115,15 +115,15 @@ function SectionRow({
       ? "text-emerald-400"
       : highlight === "red"
         ? "text-red-400"
-        : "text-white";
+        : "text-slate-900";
 
   return (
     <div
       className={`flex items-center justify-between py-2 px-3 ${
         bold ? "font-semibold" : ""
-      } ${indent ? "pl-8" : ""} ${bold ? "border-t border-slate-700" : ""}`}
+      } ${indent ? "pl-8" : ""} ${bold ? "border-t border-slate-300" : ""}`}
     >
-      <span className={bold ? "text-white" : "text-slate-300"}>{label}</span>
+      <span className={bold ? "text-slate-900" : "text-slate-700"}>{label}</span>
       <span className={`font-mono text-sm ${textColor}`}>
         {formatCurrency(amount)}
       </span>
@@ -133,7 +133,7 @@ function SectionRow({
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <div className="flex items-center gap-2 py-2 px-3 bg-slate-800/50 rounded-md mt-4 first:mt-0">
+    <div className="flex items-center gap-2 py-2 px-3 bg-slate-100/50 rounded-md mt-4 first:mt-0">
       <ChevronRight className="w-4 h-4 text-teal-400" />
       <span className="text-sm font-semibold text-teal-400 uppercase tracking-wider">
         {title}
@@ -143,7 +143,7 @@ function SectionHeader({ title }: { title: string }) {
 }
 
 function SectionDivider() {
-  return <div className="border-t border-dashed border-slate-700 my-1" />;
+  return <div className="border-t border-dashed border-slate-300 my-1" />;
 }
 
 function ExportButtons({
@@ -157,14 +157,14 @@ function ExportButtons({
     <div className="flex items-center gap-2">
       <button
         onClick={onPdf}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition"
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 transition"
       >
         <Download className="w-3.5 h-3.5" />
         Export PDF
       </button>
       <button
         onClick={onExcel}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition"
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 transition"
       >
         <FileSpreadsheet className="w-3.5 h-3.5" />
         Export Excel
@@ -187,22 +187,22 @@ function DateRangeFilter({
   return (
     <div className="flex items-center gap-3">
       <div className="flex items-center gap-2">
-        <label className="text-xs text-slate-400">From</label>
+        <label className="text-xs text-slate-500">From</label>
         <input
           type="date"
           value={from}
           onChange={(e) => onFromChange(e.target.value)}
-          className="px-2.5 py-1.5 text-sm bg-slate-800 border border-slate-700 rounded-lg text-slate-300 focus:outline-none focus:border-teal-500"
+          className="px-2.5 py-1.5 text-sm bg-slate-100 border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:border-teal-500"
         />
       </div>
       <Minus className="w-3 h-3 text-slate-600" />
       <div className="flex items-center gap-2">
-        <label className="text-xs text-slate-400">To</label>
+        <label className="text-xs text-slate-500">To</label>
         <input
           type="date"
           value={to}
           onChange={(e) => onToChange(e.target.value)}
-          className="px-2.5 py-1.5 text-sm bg-slate-800 border border-slate-700 rounded-lg text-slate-300 focus:outline-none focus:border-teal-500"
+          className="px-2.5 py-1.5 text-sm bg-slate-100 border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:border-teal-500"
         />
       </div>
     </div>
@@ -218,12 +218,12 @@ function AsOfFilter({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <label className="text-xs text-slate-400">As of</label>
+      <label className="text-xs text-slate-500">As of</label>
       <input
         type="date"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="px-2.5 py-1.5 text-sm bg-slate-800 border border-slate-700 rounded-lg text-slate-300 focus:outline-none focus:border-teal-500"
+        className="px-2.5 py-1.5 text-sm bg-slate-100 border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:border-teal-500"
       />
     </div>
   );
@@ -318,10 +318,10 @@ export default function FinancialReportsPage() {
 
   function StatementHeader({ title, subtitle }: { title: string; subtitle: string }) {
     return (
-      <div className="text-center py-4 border-b border-slate-800 mb-4">
-        <h3 className="text-xl font-bold text-white">DELViON Health</h3>
+      <div className="text-center py-4 border-b border-slate-200 mb-4">
+        <h3 className="text-xl font-bold text-slate-900">DELViON Health</h3>
         <p className="text-sm font-semibold text-teal-400 mt-1">{title}</p>
-        <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+        <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
       </div>
     );
   }
@@ -333,8 +333,8 @@ export default function FinancialReportsPage() {
       <div className="space-y-3 animate-pulse">
         {Array.from({ length: 12 }).map((_, i) => (
           <div key={i} className="flex justify-between px-3">
-            <div className="h-4 bg-slate-800 rounded w-48" />
-            <div className="h-4 bg-slate-800 rounded w-24" />
+            <div className="h-4 bg-slate-100 rounded w-48" />
+            <div className="h-4 bg-slate-100 rounded w-24" />
           </div>
         ))}
       </div>
@@ -344,22 +344,22 @@ export default function FinancialReportsPage() {
   // ── Render ────────────────────────────────────────────────────────────
 
   return (
-    <div className="p-6 space-y-6 bg-slate-950 min-h-screen">
+    <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <FileText className="w-6 h-6 text-teal-400" />
             Financial Reports
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Statements, analysis and exports
           </p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-900 border border-slate-800 rounded-lg p-1">
+      <div className="flex gap-1 bg-white border border-slate-200 rounded-lg p-1">
         {TABS.map((tab) => {
           const TabIcon = TAB_ICONS[tab];
           return (
@@ -369,7 +369,7 @@ export default function FinancialReportsPage() {
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md transition ${
                 activeTab === tab
                   ? "bg-teal-600 text-white"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
               <TabIcon className="w-4 h-4" />
@@ -381,8 +381,8 @@ export default function FinancialReportsPage() {
 
       {/* ── P&L Tab ──────────────────────────────────────────────────────── */}
       {activeTab === "P&L" && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl">
-          <div className="flex items-center justify-between p-5 border-b border-slate-800">
+        <div className="bg-white border border-slate-200 rounded-xl">
+          <div className="flex items-center justify-between p-5 border-b border-slate-200">
             <DateRangeFilter
               from={plFrom}
               to={plTo}
@@ -452,7 +452,7 @@ export default function FinancialReportsPage() {
                 />
 
                 {/* Net Income */}
-                <div className="mt-2 bg-slate-800/50 rounded-lg">
+                <div className="mt-2 bg-slate-100/50 rounded-lg">
                   <SectionRow
                     label="Net Income"
                     amount={plData.netIncome ?? 0}
@@ -474,8 +474,8 @@ export default function FinancialReportsPage() {
 
       {/* ── Balance Sheet Tab ────────────────────────────────────────────── */}
       {activeTab === "Balance Sheet" && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl">
-          <div className="flex items-center justify-between p-5 border-b border-slate-800">
+        <div className="bg-white border border-slate-200 rounded-xl">
+          <div className="flex items-center justify-between p-5 border-b border-slate-200">
             <AsOfFilter value={bsAsOf} onChange={setBsAsOf} />
             <ExportButtons
               onPdf={() => handleExport("balance-sheet", "pdf")}
@@ -498,7 +498,7 @@ export default function FinancialReportsPage() {
                   <SectionHeader title="Assets" />
 
                   <div className="pl-2 mt-2">
-                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wider px-3 py-1">
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-1">
                       Current Assets
                     </p>
                     {(bsData.assets?.current ?? []).map((item) => (
@@ -517,7 +517,7 @@ export default function FinancialReportsPage() {
                   </div>
 
                   <div className="pl-2 mt-2">
-                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wider px-3 py-1">
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-1">
                       Fixed Assets
                     </p>
                     {(bsData.assets?.fixed ?? []).map((item) => (
@@ -550,7 +550,7 @@ export default function FinancialReportsPage() {
                   <SectionHeader title="Liabilities" />
 
                   <div className="pl-2 mt-2">
-                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wider px-3 py-1">
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-1">
                       Current Liabilities
                     </p>
                     {(bsData.liabilities?.current ?? []).map((item) => (
@@ -569,7 +569,7 @@ export default function FinancialReportsPage() {
                   </div>
 
                   <div className="pl-2 mt-2">
-                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wider px-3 py-1">
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-1">
                       Long-term Liabilities
                     </p>
                     {(bsData.liabilities?.longTerm ?? []).map((item) => (
@@ -623,8 +623,8 @@ export default function FinancialReportsPage() {
 
       {/* ── Cash Flow Tab ────────────────────────────────────────────────── */}
       {activeTab === "Cash Flow" && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl">
-          <div className="flex items-center justify-between p-5 border-b border-slate-800">
+        <div className="bg-white border border-slate-200 rounded-xl">
+          <div className="flex items-center justify-between p-5 border-b border-slate-200">
             <DateRangeFilter
               from={cfFrom}
               to={cfTo}
@@ -707,7 +707,7 @@ export default function FinancialReportsPage() {
                 <SectionDivider />
 
                 {/* Summary */}
-                <div className="mt-3 space-y-1 bg-slate-800/40 rounded-lg p-2">
+                <div className="mt-3 space-y-1 bg-slate-100/40 rounded-lg p-2">
                   <SectionRow
                     label="Net Change in Cash"
                     amount={cfData.netChange ?? 0}
@@ -741,9 +741,9 @@ export default function FinancialReportsPage() {
 
       {/* ── Trial Balance Tab ────────────────────────────────────────────── */}
       {activeTab === "Trial Balance" && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl">
-          <div className="flex items-center justify-between p-5 border-b border-slate-800">
-            <div className="text-sm text-slate-400 flex items-center gap-2">
+        <div className="bg-white border border-slate-200 rounded-xl">
+          <div className="flex items-center justify-between p-5 border-b border-slate-200">
+            <div className="text-sm text-slate-500 flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               As of current date
             </div>
@@ -765,47 +765,47 @@ export default function FinancialReportsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-700">
-                      <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                    <tr className="border-b border-slate-300">
+                      <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
                         Account Code
                       </th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                      <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
                         Account Name
                       </th>
-                      <th className="text-right py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                      <th className="text-right py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
                         Debit
                       </th>
-                      <th className="text-right py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                      <th className="text-right py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
                         Credit
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y divide-slate-100/60">
                     {(tbData.lines ?? []).map((line) => (
                       <tr
                         key={line.accountId}
-                        className="hover:bg-slate-800/40 transition"
+                        className="hover:bg-slate-100/40 transition"
                       >
                         <td className="py-2.5 px-4 font-mono text-xs text-teal-400">
                           {line.accountCode}
                         </td>
-                        <td className="py-2.5 px-4 text-slate-300">
+                        <td className="py-2.5 px-4 text-slate-700">
                           {line.accountName}
                         </td>
-                        <td className="py-2.5 px-4 text-right text-white font-mono">
+                        <td className="py-2.5 px-4 text-right text-slate-900 font-mono">
                           {line.debit > 0 ? formatCurrency(line.debit) : ""}
                         </td>
-                        <td className="py-2.5 px-4 text-right text-white font-mono">
+                        <td className="py-2.5 px-4 text-right text-slate-900 font-mono">
                           {line.credit > 0 ? formatCurrency(line.credit) : ""}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-teal-600/50 bg-slate-800/50">
+                    <tr className="border-t-2 border-teal-600/50 bg-slate-100/50">
                       <td
                         colSpan={2}
-                        className="py-3 px-4 text-sm font-bold text-white"
+                        className="py-3 px-4 text-sm font-bold text-slate-900"
                       >
                         Totals
                       </td>

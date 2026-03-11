@@ -69,27 +69,27 @@ interface AgingReport {
 // ── Status badge config ──────────────────────────────────────────────────────
 
 const INVOICE_STATUS_COLORS: Record<string, string> = {
-  DRAFT: "bg-slate-700 text-slate-300",
-  SENT: "bg-blue-900/60 text-blue-300",
-  PARTIALLY_PAID: "bg-yellow-900/60 text-yellow-300",
-  PAID: "bg-emerald-900/60 text-emerald-300",
-  OVERDUE: "bg-red-900/60 text-red-300",
-  CANCELLED: "bg-slate-800 text-slate-500",
+  DRAFT: "bg-slate-100 text-slate-600",
+  SENT: "bg-blue-100 text-blue-700",
+  PARTIALLY_PAID: "bg-yellow-100 text-yellow-700",
+  PAID: "bg-emerald-100 text-emerald-700",
+  OVERDUE: "bg-red-100 text-red-700",
+  CANCELLED: "bg-slate-100 text-slate-500",
 };
 
 const CLAIM_STATUS_COLORS: Record<string, string> = {
-  SUBMITTED: "bg-blue-900/60 text-blue-300",
-  IN_REVIEW: "bg-yellow-900/60 text-yellow-300",
-  APPROVED: "bg-emerald-900/60 text-emerald-300",
-  PARTIALLY_APPROVED: "bg-orange-900/60 text-orange-300",
-  REJECTED: "bg-red-900/60 text-red-300",
-  APPEALED: "bg-purple-900/60 text-purple-300",
+  SUBMITTED: "bg-blue-100 text-blue-700",
+  IN_REVIEW: "bg-yellow-100 text-yellow-700",
+  APPROVED: "bg-emerald-100 text-emerald-700",
+  PARTIALLY_APPROVED: "bg-orange-100 text-orange-700",
+  REJECTED: "bg-red-100 text-red-700",
+  APPEALED: "bg-purple-100 text-purple-700",
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  PATIENT: "bg-teal-900/60 text-teal-300",
-  INSURANCE: "bg-indigo-900/60 text-indigo-300",
-  CORPORATE: "bg-amber-900/60 text-amber-300",
+  PATIENT: "bg-teal-100 text-teal-700",
+  INSURANCE: "bg-indigo-100 text-indigo-700",
+  CORPORATE: "bg-amber-100 text-amber-700",
 };
 
 const AGING_BAR_COLORS = [
@@ -101,11 +101,11 @@ const AGING_BAR_COLORS = [
 ];
 
 const AGING_BG_COLORS = [
-  "bg-emerald-900/30 border-emerald-800/50",
-  "bg-yellow-900/30 border-yellow-800/50",
-  "bg-orange-900/30 border-orange-800/50",
-  "bg-red-900/30 border-red-800/50",
-  "bg-red-950/40 border-red-900/50",
+  "bg-emerald-50 border-emerald-200",
+  "bg-yellow-50 border-yellow-200",
+  "bg-orange-50 border-orange-200",
+  "bg-red-50 border-red-200",
+  "bg-red-100 border-red-300",
 ];
 
 const TABS = ["Invoices", "Payments", "Insurance Claims", "Aging Report"] as const;
@@ -302,28 +302,28 @@ export default function ReceivablesPage() {
   if (loading) {
     return (
       <div className="p-6 space-y-6">
-        <div className="h-8 w-64 bg-slate-800 rounded animate-pulse" />
+        <div className="h-8 w-64 bg-slate-200 rounded animate-pulse" />
         <div className="grid grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-28 bg-slate-900 border border-slate-800 rounded-xl animate-pulse" />
+            <div key={i} className="h-28 bg-white border border-slate-200 rounded-xl animate-pulse" />
           ))}
         </div>
-        <div className="h-96 bg-slate-900 border border-slate-800 rounded-xl animate-pulse" />
+        <div className="h-96 bg-white border border-slate-200 rounded-xl animate-pulse" />
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 bg-slate-950 min-h-screen">
+    <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Receivables Management</h1>
-          <p className="text-sm text-slate-400 mt-1">Invoices, payments, insurance claims & aging</p>
+          <h1 className="text-2xl font-bold text-slate-900">Receivables Management</h1>
+          <p className="text-sm text-slate-500 mt-1">Invoices, payments, insurance claims & aging</p>
         </div>
         <button
           onClick={() => { fetchInvoices(); fetchPayments(); fetchClaims(); fetchAgingReport(); }}
-          className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 bg-slate-900 border border-slate-800 rounded-lg hover:bg-slate-800 transition"
+          className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition"
         >
           <RefreshCw className="w-4 h-4" /> Refresh
         </button>
@@ -336,20 +336,20 @@ export default function ReceivablesPage() {
           { label: "Overdue Amount", value: stats.overdueAmount, icon: AlertTriangle, color: "text-red-400" },
           { label: "Collected This Month", value: stats.collectedThisMonth, icon: TrendingUp, color: "text-emerald-400" },
         ].map((card) => (
-          <div key={card.label} className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <div key={card.label} className="bg-white border border-slate-200 rounded-xl p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-slate-800">
+              <div className="p-2 rounded-lg bg-slate-100">
                 <card.icon className={`w-5 h-5 ${card.color}`} />
               </div>
-              <span className="text-sm text-slate-400">{card.label}</span>
+              <span className="text-sm text-slate-500">{card.label}</span>
             </div>
-            <p className="text-2xl font-bold text-white">{`\u20B9${card.value.toLocaleString()}`}</p>
+            <p className="text-2xl font-bold text-slate-900">{`\u20B9${card.value.toLocaleString()}`}</p>
           </div>
         ))}
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-900 border border-slate-800 rounded-lg p-1">
+      <div className="flex gap-1 bg-white border border-slate-200 rounded-lg p-1">
         {TABS.map((tab) => (
           <button
             key={tab}
@@ -357,7 +357,7 @@ export default function ReceivablesPage() {
             className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition ${
               activeTab === tab
                 ? "bg-teal-600 text-white"
-                : "text-slate-400 hover:text-white hover:bg-slate-800"
+                : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
             {tab}
@@ -373,7 +373,7 @@ export default function ReceivablesPage() {
             <select
               value={invoiceFilter.status}
               onChange={(e) => setInvoiceFilter((f) => ({ ...f, status: e.target.value }))}
-              className="px-3 py-2 text-sm bg-slate-900 border border-slate-800 rounded-lg text-slate-300 focus:outline-none focus:border-teal-500"
+              className="px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:border-teal-500"
             >
               <option value="">All Statuses</option>
               {["DRAFT", "SENT", "PARTIALLY_PAID", "PAID", "OVERDUE", "CANCELLED"].map((s) => (
@@ -383,7 +383,7 @@ export default function ReceivablesPage() {
             <select
               value={invoiceFilter.type}
               onChange={(e) => setInvoiceFilter((f) => ({ ...f, type: e.target.value }))}
-              className="px-3 py-2 text-sm bg-slate-900 border border-slate-800 rounded-lg text-slate-300 focus:outline-none focus:border-teal-500"
+              className="px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:border-teal-500"
             >
               <option value="">All Types</option>
               {["PATIENT", "INSURANCE", "CORPORATE"].map((t) => (
@@ -400,17 +400,17 @@ export default function ReceivablesPage() {
           </div>
 
           {/* Invoices Table */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-800">
+                  <tr className="border-b border-slate-200">
                     {["Invoice #", "Patient", "Type", "Total", "Paid", "Balance", "Status", "Due Date", "Actions"].map((h) => (
                       <th key={h} className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/50">
+                <tbody className="divide-y divide-slate-100">
                   {invoices.length === 0 ? (
                     <tr>
                       <td colSpan={9} className="px-4 py-12 text-center text-slate-500">
@@ -419,28 +419,28 @@ export default function ReceivablesPage() {
                     </tr>
                   ) : (
                     invoices.map((inv) => (
-                      <tr key={inv.id} className="hover:bg-slate-800/30 transition">
-                        <td className="px-4 py-3 text-white font-medium">{inv.invoiceNumber}</td>
-                        <td className="px-4 py-3 text-slate-300">{inv.patient?.name ?? inv.patientName ?? "-"}</td>
+                      <tr key={inv.id} className="hover:bg-slate-50 transition">
+                        <td className="px-4 py-3 text-slate-900 font-medium">{inv.invoiceNumber}</td>
+                        <td className="px-4 py-3 text-slate-700">{inv.patient?.name ?? inv.patientName ?? "-"}</td>
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${TYPE_COLORS[inv.type] ?? "bg-slate-800 text-slate-400"}`}>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${TYPE_COLORS[inv.type] ?? "bg-slate-100 text-slate-500"}`}>
                             {inv.type}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-slate-300">{`\u20B9${(inv.total ?? 0).toLocaleString()}`}</td>
-                        <td className="px-4 py-3 text-slate-300">{`\u20B9${(inv.paid ?? 0).toLocaleString()}`}</td>
-                        <td className="px-4 py-3 text-white font-medium">{`\u20B9${(inv.balance ?? 0).toLocaleString()}`}</td>
+                        <td className="px-4 py-3 text-slate-700">{`\u20B9${(inv.total ?? 0).toLocaleString()}`}</td>
+                        <td className="px-4 py-3 text-slate-700">{`\u20B9${(inv.paid ?? 0).toLocaleString()}`}</td>
+                        <td className="px-4 py-3 text-slate-900 font-medium">{`\u20B9${(inv.balance ?? 0).toLocaleString()}`}</td>
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${INVOICE_STATUS_COLORS[inv.status] ?? "bg-slate-800 text-slate-400"}`}>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${INVOICE_STATUS_COLORS[inv.status] ?? "bg-slate-100 text-slate-500"}`}>
                             {inv.status?.replace("_", " ")}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-slate-400">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "-"}</td>
+                        <td className="px-4 py-3 text-slate-500">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "-"}</td>
                         <td className="px-4 py-3">
                           {inv.status !== "PAID" && inv.status !== "CANCELLED" && (
                             <button
                               onClick={() => { setSelectedInvoice(inv); setPaymentForm({ amount: inv.balance ?? 0, method: "CASH", reference: "" }); setShowPaymentModal(true); }}
-                              className="flex items-center gap-1 px-2 py-1 text-xs bg-teal-900/40 text-teal-300 rounded hover:bg-teal-900/60 transition"
+                              className="flex items-center gap-1 px-2 py-1 text-xs bg-teal-50 text-teal-700 rounded hover:bg-teal-100 transition"
                             >
                               <CreditCard className="w-3 h-3" /> Pay
                             </button>
@@ -457,17 +457,17 @@ export default function ReceivablesPage() {
       )}
 
       {activeTab === "Payments" && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-800">
+                <tr className="border-b border-slate-200">
                   {["Date", "Invoice #", "Amount", "Method", "Reference", "Status"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y divide-slate-100">
                 {payments.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-12 text-center text-slate-500">
@@ -476,14 +476,14 @@ export default function ReceivablesPage() {
                   </tr>
                 ) : (
                   payments.map((p) => (
-                    <tr key={p.id} className="hover:bg-slate-800/30 transition">
-                      <td className="px-4 py-3 text-slate-300">{new Date(p.createdAt).toLocaleDateString()}</td>
-                      <td className="px-4 py-3 text-white font-medium">{p.invoiceNumber ?? p.invoiceId}</td>
+                    <tr key={p.id} className="hover:bg-slate-50 transition">
+                      <td className="px-4 py-3 text-slate-700">{new Date(p.createdAt).toLocaleDateString()}</td>
+                      <td className="px-4 py-3 text-slate-900 font-medium">{p.invoiceNumber ?? p.invoiceId}</td>
                       <td className="px-4 py-3 text-emerald-400 font-medium">{`\u20B9${(p.amount ?? 0).toLocaleString()}`}</td>
-                      <td className="px-4 py-3 text-slate-300">{p.method}</td>
-                      <td className="px-4 py-3 text-slate-400">{p.reference || "-"}</td>
+                      <td className="px-4 py-3 text-slate-700">{p.method}</td>
+                      <td className="px-4 py-3 text-slate-500">{p.reference || "-"}</td>
                       <td className="px-4 py-3">
-                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-900/60 text-emerald-300">
+                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700">
                           {p.status ?? "COMPLETED"}
                         </span>
                       </td>
@@ -497,17 +497,17 @@ export default function ReceivablesPage() {
       )}
 
       {activeTab === "Insurance Claims" && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-800">
+                <tr className="border-b border-slate-200">
                   {["Claim #", "Invoice #", "Insurer", "Claimed", "Approved", "Status", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y divide-slate-100">
                 {claims.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-4 py-12 text-center text-slate-500">
@@ -516,14 +516,14 @@ export default function ReceivablesPage() {
                   </tr>
                 ) : (
                   claims.map((c) => (
-                    <tr key={c.id} className="hover:bg-slate-800/30 transition">
-                      <td className="px-4 py-3 text-white font-medium">{c.claimNumber}</td>
-                      <td className="px-4 py-3 text-slate-300">{c.invoiceNumber}</td>
-                      <td className="px-4 py-3 text-slate-300">{c.insurer}</td>
-                      <td className="px-4 py-3 text-slate-300">{`\u20B9${(c.claimedAmount ?? 0).toLocaleString()}`}</td>
+                    <tr key={c.id} className="hover:bg-slate-50 transition">
+                      <td className="px-4 py-3 text-slate-900 font-medium">{c.claimNumber}</td>
+                      <td className="px-4 py-3 text-slate-700">{c.invoiceNumber}</td>
+                      <td className="px-4 py-3 text-slate-700">{c.insurer}</td>
+                      <td className="px-4 py-3 text-slate-700">{`\u20B9${(c.claimedAmount ?? 0).toLocaleString()}`}</td>
                       <td className="px-4 py-3 text-emerald-400 font-medium">{`\u20B9${(c.approvedAmount ?? 0).toLocaleString()}`}</td>
                       <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${CLAIM_STATUS_COLORS[c.status] ?? "bg-slate-800 text-slate-400"}`}>
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${CLAIM_STATUS_COLORS[c.status] ?? "bg-slate-100 text-slate-500"}`}>
                           {c.status?.replace("_", " ")}
                         </span>
                       </td>
@@ -531,7 +531,7 @@ export default function ReceivablesPage() {
                         <select
                           value={c.status}
                           onChange={(e) => handleClaimStatusUpdate(c.id, e.target.value)}
-                          className="px-2 py-1 text-xs bg-slate-800 border border-slate-700 rounded text-slate-300 focus:outline-none focus:border-teal-500"
+                          className="px-2 py-1 text-xs bg-white border border-slate-300 rounded text-slate-700 focus:outline-none focus:border-teal-500"
                         >
                           {["SUBMITTED", "IN_REVIEW", "APPROVED", "PARTIALLY_APPROVED", "REJECTED", "APPEALED"].map((s) => (
                             <option key={s} value={s}>{s.replace("_", " ")}</option>
@@ -560,18 +560,18 @@ export default function ReceivablesPage() {
             ]).map((bucket, idx) => (
               <div
                 key={bucket.label}
-                className={`rounded-xl border p-4 ${AGING_BG_COLORS[idx] ?? "bg-slate-900 border-slate-800"}`}
+                className={`rounded-xl border p-4 ${AGING_BG_COLORS[idx] ?? "bg-white border-slate-200"}`}
               >
-                <p className="text-xs text-slate-400 mb-1">{bucket.label}</p>
-                <p className="text-lg font-bold text-white">{`\u20B9${(bucket.amount ?? 0).toLocaleString()}`}</p>
-                <p className="text-xs text-slate-500">{bucket.count ?? 0} invoices</p>
+                <p className="text-xs text-slate-500 mb-1">{bucket.label}</p>
+                <p className="text-lg font-bold text-slate-900">{`\u20B9${(bucket.amount ?? 0).toLocaleString()}`}</p>
+                <p className="text-xs text-slate-400">{bucket.count ?? 0} invoices</p>
               </div>
             ))}
           </div>
 
           {/* Horizontal Bar Chart */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-white mb-4">Aging Distribution</h3>
+          <div className="bg-white border border-slate-200 rounded-xl p-5">
+            <h3 className="text-sm font-semibold text-slate-900 mb-4">Aging Distribution</h3>
             {(() => {
               const buckets = agingReport?.buckets ?? [];
               const maxAmount = Math.max(...buckets.map((b) => b.amount), 1);
@@ -582,10 +582,10 @@ export default function ReceivablesPage() {
                     return (
                       <div key={bucket.label}>
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs text-slate-400">{bucket.label}</span>
-                          <span className="text-xs text-slate-300 font-medium">{`\u20B9${bucket.amount.toLocaleString()}`}</span>
+                          <span className="text-xs text-slate-500">{bucket.label}</span>
+                          <span className="text-xs text-slate-700 font-medium">{`\u20B9${bucket.amount.toLocaleString()}`}</span>
                         </div>
-                        <div className="w-full h-6 bg-slate-800 rounded-md overflow-hidden">
+                        <div className="w-full h-6 bg-slate-100 rounded-md overflow-hidden">
                           <div
                             className={`h-full rounded-md transition-all duration-500 ${AGING_BAR_COLORS[idx] ?? "bg-slate-600"}`}
                             style={{ width: `${pct}%` }}
@@ -600,20 +600,20 @@ export default function ReceivablesPage() {
           </div>
 
           {/* Overdue Invoices Table */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-800">
-              <h3 className="text-sm font-semibold text-white">Overdue Invoices</h3>
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-200">
+              <h3 className="text-sm font-semibold text-slate-900">Overdue Invoices</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-800">
+                  <tr className="border-b border-slate-200">
                     {["Invoice #", "Patient", "Type", "Balance", "Due Date", "Status"].map((h) => (
                       <th key={h} className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/50">
+                <tbody className="divide-y divide-slate-100">
                   {(agingReport?.overdueInvoices ?? []).length === 0 ? (
                     <tr>
                       <td colSpan={6} className="px-4 py-12 text-center text-slate-500">
@@ -622,18 +622,18 @@ export default function ReceivablesPage() {
                     </tr>
                   ) : (
                     (agingReport?.overdueInvoices ?? []).map((inv) => (
-                      <tr key={inv.id} className="hover:bg-slate-800/30 transition">
-                        <td className="px-4 py-3 text-white font-medium">{inv.invoiceNumber}</td>
-                        <td className="px-4 py-3 text-slate-300">{inv.patient?.name ?? inv.patientName ?? "-"}</td>
+                      <tr key={inv.id} className="hover:bg-slate-50 transition">
+                        <td className="px-4 py-3 text-slate-900 font-medium">{inv.invoiceNumber}</td>
+                        <td className="px-4 py-3 text-slate-700">{inv.patient?.name ?? inv.patientName ?? "-"}</td>
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${TYPE_COLORS[inv.type] ?? "bg-slate-800 text-slate-400"}`}>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${TYPE_COLORS[inv.type] ?? "bg-slate-100 text-slate-500"}`}>
                             {inv.type}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-red-400 font-medium">{`\u20B9${(inv.balance ?? 0).toLocaleString()}`}</td>
-                        <td className="px-4 py-3 text-slate-400">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "-"}</td>
+                        <td className="px-4 py-3 text-slate-500">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "-"}</td>
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${INVOICE_STATUS_COLORS[inv.status] ?? "bg-slate-800 text-slate-400"}`}>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${INVOICE_STATUS_COLORS[inv.status] ?? "bg-slate-100 text-slate-500"}`}>
                             {inv.status?.replace("_", " ")}
                           </span>
                         </td>
@@ -650,10 +650,10 @@ export default function ReceivablesPage() {
       {/* ── Create Invoice Modal ─────────────────────────────────────────────── */}
       {showCreateInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+          <div className="bg-white border border-slate-200 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-white">Create Invoice</h2>
-              <button onClick={() => setShowCreateInvoice(false)} className="text-slate-400 hover:text-white">
+              <h2 className="text-lg font-bold text-slate-900">Create Invoice</h2>
+              <button onClick={() => setShowCreateInvoice(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -661,11 +661,11 @@ export default function ReceivablesPage() {
             <div className="space-y-4">
               {/* Type */}
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Invoice Type</label>
+                <label className="block text-sm text-slate-500 mb-1">Invoice Type</label>
                 <select
                   value={invoiceForm.type}
                   onChange={(e) => setInvoiceForm((f) => ({ ...f, type: e.target.value }))}
-                  className="w-full px-3 py-2 text-sm bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-teal-500"
+                  className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-teal-500"
                 >
                   <option value="PATIENT">Patient</option>
                   <option value="INSURANCE">Insurance</option>
@@ -675,19 +675,19 @@ export default function ReceivablesPage() {
 
               {/* Patient */}
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Patient / Entity Name</label>
+                <label className="block text-sm text-slate-500 mb-1">Patient / Entity Name</label>
                 <input
                   type="text"
                   value={invoiceForm.patientName}
                   onChange={(e) => setInvoiceForm((f) => ({ ...f, patientName: e.target.value }))}
                   placeholder="Search patient..."
-                  className="w-full px-3 py-2 text-sm bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
+                  className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500"
                 />
               </div>
 
               {/* Items */}
               <div>
-                <label className="block text-sm text-slate-400 mb-2">Line Items</label>
+                <label className="block text-sm text-slate-500 mb-2">Line Items</label>
                 <div className="space-y-2">
                   {invoiceForm.items.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-2">
@@ -696,23 +696,23 @@ export default function ReceivablesPage() {
                         value={item.description}
                         onChange={(e) => updateInvoiceItem(idx, "description", e.target.value)}
                         placeholder="Description"
-                        className="flex-1 px-3 py-2 text-sm bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
+                        className="flex-1 px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500"
                       />
                       <input
                         type="number"
                         value={item.quantity}
                         onChange={(e) => updateInvoiceItem(idx, "quantity", Number(e.target.value))}
                         placeholder="Qty"
-                        className="w-20 px-3 py-2 text-sm bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-teal-500"
+                        className="w-20 px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-teal-500"
                       />
                       <input
                         type="number"
                         value={item.unitPrice}
                         onChange={(e) => updateInvoiceItem(idx, "unitPrice", Number(e.target.value))}
                         placeholder="Price"
-                        className="w-28 px-3 py-2 text-sm bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-teal-500"
+                        className="w-28 px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-teal-500"
                       />
-                      <span className="text-sm text-slate-400 w-24 text-right">{`\u20B9${(item.quantity * item.unitPrice).toLocaleString()}`}</span>
+                      <span className="text-sm text-slate-500 w-24 text-right">{`\u20B9${(item.quantity * item.unitPrice).toLocaleString()}`}</span>
                       {invoiceForm.items.length > 1 && (
                         <button onClick={() => removeInvoiceItem(idx)} className="text-red-400 hover:text-red-300">
                           <X className="w-4 h-4" />
@@ -727,28 +727,28 @@ export default function ReceivablesPage() {
               </div>
 
               {/* Totals */}
-              <div className="bg-slate-800 rounded-lg p-4 space-y-2">
+              <div className="bg-slate-50 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Subtotal</span>
-                  <span className="text-white">{`\u20B9${invoiceSubtotal.toLocaleString()}`}</span>
+                  <span className="text-slate-500">Subtotal</span>
+                  <span className="text-slate-900">{`\u20B9${invoiceSubtotal.toLocaleString()}`}</span>
                 </div>
                 <div className="flex justify-between text-sm items-center">
-                  <span className="text-slate-400">Discount</span>
+                  <span className="text-slate-500">Discount</span>
                   <input
                     type="number"
                     value={invoiceForm.discount}
                     onChange={(e) => setInvoiceForm((f) => ({ ...f, discount: Number(e.target.value) }))}
-                    className="w-28 px-2 py-1 text-sm bg-slate-700 border border-slate-600 rounded text-white text-right focus:outline-none focus:border-teal-500"
+                    className="w-28 px-2 py-1 text-sm bg-white border border-slate-300 rounded text-slate-900 text-right focus:outline-none focus:border-teal-500"
                   />
                 </div>
-                <div className="flex justify-between text-sm font-bold border-t border-slate-700 pt-2">
-                  <span className="text-white">Total</span>
-                  <span className="text-teal-400">{`\u20B9${(invoiceSubtotal - invoiceForm.discount).toLocaleString()}`}</span>
+                <div className="flex justify-between text-sm font-bold border-t border-slate-200 pt-2">
+                  <span className="text-slate-900">Total</span>
+                  <span className="text-teal-600">{`\u20B9${(invoiceSubtotal - invoiceForm.discount).toLocaleString()}`}</span>
                 </div>
               </div>
 
               <div className="flex justify-end gap-3">
-                <button onClick={() => setShowCreateInvoice(false)} className="px-4 py-2 text-sm text-slate-400 border border-slate-700 rounded-lg hover:bg-slate-800 transition">
+                <button onClick={() => setShowCreateInvoice(false)} className="px-4 py-2 text-sm text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50 transition">
                   Cancel
                 </button>
                 <button onClick={handleCreateInvoice} className="px-4 py-2 text-sm font-medium bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition">
@@ -763,35 +763,35 @@ export default function ReceivablesPage() {
       {/* ── Record Payment Modal ─────────────────────────────────────────────── */}
       {showPaymentModal && selectedInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-md p-6">
+          <div className="bg-white border border-slate-200 rounded-xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-white">Record Payment</h2>
-              <button onClick={() => { setShowPaymentModal(false); setSelectedInvoice(null); }} className="text-slate-400 hover:text-white">
+              <h2 className="text-lg font-bold text-slate-900">Record Payment</h2>
+              <button onClick={() => { setShowPaymentModal(false); setSelectedInvoice(null); }} className="text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="mb-4 bg-slate-800 rounded-lg p-3">
-              <p className="text-sm text-slate-400">Invoice: <span className="text-white font-medium">{selectedInvoice.invoiceNumber}</span></p>
-              <p className="text-sm text-slate-400">Outstanding: <span className="text-teal-400 font-medium">{`\u20B9${(selectedInvoice.balance ?? 0).toLocaleString()}`}</span></p>
+            <div className="mb-4 bg-slate-50 rounded-lg p-3">
+              <p className="text-sm text-slate-500">Invoice: <span className="text-slate-900 font-medium">{selectedInvoice.invoiceNumber}</span></p>
+              <p className="text-sm text-slate-500">Outstanding: <span className="text-teal-600 font-medium">{`\u20B9${(selectedInvoice.balance ?? 0).toLocaleString()}`}</span></p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Amount</label>
+                <label className="block text-sm text-slate-500 mb-1">Amount</label>
                 <input
                   type="number"
                   value={paymentForm.amount}
                   onChange={(e) => setPaymentForm((f) => ({ ...f, amount: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 text-sm bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-teal-500"
+                  className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-teal-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Payment Method</label>
+                <label className="block text-sm text-slate-500 mb-1">Payment Method</label>
                 <select
                   value={paymentForm.method}
                   onChange={(e) => setPaymentForm((f) => ({ ...f, method: e.target.value }))}
-                  className="w-full px-3 py-2 text-sm bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-teal-500"
+                  className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-teal-500"
                 >
                   {["CASH", "CARD", "UPI", "NEFT", "CHEQUE", "ONLINE"].map((m) => (
                     <option key={m} value={m}>{m}</option>
@@ -799,17 +799,17 @@ export default function ReceivablesPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Reference</label>
+                <label className="block text-sm text-slate-500 mb-1">Reference</label>
                 <input
                   type="text"
                   value={paymentForm.reference}
                   onChange={(e) => setPaymentForm((f) => ({ ...f, reference: e.target.value }))}
                   placeholder="Transaction ID / Cheque #"
-                  className="w-full px-3 py-2 text-sm bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
+                  className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-2">
-                <button onClick={() => { setShowPaymentModal(false); setSelectedInvoice(null); }} className="px-4 py-2 text-sm text-slate-400 border border-slate-700 rounded-lg hover:bg-slate-800 transition">
+                <button onClick={() => { setShowPaymentModal(false); setSelectedInvoice(null); }} className="px-4 py-2 text-sm text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50 transition">
                   Cancel
                 </button>
                 <button onClick={handleRecordPayment} className="px-4 py-2 text-sm font-medium bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition">

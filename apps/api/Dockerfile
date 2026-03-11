@@ -35,4 +35,4 @@ COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/packages/db/prisma ./prisma
 EXPOSE 3001
 USER node
-CMD ["node", "dist/main"]
+CMD ["node", "dist/apps/api/src/main"]
