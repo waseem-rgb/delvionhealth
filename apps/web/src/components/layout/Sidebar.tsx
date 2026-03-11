@@ -212,6 +212,8 @@ const NAV_GROUPS: NavGroup[] = [
       { label: "Accounting", href: "/finance/accounting", icon: BookOpenCheck },
       { label: "Procurement", href: "/finance/procurement", icon: Truck },
       { label: "Statutory & Payroll", href: "/finance/statutory", icon: Shield },
+      { label: "Reports & Statements", href: "/finance/reports", icon: FileSpreadsheet },
+      { label: "Bank Reconciliation", href: "/finance/reconciliation", icon: GitMerge },
     ],
   },
   {
