@@ -131,7 +131,7 @@ function ComplianceCalendarTab() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/api/v1/finance/compliance-calendar?month=${month}&year=${year}`);
+      const res = await api.get(`/finance/compliance-calendar?month=${month}&year=${year}`);
       setItems(unwrap(res) ?? []);
     } catch { setItems([]); }
     setLoading(false);
@@ -166,7 +166,7 @@ function ComplianceCalendarTab() {
     if (!payModal) return;
     setSaving(true);
     try {
-      await api.post("/api/v1/finance/statutory-payments", {
+      await api.post("/finance/statutory-payments", {
         id: payModal.id,
         challanNumber: payForm.challanNumber,
         paymentDate: payForm.paymentDate,
@@ -320,7 +320,7 @@ function PayrollTab() {
   const generate = async () => {
     setGenerating(true);
     try {
-      const res = await api.post("/api/v1/finance/payroll/run", { month, year });
+      const res = await api.post("/finance/payroll/run", { month, year });
       const data = unwrap(res);
       setRun(data);
       if (data?.id) await loadRun(data.id);
@@ -331,7 +331,7 @@ function PayrollTab() {
   const loadRun = async (id: string) => {
     setLoading(true);
     try {
-      const res = await api.get(`/api/v1/finance/payroll/${id}`);
+      const res = await api.get(`/finance/payroll/${id}`);
       const data = unwrap(res);
       setRun(data);
       setLines(data?.lines ?? data?.payrollLines ?? []);
@@ -342,21 +342,21 @@ function PayrollTab() {
   const approve = async () => {
     if (!run?.id) return;
     setApproving(true);
-    try { await api.post(`/api/v1/finance/payroll/${run.id}/approve`); await loadRun(run.id); } catch {}
+    try { await api.post(`/finance/payroll/${run.id}/approve`); await loadRun(run.id); } catch {}
     setApproving(false);
   };
 
   const post = async () => {
     if (!run?.id) return;
     setPosting(true);
-    try { await api.post(`/api/v1/finance/payroll/${run.id}/post`); await loadRun(run.id); } catch {}
+    try { await api.post(`/finance/payroll/${run.id}/post`); await loadRun(run.id); } catch {}
     setPosting(false);
   };
 
   const viewPayslip = async (employeeId: string) => {
     if (!run?.id) return;
     try {
-      const res = await api.get(`/api/v1/finance/payroll/${run.id}/payslip/${employeeId}`);
+      const res = await api.get(`/finance/payroll/${run.id}/payslip/${employeeId}`);
       setPayslip(unwrap(res));
     } catch {}
   };
@@ -625,7 +625,7 @@ function TDSTab() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await api.get("/api/v1/finance/statutory-payments");
+        const res = await api.get("/finance/statutory-payments");
         setPayments(unwrap(res) ?? []);
       } catch { setPayments([]); }
       setLoading(false);
@@ -718,8 +718,8 @@ function PFESICTab() {
     (async () => {
       try {
         const [empRes, payRes] = await Promise.all([
-          api.get("/api/v1/finance/employees"),
-          api.get("/api/v1/finance/statutory-payments"),
+          api.get("/finance/employees"),
+          api.get("/finance/statutory-payments"),
         ]);
         setEmployees(unwrap(empRes) ?? []);
         setPayments(unwrap(payRes) ?? []);
@@ -852,7 +852,7 @@ function EmployeesTab() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get("/api/v1/finance/employees");
+      const res = await api.get("/finance/employees");
       setEmployees(unwrap(res) ?? []);
     } catch { setEmployees([]); }
     setLoading(false);
@@ -885,7 +885,7 @@ function EmployeesTab() {
     if (!modal) return;
     setSaving(true);
     try {
-      await api.post("/api/v1/finance/salary-structures", {
+      await api.post("/finance/salary-structures", {
         employeeId: modal.id,
         effectiveFrom: form.effectiveFrom,
         basicSalary: parseFloat(form.basicSalary) || 0,

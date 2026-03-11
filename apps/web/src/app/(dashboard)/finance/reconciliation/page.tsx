@@ -136,7 +136,7 @@ export default function BankReconciliationPage() {
     queryKey: ["finance-bank-accounts"],
     queryFn: async () => {
       const result = unwrap<BankAccount[] | { accounts: BankAccount[] }>(
-        await api.get("/api/v1/finance/bank-accounts")
+        await api.get("/finance/bank-accounts")
       );
       return Array.isArray(result) ? result : (result as any)?.accounts ?? [];
     },
@@ -151,7 +151,7 @@ export default function BankReconciliationPage() {
     queryKey: ["finance-recon-summary", activeBankId],
     queryFn: async () =>
       unwrap(
-        await api.get("/api/v1/finance/reconciliation/summary", {
+        await api.get("/finance/reconciliation/summary", {
           params: { bankAccountId: activeBankId },
         })
       ),
@@ -162,7 +162,7 @@ export default function BankReconciliationPage() {
     queryKey: ["finance-recon-suggested", activeBankId],
     queryFn: async () => {
       const result = unwrap<SuggestedMatch[] | { matches: SuggestedMatch[] }>(
-        await api.get("/api/v1/finance/reconciliation/suggested", {
+        await api.get("/finance/reconciliation/suggested", {
           params: { bankAccountId: activeBankId },
         })
       );
@@ -175,7 +175,7 @@ export default function BankReconciliationPage() {
     queryKey: ["finance-recon-statements", activeBankId],
     queryFn: async () => {
       const result = unwrap<StatementLine[] | { lines: StatementLine[] }>(
-        await api.get(`/api/v1/finance/bank-accounts/${activeBankId}/statement`)
+        await api.get(`/finance/bank-accounts/${activeBankId}/statement`)
       );
       return Array.isArray(result) ? result : (result as any)?.lines ?? [];
     },
@@ -191,7 +191,7 @@ export default function BankReconciliationPage() {
 
   const autoReconcile = useMutation({
     mutationFn: async () => {
-      const res = await api.post("/api/v1/finance/reconciliation/auto-reconcile", {
+      const res = await api.post("/finance/reconciliation/auto-reconcile", {
         bankAccountId: activeBankId,
       });
       return unwrap(res);
@@ -213,7 +213,7 @@ export default function BankReconciliationPage() {
       statementId: string;
       journalEntryId: string;
     }) => {
-      const res = await api.post("/api/v1/finance/reconciliation/accept-match", {
+      const res = await api.post("/finance/reconciliation/accept-match", {
         statementId,
         journalEntryId,
       });
@@ -230,7 +230,7 @@ export default function BankReconciliationPage() {
 
   const rejectMatch = useMutation({
     mutationFn: async ({ statementId }: { statementId: string }) => {
-      const res = await api.post("/api/v1/finance/reconciliation/reject-match", {
+      const res = await api.post("/finance/reconciliation/reject-match", {
         statementId,
       });
       return unwrap(res);

@@ -263,7 +263,7 @@ export default function FinancialReportsPage() {
     queryKey: ["finance-pl", plFrom, plTo],
     queryFn: async () =>
       unwrap(
-        await api.get("/api/v1/finance/statements/profit-loss", {
+        await api.get("/finance/statements/profit-loss", {
           params: { from: plFrom, to: plTo },
         })
       ),
@@ -277,7 +277,7 @@ export default function FinancialReportsPage() {
     queryKey: ["finance-bs", bsAsOf],
     queryFn: async () =>
       unwrap(
-        await api.get("/api/v1/finance/statements/balance-sheet", {
+        await api.get("/finance/statements/balance-sheet", {
           params: { asOf: bsAsOf },
         })
       ),
@@ -291,7 +291,7 @@ export default function FinancialReportsPage() {
     queryKey: ["finance-cf", cfFrom, cfTo],
     queryFn: async () =>
       unwrap(
-        await api.get("/api/v1/finance/statements/cash-flow", {
+        await api.get("/finance/statements/cash-flow", {
           params: { from: cfFrom, to: cfTo },
         })
       ),
@@ -304,7 +304,7 @@ export default function FinancialReportsPage() {
   } = useQuery<TrialBalanceData>({
     queryKey: ["finance-tb"],
     queryFn: async () =>
-      unwrap(await api.get("/api/v1/finance/trial-balance")),
+      unwrap(await api.get("/finance/trial-balance")),
     enabled: activeTab === "Trial Balance",
   });
 

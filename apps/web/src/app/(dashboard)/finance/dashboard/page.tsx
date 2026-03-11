@@ -108,27 +108,27 @@ const BAR_COLORS = [
 export default function FinanceDashboardPage() {
   const { data: kpis, isLoading: kpisLoading } = useQuery<KPIData>({
     queryKey: ["finance-dashboard-kpis"],
-    queryFn: async () => unwrap(await api.get("/api/v1/finance/dashboard/kpis")),
+    queryFn: async () => unwrap(await api.get("/finance/dashboard/kpis")),
   });
 
   const { data: revenueTrend, isLoading: trendLoading } = useQuery<RevenueTrendItem[]>({
     queryKey: ["finance-dashboard-revenue-trend"],
-    queryFn: async () => unwrap(await api.get("/api/v1/finance/dashboard/revenue-trend")),
+    queryFn: async () => unwrap(await api.get("/finance/dashboard/revenue-trend")),
   });
 
   const { data: expenseBreakdown } = useQuery<ExpenseCategory[]>({
     queryKey: ["finance-dashboard-expense-breakdown"],
-    queryFn: async () => unwrap(await api.get("/api/v1/finance/dashboard/expense-breakdown")),
+    queryFn: async () => unwrap(await api.get("/finance/dashboard/expense-breakdown")),
   });
 
   const { data: recentTxns } = useQuery<RecentTransaction[]>({
     queryKey: ["finance-dashboard-recent-transactions"],
-    queryFn: async () => unwrap(await api.get("/api/v1/finance/dashboard/recent-transactions")),
+    queryFn: async () => unwrap(await api.get("/finance/dashboard/recent-transactions")),
   });
 
   const { data: insights } = useQuery<Insight[]>({
     queryKey: ["finance-dashboard-insights"],
-    queryFn: async () => unwrap(await api.get("/api/v1/finance/dashboard/insights")),
+    queryFn: async () => unwrap(await api.get("/finance/dashboard/insights")),
   });
 
   const trendData = Array.isArray(revenueTrend) ? revenueTrend : [];
