@@ -110,11 +110,19 @@ export default function SuperAdminOverviewPage() {
 
   return (
     <div className="space-y-6">
+      {/* Demo context banner */}
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+        <span className="text-amber-600 text-sm font-medium">ℹ️</span>
+        <div className="text-amber-800 text-sm">
+          <strong>Super Admin (Phase 3 — Not yet built).</strong> This view currently shows Tenant 1 (Demo) data. The real DELViON Global management platform will be built after the tenant product is complete.
+        </div>
+      </div>
+
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Platform Overview</h1>
+        <h1 className="text-2xl font-bold text-white">Tenant 1 — Platform Overview (Demo)</h1>
         <p className="text-sm mt-1" style={{ color: '#94a3b8' }}>
-          Real-time platform health and revenue metrics
+          Demo tenant data — delvionhealth.com
         </p>
       </div>
 

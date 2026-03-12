@@ -57,11 +57,11 @@ export default function SuperAdminLayout({
             className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm flex-shrink-0"
             style={{ backgroundColor: '#0D9488' }}
           >
-            SA
+            T1
           </div>
           <div>
-            <p className="text-white font-bold text-sm leading-tight">DELViON</p>
-            <p className="text-xs leading-tight" style={{ color: '#94a3b8' }}>Super Admin</p>
+            <p className="text-white font-bold text-sm leading-tight">Tenant 1 — Demo</p>
+            <p className="text-xs leading-tight" style={{ color: '#94a3b8' }}>Apollo Diagnostics (Demo)</p>
           </div>
         </div>
 
