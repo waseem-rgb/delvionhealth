@@ -617,6 +617,10 @@ model Tenant {
   nonPathTemplates    NonPathReportTemplate[]
   nonPathReports      NonPathReport[]
 
+  // Corporate & Wellness
+  industryMasters     IndustryMaster[]
+  corporates          Corporate[]
+
   @@map("tenants")
 }
 
@@ -761,6 +765,10 @@ model Patient {
   standingOrders          StandingOrder[]
   paymentPlans            PatientPaymentPlan[]
   nonPathReports          NonPathReport[]
+
+  // Corporate & Wellness
+  corporateMemberships  CorporateMember[]
+  corporateDependencies CorporateDependent[] @relation("DependentPatient")
 
   // Phase G2: Merge patients
   mergedIntoId  String?
@@ -5243,4 +5251,444 @@ model NonPathReport {
   @@index([tenantId, patientId])
   @@index([tenantId, investigationType, status])
   @@map("non_path_reports")
+}
+
+// ─────────────────────────────────────────────
+// CORPORATE & WELLNESS MODULE
+// ─────────────────────────────────────────────
+
+enum CorporateStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+enum CorporateMemberStatus {
+  ACTIVE
+  INACTIVE
+  EXITED
+}
+
+enum CorporatePackageType {
+  ANNUAL_HEALTH_CHECK
+  PRE_POLICY
+  PRE_EMPLOYMENT
+  PAY_PER_USE
+  CAMP
+}
+
+enum CorporateRegistrationScenario {
+  BULK
+  INDIVIDUAL
+  CAMP
+  ASSOCIATE
+  EMAIL_DOMAIN
+}
+
+enum CorporateEventType {
+  HEALTH_CAMP
+  ANNUAL_CHECK
+  WELLNESS_SESSION
+  FITNESS_CHALLENGE
+  LOUNGE
+}
+
+enum CorporateEventStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum CorporateInvoiceTo {
+  CORPORATE
+  INDIVIDUAL
+}
+
+enum CorporateReportTo {
+  INDIVIDUAL
+  CORPORATE
+  BOTH
+}
+
+enum CorporateUploadType {
+  EMPLOYEES
+  DEPENDENTS
+  ORDERS
+}
+
+enum CorporateUploadStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum CorporateDiscountType {
+  FLAT
+  OVER_AND_ABOVE
+}
+
+enum CorporateOrderType {
+  B2B
+  B2B2C
+}
+
+enum CorporateFeedbackStatus {
+  OPEN
+  REPLIED
+  CLOSED
+}
+
+enum CorporateInvoiceStatus {
+  RAISED
+  SENT
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+}
+
+enum CorporateInvoiceType {
+  B2B
+  B2B2C
+  CAMP
+  LOUNGE
+}
+
+enum DependentRelation {
+  SPOUSE
+  CHILD
+  PARENT
+  SIBLING
+  OTHER
+}
+
+enum CorporateUploadErrorType {
+  DUPLICATE
+  MISSING_MANDATORY
+  INVALID_FORMAT
+  MRN_NOT_FOUND
+}
+
+model IndustryMaster {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  @@map("industry_masters")
+}
+
+model Corporate {
+  id              String          @id @default(cuid())
+  tenantId        String
+  name            String
+  corporateCode   String          @unique
+  industry        String?
+  address         String
+  city            String
+  pincode         String
+  contactName     String
+  contactPhone    String
+  contactEmail    String
+  logoUrl         String?
+  mouDocumentUrl  String?
+  status          CorporateStatus @default(PENDING)
+  notes           String?
+  createdById     String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  tenant          Tenant          @relation(fields: [tenantId], references: [id])
+  locations       CorporateLocation[]
+  groups          CorporateGroup[]
+  members         CorporateMember[]
+  packages        CorporatePackage[]
+  events          CorporateEvent[]
+  orders          CorporateOrder[]
+  invoices        CorporateInvoice[]
+  feedback        CorporateFeedback[]
+  mailers         CorporateMailer[]
+  bulkUploads     CorporateBulkUpload[]
+  adminPortals    CorporateAdminPortal[]
+  @@map("corporates")
+}
+
+model CorporateLocation {
+  id            String    @id @default(cuid())
+  corporateId   String
+  tenantId      String
+  locationName  String
+  locationCode  String    @unique
+  city          String
+  address       String
+  adminName     String?
+  adminEmail    String?
+  adminPhone    String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  corporate     Corporate @relation(fields: [corporateId], references: [id])
+  members       CorporateMember[]
+  groups        CorporateGroup[]
+  events        CorporateEvent[]
+  invoices      CorporateInvoice[]
+  bulkUploads   CorporateBulkUpload[]
+  adminPortals  CorporateAdminPortal[]
+  @@map("corporate_locations")
+}
+
+model CorporateGroup {
+  id              String                @id @default(cuid())
+  corporateId     String
+  locationId      String?
+  tenantId        String
+  name            String
+  groupCode       String
+  emailDomain     String?
+  discountType    CorporateDiscountType @default(FLAT)
+  discountPercent Float                 @default(0)
+  maxDependents   Int                   @default(0)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  corporate       Corporate             @relation(fields: [corporateId], references: [id])
+  location        CorporateLocation?    @relation(fields: [locationId], references: [id])
+  members         CorporateMember[]
+  packages        CorporatePackage[]
+  @@map("corporate_groups")
+}
+
+model CorporateMember {
+  id                               String                          @id @default(cuid())
+  corporateId                      String
+  locationId                       String?
+  groupId                          String?
+  patientId                        String
+  tenantId                         String
+  employeeId                       String?
+  officialEmail                    String?
+  emailVerified                    Boolean                         @default(false)
+  emailVerificationToken           String?
+  pendingOrdersWithoutVerification Int                             @default(0)
+  joinDate                         DateTime?
+  exitDate                         DateTime?
+  status                           CorporateMemberStatus           @default(ACTIVE)
+  registrationScenario             CorporateRegistrationScenario   @default(INDIVIDUAL)
+  createdAt                        DateTime                        @default(now())
+  updatedAt                        DateTime                        @updatedAt
+  corporate                        Corporate                       @relation(fields: [corporateId], references: [id])
+  location                         CorporateLocation?              @relation(fields: [locationId], references: [id])
+  group                            CorporateGroup?                 @relation(fields: [groupId], references: [id])
+  patient                          Patient                         @relation(fields: [patientId], references: [id])
+  dependents                       CorporateDependent[]
+  orders                           CorporateOrder[]
+  @@map("corporate_members")
+}
+
+model CorporateDependent {
+  id          String           @id @default(cuid())
+  memberId    String
+  patientId   String
+  relation    DependentRelation
+  tenantId    String
+  createdAt   DateTime         @default(now())
+  member      CorporateMember  @relation(fields: [memberId], references: [id])
+  patient     Patient          @relation("DependentPatient", fields: [patientId], references: [id])
+  @@map("corporate_dependents")
+}
+
+model CorporatePackage {
+  id            String               @id @default(cuid())
+  corporateId   String
+  groupId       String?
+  tenantId      String
+  name          String
+  packageCode   String               @unique
+  packageType   CorporatePackageType
+  validFrom     DateTime
+  validTo       DateTime
+  maxUses       Int?
+  usedCount     Int                  @default(0)
+  invoiceTo     CorporateInvoiceTo
+  reportTo      CorporateReportTo
+  smsOnBooking  Boolean              @default(true)
+  visibleOn     String[]
+  grossPrice    BigInt
+  discountAmount BigInt              @default(0)
+  netPrice      BigInt
+  reportEmail   String?
+  status        CorporateStatus      @default(ACTIVE)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  corporate     Corporate            @relation(fields: [corporateId], references: [id])
+  group         CorporateGroup?      @relation(fields: [groupId], references: [id])
+  items         CorporatePackageItem[]
+  events        CorporateEvent[]
+  orders        CorporateOrder[]
+  invoices      CorporateInvoice[]
+  @@map("corporate_packages")
+}
+
+model CorporatePackageItem {
+  id             String           @id @default(cuid())
+  packageId      String
+  testId         String
+  testName       String
+  listedPrice    BigInt
+  discountAmount BigInt
+  netPrice       BigInt
+  package        CorporatePackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  @@map("corporate_package_items")
+}
+
+model CorporateBulkUpload {
+  id            String                @id @default(cuid())
+  corporateId   String
+  locationId    String?
+  tenantId      String
+  uploadType    CorporateUploadType
+  fileName      String
+  totalRows     Int
+  successRows   Int                   @default(0)
+  failedRows    Int                   @default(0)
+  duplicateRows Int                   @default(0)
+  status        CorporateUploadStatus @default(PENDING)
+  uploadedById  String
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  corporate     Corporate             @relation(fields: [corporateId], references: [id])
+  location      CorporateLocation?    @relation(fields: [locationId], references: [id])
+  errors        CorporateBulkUploadError[]
+  @@map("corporate_bulk_uploads")
+}
+
+model CorporateBulkUploadError {
+  id           String                    @id @default(cuid())
+  uploadId     String
+  rowNumber    Int
+  errorType    CorporateUploadErrorType
+  errorMessage String
+  rowData      Json
+  upload       CorporateBulkUpload       @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+  @@map("corporate_bulk_upload_errors")
+}
+
+model CorporateEvent {
+  id             String               @id @default(cuid())
+  corporateId    String
+  locationId     String?
+  tenantId       String
+  name           String
+  eventType      CorporateEventType
+  scheduledDate  DateTime
+  scheduledTime  String?
+  venue          String
+  packageId      String?
+  officerUserId  String?
+  status         CorporateEventStatus @default(SCHEDULED)
+  notes          String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  corporate      Corporate            @relation(fields: [corporateId], references: [id])
+  location       CorporateLocation?   @relation(fields: [locationId], references: [id])
+  package        CorporatePackage?    @relation(fields: [packageId], references: [id])
+  orders         CorporateOrder[]
+  @@map("corporate_events")
+}
+
+model CorporateOrder {
+  id               String             @id @default(cuid())
+  corporateId      String
+  orderId          String
+  packageId        String?
+  eventId          String?
+  memberId         String
+  tenantId         String
+  orderType        CorporateOrderType @default(B2B)
+  invoiceTo        CorporateInvoiceTo
+  reportTo         CorporateReportTo
+  discountApplied  BigInt             @default(0)
+  createdAt        DateTime           @default(now())
+  corporate        Corporate          @relation(fields: [corporateId], references: [id])
+  package          CorporatePackage?  @relation(fields: [packageId], references: [id])
+  event            CorporateEvent?    @relation(fields: [eventId], references: [id])
+  member           CorporateMember    @relation(fields: [memberId], references: [id])
+  @@map("corporate_orders")
+}
+
+model CorporateInvoice {
+  id             String                @id @default(cuid())
+  corporateId    String
+  locationId     String?
+  tenantId       String
+  invoiceNumber  String                @unique
+  invoiceType    CorporateInvoiceType
+  packageId      String?
+  fromDate       DateTime
+  toDate         DateTime
+  orderCount     Int
+  grossAmount    BigInt
+  discountAmount BigInt
+  netAmount      BigInt
+  paidAmount     BigInt                @default(0)
+  status         CorporateInvoiceStatus @default(RAISED)
+  paymentMode    String?
+  remarks        String?
+  generatedById  String
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  corporate      Corporate             @relation(fields: [corporateId], references: [id])
+  location       CorporateLocation?    @relation(fields: [locationId], references: [id])
+  package        CorporatePackage?     @relation(fields: [packageId], references: [id])
+  @@map("corporate_invoices")
+}
+
+model CorporateFeedback {
+  id          String                  @id @default(cuid())
+  corporateId String
+  tenantId    String
+  subject     String
+  message     String
+  submittedBy String
+  status      CorporateFeedbackStatus @default(OPEN)
+  reply       String?
+  repliedById String?
+  repliedAt   DateTime?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  corporate   Corporate               @relation(fields: [corporateId], references: [id])
+  @@map("corporate_feedback")
+}
+
+model CorporateMailer {
+  id          String    @id @default(cuid())
+  corporateId String
+  tenantId    String
+  subject     String
+  content     String
+  documentUrl String?
+  sentById    String
+  sentAt      DateTime  @default(now())
+  corporate   Corporate @relation(fields: [corporateId], references: [id])
+  @@map("corporate_mailers")
+}
+
+model CorporateAdminPortal {
+  id           String    @id @default(cuid())
+  corporateId  String
+  locationId   String?
+  tenantId     String
+  adminName    String
+  designation  String?
+  email        String    @unique
+  phone        String
+  passwordHash String
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  corporate    Corporate  @relation(fields: [corporateId], references: [id])
+  location     CorporateLocation? @relation(fields: [locationId], references: [id])
+  @@map("corporate_admin_portals")
 }

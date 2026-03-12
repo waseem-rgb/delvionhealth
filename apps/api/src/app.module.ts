@@ -54,6 +54,7 @@ import { LabPackagesModule } from "./modules/lab-packages/lab-packages.module";
 import { SopsModule } from "./modules/sops/sops.module";
 import { QualityFormsModule } from "./modules/quality-forms/quality-forms.module";
 import { NonPathModule } from "./modules/non-path/non-path.module";
+import { CorporateModule } from "./modules/corporate/corporate.module";
 import { TenantMiddleware } from "./common/middleware/tenant.middleware";
 
 @Module({
@@ -127,6 +128,7 @@ import { TenantMiddleware } from "./common/middleware/tenant.middleware";
     SopsModule,
     QualityFormsModule,
     NonPathModule,
+    CorporateModule,
   ],
 })
 export class AppModule {

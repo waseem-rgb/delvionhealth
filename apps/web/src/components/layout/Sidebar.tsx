@@ -76,6 +76,7 @@ import {
   Filter,
   Upload,
   ArrowLeftRight,
+  Building2,
 } from "lucide-react";
 
 interface NavItem {
@@ -261,10 +262,17 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "Corporate & Wellness",
-    roles: [Role.FIELD_SALES_REP, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
+    roles: [Role.FIELD_SALES_REP, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN, Role.CORPORATE_CLIENT],
     items: [
+      { label: "Dashboard", href: "/corporate/dashboard", icon: LayoutDashboard },
+      { label: "Corporates", href: "/corporate/corporates", icon: Building2 },
+      { label: "Members", href: "/corporate/members", icon: Users },
+      { label: "Packages", href: "/corporate/packages", icon: ClipboardList },
       { label: "Camp Management", href: "/corporate/camps", icon: Tent },
       { label: "Wellness Dashboard", href: "/corporate/wellness", icon: HeartHandshake },
+      { label: "Invoices", href: "/corporate/invoices", icon: FileText },
+      { label: "Feedback", href: "/corporate/feedback", icon: FileSpreadsheet },
+      { label: "Settings", href: "/corporate/settings", icon: Cog },
     ],
   },
   {
