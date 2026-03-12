@@ -58,7 +58,7 @@ export default function PatientsPage() {
   const [gender, setGender] = useState("");
   const [patientStatus, setPatientStatus] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
-  const [dateFrom, setDateFrom] = useState(initialDateFrom);
+  const dateFrom = initialDateFrom;
 
   // 'n' keyboard shortcut → new patient
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function PatientsPage() {
   }).toString();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["patients", queryParams, dateFrom],
+    queryKey: ["patients", queryParams],
     queryFn: async () => {
       const res = await api.get<{ data: QueryResponse }>(`/patients?${queryParams}`);
       return res.data.data;

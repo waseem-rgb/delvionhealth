@@ -136,7 +136,7 @@ export default function ReceivablesPage() {
 
   // Invoices state
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [invoiceDateFrom, setInvoiceDateFrom] = useState(initialDateFrom);
+  const invoiceDateFrom = initialDateFrom;
   const [invoiceFilter, setInvoiceFilter] = useState({ status: "", type: "" });
   const [showCreateInvoice, setShowCreateInvoice] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
