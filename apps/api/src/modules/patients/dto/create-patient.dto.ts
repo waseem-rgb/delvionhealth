@@ -178,4 +178,9 @@ export class CreatePatientDto {
   @ApiPropertyOptional({ description: "SMS opt-in", example: true })
   @IsOptional()
   smsOptIn?: boolean;
+
+  @ApiPropertyOptional({ description: "Preferred report language (ENGLISH, HINDI, etc.)" })
+  @IsOptional()
+  @IsString()
+  reportLanguage?: string;
 }
