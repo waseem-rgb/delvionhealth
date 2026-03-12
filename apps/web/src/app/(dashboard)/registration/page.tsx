@@ -220,7 +220,9 @@ const INDIAN_STATES = [
   "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
   "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
   "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
-  "Delhi", "Chandigarh", "Puducherry",
+  "Andaman and Nicobar Islands", "Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu", "Delhi",
+  "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry",
 ];
 
 const inputCls =
@@ -540,6 +542,8 @@ function CalculatePriceModal({ onClose }: { onClose: () => void }) {
       if (prev.find((t) => t.id === test.id)) return prev;
       return [...prev, test];
     });
+    // Auto-clear search after selection
+    setTestSearch("");
   }, []);
 
   const removeTest = useCallback((id: string) => {
@@ -909,6 +913,9 @@ export default function RegistrationPage() {
       const ratePrice = test.priceSource === "ORG" ? catalogPrice : (rateListPriceMap.get(test.id) ?? undefined);
       return [...prev, { ...test, quantity: 1, ratePrice, priceSource: test.priceSource }];
     });
+    // Auto-clear test search input and results after selection
+    setTestSearchQuery("");
+    setTestSearchResults([]);
     // Check for redundancy warnings
     const currentCodes = selectedTests.map((t) => t.code);
     const warnings = getRedundancyWarnings(test.code, currentCodes);
@@ -1372,6 +1379,25 @@ export default function RegistrationPage() {
       registerMutation.mutate(payload);
     }
   }, [form, activeBranch, registerMutation, updateMutation, selectedPatient]);
+
+  // -- Pincode auto-fill handler --
+  const handlePincodeChange = useCallback(async (value: string) => {
+    const cleaned = value.replace(/\D/g, "");
+    updateForm("pincode", cleaned);
+    if (cleaned.length === 6) {
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${cleaned}`);
+        const data = await res.json() as Array<{ Status: string; PostOffice?: Array<{ District: string; State: string }> }>;
+        if (data[0]?.Status === "Success" && (data[0]?.PostOffice?.length ?? 0) > 0) {
+          const po = data[0].PostOffice![0];
+          updateForm("city", po.District);
+          updateForm("state", po.State);
+        }
+      } catch {
+        // silently fail — user can still type manually
+      }
+    }
+  }, [updateForm]);
 
   // -- Organization search fn --
   const searchOrganizations = useCallback(async (q: string): Promise<Organization[]> => {
@@ -1852,7 +1878,7 @@ export default function RegistrationPage() {
                     type="text"
                     maxLength={6}
                     value={form.pincode}
-                    onChange={(e) => updateForm("pincode", e.target.value.replace(/\D/g, ""))}
+                    onChange={(e) => { void handlePincodeChange(e.target.value); }}
                     placeholder="560001"
                     className={inputCls}
                   />
@@ -2710,19 +2736,46 @@ export default function RegistrationPage() {
 
           {/* Order Detail Summary */}
           <div className="border rounded-xl overflow-hidden bg-white">
-            <div className="bg-gray-50 px-5 py-3 border-b">
+            {/* Print-only header */}
+            <div className="hidden print:block mb-4 px-5 pt-5">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h1 className="text-xl font-bold">DELViON Health</h1>
+                  <p className="text-sm text-gray-600">Health Platform</p>
+                  <p className="text-xs text-gray-500">www.delvionhealth.com</p>
+                  <p className="text-xs text-gray-500">support@delvionhealth.com</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-bold">TAX INVOICE</p>
+                  <p className="text-sm">Invoice #: {orderNumber ?? createdOrderId}</p>
+                  <p className="text-sm">Date: {new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+                  <p className="text-sm">Branch: {activeBranch?.name ?? "Main Branch"}</p>
+                </div>
+              </div>
+              <div className="border-t border-gray-300 mt-3 pt-3">
+                <p className="text-sm font-semibold">Patient: {registeredPatientName}{registeredPatientMrn ? ` · MRN: ${registeredPatientMrn}` : ""}</p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 px-5 py-3 border-b print:hidden">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Order Summary</p>
             </div>
             <div className="divide-y">
-              {selectedTests.map((t) => (
-                <div key={t.id} className="flex justify-between items-center px-5 py-2.5 text-sm">
-                  <div>
-                    <span className="font-medium">{t.name}</span>
-                    <span className="ml-2 text-xs text-gray-400">{t.sampleType}</span>
+              {selectedTests.map((t) => {
+                const imagingCategories = ["IMAGING", "RADIOLOGY", "X-RAY", "ULTRASOUND", "CT", "MRI", "ECG"];
+                const isImaging = imagingCategories.includes((t.category || "").toUpperCase());
+                return (
+                  <div key={t.id} className="flex justify-between items-center px-5 py-2.5 text-sm">
+                    <div>
+                      <span className="font-medium">{t.name}</span>
+                      {t.sampleType && !isImaging && (
+                        <span className="ml-2 text-xs text-gray-400">({t.sampleType})</span>
+                      )}
+                    </div>
+                    <span className="font-semibold">{formatCurrency(Number(t.price || 0))}</span>
                   </div>
-                  <span className="font-semibold">{formatCurrency(Number(t.price || 0))}</span>
-                </div>
-              ))}
+                );
+              })}
               {billingTotals.discountAmt > 0 && (
                 <div className="flex justify-between px-5 py-2.5 text-sm text-red-500">
                   <span>Discount</span>
@@ -2739,6 +2792,13 @@ export default function RegistrationPage() {
                   {isCreditOrder ? `Credit \u2014 ${form.organizationName || "Org"}` : paymentMethod}
                 </span>
               </div>
+            </div>
+
+            {/* Print-only footer */}
+            <div className="hidden print:block mt-8 border-t pt-4 pb-5 px-5 text-xs text-gray-500 text-center space-y-1">
+              <p>Reports will be shared via WhatsApp and Email</p>
+              <p>For queries: support@delvionhealth.com</p>
+              <p>This is a computer-generated invoice. — DELViON Health | Powered by DELViON Global</p>
             </div>
           </div>
 

@@ -112,6 +112,23 @@ const SECTION_COLORS: Record<string, string> = {
 // These appear as sub-labels under Revenue CRM, not independent section headings
 const SUB_SECTIONS = new Set(["B2C", "B2B"]);
 
+function getRoleLabel(role: string | undefined): string {
+  switch (role) {
+    case "SUPER_ADMIN": return "Lab Director";
+    case "TENANT_ADMIN": return "Admin";
+    case "FRONT_DESK": return "Front Desk";
+    case "LAB_TECHNICIAN": return "Lab Tech";
+    case "PHLEBOTOMIST": return "Phlebotomist";
+    case "PATHOLOGIST": return "Pathologist";
+    case "LAB_MANAGER": return "Lab Manager";
+    case "FINANCE_EXECUTIVE": return "Finance";
+    case "FIELD_SALES_REP": return "Sales Rep";
+    case "IT_ADMIN": return "IT Admin";
+    case "CORPORATE_CLIENT": return "Corporate";
+    default: return role?.replace(/_/g, " ") ?? "";
+  }
+}
+
 const NAV_GROUPS: NavGroup[] = [
   {
     label: "Overview",
@@ -499,7 +516,7 @@ export function Sidebar() {
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold cursor-pointer"
               style={{ backgroundColor: avatarBg }}
-              title={`${fullName} · ${userRole}`}
+              title={`${fullName} · ${getRoleLabel(userRole)}`}
             >
               {initials}
             </div>
@@ -521,7 +538,7 @@ export function Sidebar() {
             </div>
             <div className="overflow-hidden flex-1 min-w-0">
               <p className="text-white text-xs font-semibold truncate">{fullName}</p>
-              <p className="text-slate-500 text-[10px] truncate">{userRole?.replace("_", " ")}</p>
+              <p className="text-slate-500 text-[10px] truncate">{getRoleLabel(userRole)}</p>
             </div>
             <button
               onClick={logout}

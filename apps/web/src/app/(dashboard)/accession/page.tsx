@@ -3,29 +3,22 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, useRouter } from "next/navigation";
-import type { ColumnDef } from "@tanstack/react-table";
 import {
   Scan,
   X,
   Eye,
   CheckCircle2,
   XCircle,
-  Clock,
-  ThumbsDown,
-  AlertTriangle,
   Loader2,
   RefreshCw,
   Printer,
   ChevronDown,
   ChevronRight,
-  Package,
   ClipboardPlus,
 } from "lucide-react";
 import { toast } from "sonner";
-import { DataTable } from "@/components/tables/DataTable";
-import { KPICard } from "@/components/shared/KPICard";
 import { SearchInput } from "@/components/shared/SearchInput";
-import { formatDateTime, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import api from "@/lib/api";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -73,16 +66,6 @@ interface AccessionOrder {
   branch?: { id: string; name: string };
   createdBy?: { firstName: string; lastName: string };
 }
-
-interface AccessionStats {
-  pending: number;
-  received: number;
-  rejected: number;
-  tatBreached: number;
-}
-
-type FilterTab = "ALL" | "WALK_IN" | "HOME_COLLECTION" | "B2B" | "STAT";
-type StatusTab = "PENDING" | "RECEIVED_TODAY" | "REJECTED";
 
 const REJECTION_REASONS = [
   "HEMOLYZED", "INSUFFICIENT_QUANTITY", "WRONG_TUBE", "CLOTTED_SAMPLE",
@@ -373,8 +356,6 @@ export default function AccessionPage() {
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [filterTab, setFilterTab] = useState<FilterTab>("ALL");
-  const [statusTab, setStatusTab] = useState<StatusTab>("PENDING");
   const [scannerMode, setScannerMode] = useState(false);
   const [scanInput, setScanInput] = useState("");
   const [rejectOrder, setRejectOrder] = useState<AccessionOrder | null>(null);
@@ -495,31 +476,16 @@ export default function AccessionPage() {
     }
   }, [highlightOrderId]);
 
-  // ── Stats ──────────────────────────────────────────────────────────────────
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["accession-stats"],
-    queryFn: async () => {
-      try {
-        const res = await api.get<{ data: AccessionStats }>("/lab/accession/stats");
-        return res.data.data ?? res.data as unknown as AccessionStats;
-      } catch { return { pending: 0, received: 0, rejected: 0, tatBreached: 0 }; }
-    },
-    refetchInterval: 30000,
-  });
-
-  // ── Accession list ─────────────────────────────────────────────────────────
+  // ── Accession list — always shows PENDING (PENDING_COLLECTION + SAMPLE_COLLECTED), newest first ──
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["accession", search, page, filterTab, statusTab],
+    queryKey: ["accession", search, page],
     queryFn: async () => {
-      const params = new URLSearchParams({ page: String(page), limit: "20" });
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: "20",
+        status: "PENDING_COLLECTION,SAMPLE_COLLECTED",
+      });
       if (search) params.set("search", search);
-      if (filterTab !== "ALL") {
-        if (filterTab === "STAT") params.set("priority", "STAT");
-        else params.set("collectionType", filterTab);
-      }
-      if (statusTab === "PENDING") params.set("status", "PENDING_COLLECTION,SAMPLE_COLLECTED");
-      else if (statusTab === "RECEIVED_TODAY") params.set("status", "RECEIVED");
-      else if (statusTab === "REJECTED") params.set("status", "SAMPLE_REJECTED");
 
       try {
         const res = await api.get(`/lab/accession?${params.toString()}`);
@@ -568,20 +534,6 @@ export default function AccessionPage() {
     });
   }, []);
 
-  const FILTER_TABS: { label: string; value: FilterTab }[] = [
-    { label: "All", value: "ALL" },
-    { label: "Walk-in", value: "WALK_IN" },
-    { label: "Home Collection", value: "HOME_COLLECTION" },
-    { label: "B2B", value: "B2B" },
-    { label: "STAT", value: "STAT" },
-  ];
-
-  const STATUS_TABS: { label: string; value: StatusTab }[] = [
-    { label: "Pending", value: "PENDING" },
-    { label: "Received Today", value: "RECEIVED_TODAY" },
-    { label: "Rejected", value: "REJECTED" },
-  ];
-
   const orders = data?.data ?? [];
 
   return (
@@ -607,9 +559,10 @@ export default function AccessionPage() {
               scannerMode ? "bg-teal-600 text-white border-teal-600" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50")}>
             <Scan size={14} /> Scan Mode
           </button>
-          <button onClick={() => void refetch()}
-            className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">
-            <RefreshCw size={14} /> Refresh
+          <button onClick={() => void refetch()} disabled={isLoading}
+            className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50">
+            {isLoading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+            {isLoading ? "Refreshing..." : "Refresh"}
           </button>
         </div>
       </div>
@@ -624,36 +577,6 @@ export default function AccessionPage() {
           <button onClick={() => setScannerMode(false)} className="text-teal-600 hover:text-teal-800"><X size={16} /></button>
         </div>
       )}
-
-      {/* KPI Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        <KPICard title="Pending" value={stats?.pending ?? 0} icon={Clock} iconColor="bg-yellow-100 text-yellow-600" isLoading={statsLoading} />
-        <KPICard title="Received Today" value={stats?.received ?? 0} icon={CheckCircle2} iconColor="bg-green-100 text-green-600" isLoading={statsLoading} />
-        <KPICard title="Rejected" value={stats?.rejected ?? 0} icon={ThumbsDown} iconColor="bg-red-100 text-red-600" isLoading={statsLoading} />
-        <KPICard title="TAT Breached" value={stats?.tatBreached ?? 0} icon={AlertTriangle} iconColor="bg-orange-100 text-orange-600" isLoading={statsLoading} />
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1.5 flex-wrap">
-        {FILTER_TABS.map((tab) => (
-          <button key={tab.value} onClick={() => { setFilterTab(tab.value); setPage(1); }}
-            className={cn("px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
-              filterTab === tab.value ? "bg-[#1B4F8A] text-white" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50")}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      <div className="flex gap-1.5">
-        {STATUS_TABS.map((tab) => (
-          <button key={tab.value} onClick={() => { setStatusTab(tab.value); setPage(1); }}
-            className={cn("px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
-              statusTab === tab.value
-                ? tab.value === "REJECTED" ? "bg-red-600 text-white" : tab.value === "RECEIVED_TODAY" ? "bg-green-600 text-white" : "bg-[#0D7E8A] text-white"
-                : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50")}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
 
       {/* Search */}
       <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search by order #, barcode, patient name or MRN..." />

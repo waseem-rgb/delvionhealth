@@ -164,6 +164,38 @@ export class NotificationsService {
     }
   }
 
+  // ─── Unified order/report notification helpers ────────────────────────────
+
+  /**
+   * Fire-and-forget notification on order creation.
+   * Never throws, never blocks the main order flow.
+   */
+  async notifyOrderCreated(
+    orderNumber: string,
+    token: string,
+    patientPhone: string,
+    _patientEmail: string,
+  ): Promise<void> {
+    const msg = `Your order ${orderNumber} at DELViON Health is confirmed. Token: ${token}. We'll notify when reports are ready.`;
+    this.sendWhatsApp(patientPhone, msg).catch(() => {});
+    this.sendSMS(patientPhone, msg).catch(() => {});
+  }
+
+  /**
+   * Fire-and-forget notification when a report is ready.
+   * Never throws, never blocks the main flow.
+   */
+  async notifyReportReady(
+    orderNumber: string,
+    testNames: string,
+    patientPhone: string,
+    reportUrl: string,
+  ): Promise<void> {
+    const msg = `Your DELViON Health report for ${testNames} (Order: ${orderNumber}) is ready. ${reportUrl}`;
+    this.sendWhatsApp(patientPhone, msg).catch(() => {});
+    this.sendSMS(patientPhone, msg).catch(() => {});
+  }
+
   // ─── CRUD helpers ──────────────────────────────────────────────────────────
 
   async findAll(tenantId: string): Promise<unknown[]> {
