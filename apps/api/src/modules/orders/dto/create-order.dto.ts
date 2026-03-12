@@ -107,4 +107,5 @@ export class CreateOrderDto {
   @ApiPropertyOptional() @IsOptional() @IsString() paymentScreenshotKey?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() insuranceTpaName?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() insurancePolicyNo?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() reportLanguage?: string;
 }
