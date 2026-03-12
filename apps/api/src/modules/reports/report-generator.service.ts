@@ -25,21 +25,25 @@ export class ReportGeneratorService implements OnModuleInit {
 
   async onModuleInit() {
     // Auto-resume any incomplete jobs after server restart
-    // A job is considered incomplete if templates exist but don't cover all tests
-    const tenants = await this.prisma.tenant.findMany({ select: { id: true } });
-    for (const tenant of tenants) {
-      const [totalTests, generated] = await Promise.all([
-        this.prisma.testCatalog.count({ where: { tenantId: tenant.id, isActive: true } }),
-        this.prisma.testReportTemplate.count({ where: { tenantId: tenant.id, status: 'COMPLETED' } }),
-      ]);
-      if (totalTests > 0 && generated > 0 && generated < totalTests && !this.activeJobs.has(tenant.id)) {
-        this.logger.log(`Auto-resuming report generation for tenant ${tenant.id}: ${generated}/${totalTests} done`);
-        this.activeJobs.add(tenant.id);
-        setImmediate(() => this.runJob(tenant.id).catch(e => {
-          this.logger.error(`Auto-resume failed for tenant ${tenant.id}:`, e);
-          this.activeJobs.delete(tenant.id);
-        }));
+    // Wrapped in try-catch so a missing table or DB error doesn't crash the process
+    try {
+      const tenants = await this.prisma.tenant.findMany({ select: { id: true } });
+      for (const tenant of tenants) {
+        const [totalTests, generated] = await Promise.all([
+          this.prisma.testCatalog.count({ where: { tenantId: tenant.id, isActive: true } }),
+          this.prisma.testReportTemplate.count({ where: { tenantId: tenant.id, status: 'COMPLETED' } }),
+        ]);
+        if (totalTests > 0 && generated > 0 && generated < totalTests && !this.activeJobs.has(tenant.id)) {
+          this.logger.log(`Auto-resuming report generation for tenant ${tenant.id}: ${generated}/${totalTests} done`);
+          this.activeJobs.add(tenant.id);
+          setImmediate(() => this.runJob(tenant.id).catch(e => {
+            this.logger.error(`Auto-resume failed for tenant ${tenant.id}:`, e);
+            this.activeJobs.delete(tenant.id);
+          }));
+        }
       }
+    } catch (e) {
+      this.logger.warn('onModuleInit: could not check resume state (DB may not be ready yet):', e);
     }
   }
 
