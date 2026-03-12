@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 
 interface DisplayData {
@@ -19,6 +20,7 @@ const HEALTH_TIPS = [
 ];
 
 export default function QueueDisplayPage() {
+  const router = useRouter();
   const { data } = useQuery<DisplayData>({
     queryKey: ["queue-display"],
     queryFn: async () => {
@@ -42,8 +44,19 @@ export default function QueueDisplayPage() {
           </div>
           <span className="text-xl font-bold text-white/80">DELViON Health</span>
         </div>
-        <div className="text-sm text-white/40">
-          {new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-white/40">
+            {new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+          </span>
+          <button
+            onClick={() => router.push("/front-desk")}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white/70 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to Dashboard
+          </button>
         </div>
       </div>
 

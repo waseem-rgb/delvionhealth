@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Search,
@@ -19,6 +20,7 @@ import {
   X,
   Star,
   ArrowRight,
+  ArrowLeft,
   RefreshCw,
   Hash,
   FileText,
@@ -109,6 +111,7 @@ function statusBadge(status: TokenStatus) {
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function QueuePage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const today = new Date().toISOString().split("T")[0];
 
@@ -241,11 +244,20 @@ export default function QueuePage() {
     <div className="min-h-screen bg-slate-50 p-4 lg:p-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Queue &amp; Tokens</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Manage patient tokens and queue for today
-          </p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push("/front-desk")}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Queue &amp; Tokens</h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Manage patient tokens and queue for today
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <button
