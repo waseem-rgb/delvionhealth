@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/lib/api";
 
 interface QueueToken {
@@ -64,6 +64,7 @@ function Clock() {
 }
 
 export default function QueueDisplayPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const isKiosk = searchParams.get("kiosk") === "true";
   const [tipIndex, setTipIndex] = useState(0);
@@ -107,9 +108,20 @@ export default function QueueDisplayPage() {
           </div>
           <span className="text-lg font-bold text-white/80">DELViON Health</span>
         </div>
-        <div className="flex items-center gap-6 text-white/40 text-sm">
+        <div className="flex items-center gap-5 text-white/40 text-sm">
           <span>{new Date().toLocaleDateString("en-IN", { weekday: "long", month: "long", day: "numeric" })}</span>
           <span className="font-mono text-white/60 text-base"><Clock /></span>
+          {!isKiosk && (
+            <button
+              onClick={() => router.push("/front-desk")}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white/60 bg-white/10 border border-white/15 rounded-lg hover:bg-white/20 hover:text-white/80 transition"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+              Back to Dashboard
+            </button>
+          )}
         </div>
       </div>
 
