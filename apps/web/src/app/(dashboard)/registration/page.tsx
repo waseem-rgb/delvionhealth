@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { ColumnDef } from "@tanstack/react-table";
 import {
   Search,
   X,
@@ -12,13 +11,9 @@ import {
   ChevronDown,
   ChevronUp,
   ChevronRight,
-  Eye,
-  ShoppingCart,
-  Receipt,
   Upload,
   Download,
   Calculator,
-  Users,
   Clock,
   Heart,
   StickyNote,
@@ -31,23 +26,20 @@ import {
   Briefcase,
   AlertCircle,
   AlertTriangle,
-  Home,
   Building2,
-  FileInput,
-  Footprints,
   CreditCard,
   Banknote,
   Smartphone,
   IndianRupee,
+  ShoppingCart,
   Plus,
   Minus,
   Printer,
   Check,
-  ClipboardList,
   TestTube2,
   Barcode,
+  Users,
 } from "lucide-react";
-import { DataTable } from "@/components/tables/DataTable";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { toast } from "sonner";
 import api from "@/lib/api";
@@ -56,28 +48,6 @@ import { useTenantStore } from "@/store/tenantStore";
 import { useAuthStore } from "@/store/authStore";
 
 // ── Types ────────────────────────────────────────────────────────────────────
-
-interface Patient {
-  id: string;
-  mrn: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  age: number;
-  dob: string | null;
-  gender: string;
-  phone: string;
-  email: string | null;
-  address: string | null;
-  createdAt: string;
-  orderCount: number;
-  branch: { id: string; name: string } | null;
-}
-
-interface PatientQueryResponse {
-  data: Patient[];
-  meta: { total: number; page: number; limit: number; totalPages: number };
-}
 
 interface TestCatalogItem {
   id: string;
@@ -131,21 +101,21 @@ interface PhoneSearchResult {
 
 type SearchMode = "phone" | "name";
 
-type RegistrationMode = "walkin" | "home" | "b2b" | "trf";
-
-const REGISTRATION_MODES: { label: string; value: RegistrationMode; icon: React.ElementType; desc: string; color: string }[] = [
-  { label: "Walk-in", value: "walkin", icon: Footprints, desc: "New patient at center", color: "border-blue-300 bg-blue-50 text-blue-700" },
-  { label: "Home Collection", value: "home", icon: Home, desc: "Schedule home visit", color: "border-amber-300 bg-amber-50 text-amber-700" },
-  { label: "B2B / Referral", value: "b2b", icon: Building2, desc: "Hospital or doctor referral", color: "border-purple-300 bg-purple-50 text-purple-700" },
-  { label: "TRF Received", value: "trf", icon: FileInput, desc: "External TRF sample", color: "border-teal-300 bg-teal-50 text-teal-700" },
-];
-
-const MODE_TO_COLLECTION_TYPE: Record<RegistrationMode, string> = {
-  walkin: "WALK_IN",
-  home: "HOME_COLLECTION",
-  b2b: "B2B",
-  trf: "OUTSOURCE_RECEIVED",
-};
+interface SelectedPatient {
+  id: string;
+  mrn: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  age: number;
+  dob: string | null;
+  gender: string;
+  phone: string;
+  email: string | null;
+  address: string | null;
+  orderCount: number;
+  createdAt: string;
+}
 
 type Designation = "Mr." | "Mrs." | "Ms." | "Dr." | "Baby";
 type Gender = "MALE" | "FEMALE" | "OTHER";
@@ -762,14 +732,12 @@ const SYMPTOM_CHIPS: { label: string; testNames: string[] }[] = [
 
 export default function RegistrationPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { activeBranch } = useTenantStore();
   const user = useAuthStore((s) => s.user);
 
-  // -- Registration mode --
-  const initialMode = (searchParams.get("mode") as RegistrationMode) || "walkin";
-  const [registrationMode, setRegistrationMode] = useState<RegistrationMode>(initialMode);
+  // -- Registration mode (always walk-in on this page) --
+  const registrationMode = "walkin";
 
   // -- Inline billing state --
   const [registeredPatientId, setRegisteredPatientId] = useState<string | null>(null);
@@ -814,15 +782,12 @@ export default function RegistrationPage() {
   const [whatsAppSent, setWhatsAppSent] = useState(false);
 
   // -- Top section state --
-  const [patientsOpen, setPatientsOpen] = useState(true);
-  const [tableSearch, setTableSearch] = useState("");
-  const [tablePage, setTablePage] = useState(1);
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showPriceModal, setShowPriceModal] = useState(false);
 
   // -- Form state --
   const [form, setForm] = useState<RegistrationForm>({ ...EMPTY_FORM });
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<SelectedPatient | null>(null);
   const [searchMode, setSearchMode] = useState<SearchMode>("phone");
   const [patientSearch, setPatientSearch] = useState("");
   const [patientResults, setPatientResults] = useState<PhoneSearchResult[]>([]);
@@ -833,22 +798,6 @@ export default function RegistrationPage() {
   const [ageChanging, setAgeChanging] = useState(false);
   const patientSearchRef = useRef<HTMLDivElement>(null);
   const patientTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  // -- Patients Table Query --
-  const tableParams = new URLSearchParams({
-    page: String(tablePage),
-    limit: "20",
-    ...(tableSearch && { search: tableSearch }),
-  }).toString();
-
-  const { data: patientsData, isLoading: patientsLoading } = useQuery({
-    queryKey: ["registered-patients", tableParams],
-    queryFn: async () => {
-      const res = await api.get<{ data: PatientQueryResponse }>(`/patients?${tableParams}`);
-      return res.data.data;
-    },
-    enabled: !!user,
-  });
 
   // -- Rate Lists --
   const { data: rateLists } = useQuery({
@@ -1088,7 +1037,7 @@ export default function RegistrationPage() {
           discount: 0,
         })),
         priority: "ROUTINE",
-        collectionType: MODE_TO_COLLECTION_TYPE[registrationMode] || "WALK_IN",
+        collectionType: "WALK_IN",
         discountAmount: orderDiscount,
         discountType: orderDiscount > 0 ? discountType : "NONE",
         notes: form.notes || undefined,
@@ -1116,7 +1065,7 @@ export default function RegistrationPage() {
 
       // Auto-issue queue token
       try {
-        const tokenType = registrationMode === "home" ? "HOME" : form.patientType === "VIP" ? "PRIORITY" : registrationMode === "b2b" ? "CORPORATE" : "WALKIN";
+        const tokenType = form.patientType === "VIP" ? "PRIORITY" : "WALKIN";
         const tokenRes = await api.post<{ data: { tokenDisplay: string } }>("/front-desk/queue/issue", {
           patientName: form.fullName,
           patientId: registeredPatientId,
@@ -1184,7 +1133,7 @@ export default function RegistrationPage() {
     } finally {
       setOrderCreating(false);
     }
-  }, [registeredPatientId, selectedTests, orderDiscount, discountType, paymentMethod, amountPaid, activeBranch, registrationMode, form, isCreditOrder, billingTotals.total, paymentRemark, paymentRefNumber, proofUrl, proofKey, insuranceTpaName, insurancePolicyNo]);
+  }, [registeredPatientId, selectedTests, orderDiscount, discountType, paymentMethod, amountPaid, activeBranch, form, isCreditOrder, billingTotals.total, paymentRemark, paymentRefNumber, proofUrl, proofKey, insuranceTpaName, insurancePolicyNo]);
 
   // -- Register mutation --
   const registerMutation = useMutation({
@@ -1299,7 +1248,7 @@ export default function RegistrationPage() {
       id: p.id, mrn: p.mrn, firstName: p.firstName, lastName: p.lastName,
       fullName: p.fullName, age: p.age, dob: p.dob, gender: p.gender,
       phone: p.phone, email: p.email ?? null, address: p.address ?? null,
-      createdAt: "", orderCount: p.totalVisits ?? 0, branch: null,
+      createdAt: "", orderCount: p.totalVisits ?? 0,
     });
     setPatientDropdownOpen(false);
     setPatientSearch("");
@@ -1446,95 +1395,6 @@ export default function RegistrationPage() {
     }
   }, []);
 
-  // -- Table columns --
-  const columns: ColumnDef<Patient>[] = useMemo(() => [
-    {
-      accessorKey: "mrn",
-      header: "MRN",
-      cell: ({ row }) => (
-        <span className="font-mono text-xs text-[#1B4F8A] font-semibold tracking-wide">{row.original.mrn}</span>
-      ),
-    },
-    {
-      id: "patient",
-      header: "Patient Name",
-      cell: ({ row }) => {
-        const p = row.original;
-        const initials = `${(p.firstName?.[0] || "").toUpperCase()}${(p.lastName?.[0] || "").toUpperCase()}`;
-        return (
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-[#1B4F8A]/10 text-[#1B4F8A] flex items-center justify-center text-[10px] font-bold shrink-0">
-              {initials}
-            </div>
-            <span className="font-medium text-slate-900 text-sm">{p.firstName} {p.lastName}</span>
-          </div>
-        );
-      },
-    },
-    {
-      id: "ageGender",
-      header: "Age/Gender",
-      cell: ({ row }) => {
-        const p = row.original;
-        const gLabel = p.gender === "MALE" ? "M" : p.gender === "FEMALE" ? "F" : "O";
-        return <span className="text-sm text-slate-600">{p.age ? `${p.age}Y` : "--"} / {gLabel}</span>;
-      },
-    },
-    {
-      accessorKey: "phone",
-      header: "Phone",
-      cell: ({ row }) => <span className="text-sm text-slate-600">{row.original.phone}</span>,
-    },
-    {
-      id: "branch",
-      header: "Branch",
-      cell: ({ row }) => <span className="text-sm text-slate-500">{row.original.branch?.name ?? "--"}</span>,
-    },
-    {
-      id: "orders",
-      header: "Orders",
-      cell: ({ row }) => (
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
-          {row.original.orderCount}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Registered",
-      cell: ({ row }) => <span className="text-xs text-slate-500">{formatDate(row.original.createdAt)}</span>,
-    },
-    {
-      id: "actions",
-      header: "",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-1">
-          <button
-            onClick={(e) => { e.stopPropagation(); router.push(`/patients/${row.original.id}`); }}
-            className="p-1.5 rounded hover:bg-slate-100 text-slate-400 hover:text-[#1B4F8A] transition"
-            title="View"
-          >
-            <Eye size={14} />
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); router.push(`/orders/new?patientId=${row.original.id}`); }}
-            className="p-1.5 rounded hover:bg-slate-100 text-slate-400 hover:text-green-600 transition"
-            title="New Order"
-          >
-            <ShoppingCart size={14} />
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); router.push(`/billing?patientId=${row.original.id}`); }}
-            className="p-1.5 rounded hover:bg-slate-100 text-slate-400 hover:text-amber-600 transition"
-            title="Billing"
-          >
-            <Receipt size={14} />
-          </button>
-        </div>
-      ),
-    },
-  ], [router]);
-
   // -- Zustand hydration guard (after all hooks) --
   if (!user) {
     return (
@@ -1547,90 +1407,32 @@ export default function RegistrationPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* ── PAGE HEADER ── */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Registration & Billing</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Register patients and collect billing in one flow</p>
-      </div>
-
-      {/* ── MODE SELECTOR ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {REGISTRATION_MODES.map((mode) => {
-          const isActive = registrationMode === mode.value;
-          return (
-            <button
-              key={mode.value}
-              onClick={() => setRegistrationMode(mode.value)}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left",
-                isActive
-                  ? `${mode.color} border-current ring-2 ring-current/20 shadow-sm`
-                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-              )}
-            >
-              <mode.icon size={20} className={isActive ? "" : "text-slate-400"} />
-              <div>
-                <p className="text-sm font-semibold">{mode.label}</p>
-                <p className="text-[10px] opacity-75">{mode.desc}</p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── TOP SECTION: Registered Patients ── */}
-      <div className="bg-white rounded-xl card-shadow overflow-hidden">
-        <button
-          onClick={() => setPatientsOpen(!patientsOpen)}
-          className="w-full flex items-center justify-between px-6 py-4 hover:bg-slate-50/50 transition"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-[#1B4F8A]/10">
-              <Users size={18} className="text-[#1B4F8A]" />
-            </div>
-            <div className="text-left">
-              <h2 className="text-lg font-bold text-slate-900">Registered Patients</h2>
-              <p className="text-xs text-slate-500">{patientsData?.meta.total ?? 0} total patients</p>
-            </div>
-          </div>
-          {patientsOpen ? <ChevronUp size={20} className="text-slate-400" /> : <ChevronDown size={20} className="text-slate-400" />}
-        </button>
-
-        {patientsOpen && (
-          <div className="border-t border-slate-100">
-            <div className="px-6 py-3 flex flex-wrap items-center gap-3">
-              <div className="flex-1 min-w-[200px]">
-                <SearchInput
-                  value={tableSearch}
-                  onChange={(v) => { setTableSearch(v); setTablePage(1); }}
-                  placeholder="Search by name, phone, MRN..."
-                />
-              </div>
-              <button
-                onClick={() => router.push("/registration/bulk")}
-                className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition"
-              >
-                <Upload size={14} />
-                Bulk Registration
-              </button>
-              <button
-                onClick={() => setShowPriceModal(true)}
-                className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition"
-              >
-                <Calculator size={14} />
-                Calculate Price
-              </button>
-            </div>
-            <DataTable
-              columns={columns}
-              data={patientsData?.data ?? []}
-              total={patientsData?.meta.total}
-              page={tablePage}
-              pageSize={20}
-              onPageChange={setTablePage}
-              isLoading={patientsLoading}
-            />
-          </div>
-        )}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Registration & Billing</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Register patients and collect billing in one flow</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <SearchInput
+            value=""
+            onChange={() => {}}
+            placeholder="Search by name, phone, MRN..."
+          />
+          <button
+            onClick={() => router.push("/registration/bulk")}
+            className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition whitespace-nowrap"
+          >
+            <Upload size={14} />
+            Bulk Registration
+          </button>
+          <button
+            onClick={() => setShowPriceModal(true)}
+            className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition whitespace-nowrap"
+          >
+            <Calculator size={14} />
+            Calculate Price
+          </button>
+        </div>
       </div>
 
       {/* ── BOTTOM SECTION: Register New Patient ── */}
@@ -1640,18 +1442,8 @@ export default function RegistrationPage() {
             <UserPlus size={18} className="text-[#0D7E8A]" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
-              {registrationMode === "walkin" && "Walk-in Registration"}
-              {registrationMode === "home" && "Home Collection Request"}
-              {registrationMode === "b2b" && "B2B / Hospital Referral"}
-              {registrationMode === "trf" && "TRF Sample Received"}
-            </h2>
-            <p className="text-xs text-slate-500">
-              {registrationMode === "walkin" && "Register patient and proceed to billing"}
-              {registrationMode === "home" && "Patient details + collection address + scheduling"}
-              {registrationMode === "b2b" && "Referring doctor/org + patient + B2B pricing"}
-              {registrationMode === "trf" && "External TRF details + patient info + billing"}
-            </p>
+            <h2 className="text-lg font-bold text-slate-900">Walk-in Registration</h2>
+            <p className="text-xs text-slate-500">Register patient and proceed to billing</p>
           </div>
         </div>
 

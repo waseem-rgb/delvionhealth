@@ -56,6 +56,8 @@ interface AccessionOrder {
       sampleType: string | null;
       department: string;
       turnaroundHours: number;
+      investigationType?: string | null;
+      investigationCategory?: string | null;
     };
   }>;
   samples: Array<{
@@ -125,9 +127,20 @@ function getAgeGender(dob: string | null, gender: string | null): string {
   return [age, g].filter(Boolean).join("/") || "--";
 }
 
+function isPathologyItem(item: AccessionOrder["items"][number]): boolean {
+  const invType = item.testCatalog.investigationType;
+  const invCat = item.testCatalog.investigationCategory;
+  // Only PATHOLOGY items need tube labels
+  if (invType && invType !== "PATHOLOGY") return false;
+  if (invCat && invCat !== "PATHOLOGY") return false;
+  return true;
+}
+
 function aggregateTubes(items: AccessionOrder["items"]) {
   const tubeMap: Record<string, { type: string; tests: string[]; volume: string }> = {};
   for (const item of items) {
+    // Skip non-pathology items — no tube accession needed
+    if (!isPathologyItem(item)) continue;
     const st = (item.testCatalog.sampleType ?? "SERUM").toUpperCase();
     if (!tubeMap[st]) {
       tubeMap[st] = { type: st, tests: [], volume: "3ml" };

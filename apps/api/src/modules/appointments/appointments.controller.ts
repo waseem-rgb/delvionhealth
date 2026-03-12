@@ -28,6 +28,15 @@ export class AppointmentsController {
     });
   }
 
+  @Post()
+  @ApiOperation({ summary: "Create a new appointment (home collection)" })
+  create(
+    @CurrentUser() user: JwtPayload,
+    @Body() body: Record<string, unknown>
+  ) {
+    return this.appointmentsService.create(user.tenantId, user.sub, body as never);
+  }
+
   @Patch(":id/status")
   @ApiOperation({ summary: "Update appointment status" })
   updateStatus(

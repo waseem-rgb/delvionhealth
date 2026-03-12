@@ -162,8 +162,30 @@ export class AccessionService {
   async accessionSample(orderId: string, userId: string, tenantId: string) {
     const order = await this.prisma.order.findFirst({
       where: { id: orderId, tenantId },
-      select: { id: true, status: true, orderNumber: true },
+      include: {
+        items: {
+          include: {
+            testCatalog: {
+              select: { investigationType: true, investigationCategory: true },
+            },
+          },
+        },
+      },
     });
+
+    if (order) {
+      const nonPathItems = order.items.filter(
+        (i) =>
+          i.testCatalog.investigationType !== "PATHOLOGY" ||
+          (i.testCatalog.investigationCategory !== null &&
+            i.testCatalog.investigationCategory !== "PATHOLOGY"),
+      );
+      if (nonPathItems.length === order.items.length && order.items.length > 0) {
+        throw new BadRequestException(
+          "No accession required — all items are NonPathology",
+        );
+      }
+    }
 
     if (!order) {
       throw new NotFoundException(`Order ${orderId} not found`);
@@ -374,7 +396,7 @@ export class AccessionService {
         items: {
           include: {
             testCatalog: {
-              select: { id: true, name: true, code: true, sampleType: true },
+              select: { id: true, name: true, code: true, sampleType: true, investigationType: true, investigationCategory: true },
             },
           },
         },
@@ -386,7 +408,7 @@ export class AccessionService {
 
     if (!order) throw new NotFoundException("Order not found");
 
-    // Group tests by tube type
+    // Group tests by tube type — PATHOLOGY only
     const tubeMap: Record<string, {
       tubeKey: string;
       label: string;
@@ -397,6 +419,14 @@ export class AccessionService {
     }> = {};
 
     for (const item of order.items) {
+      // Skip accession for non-pathology items
+      if (
+        item.testCatalog.investigationType !== "PATHOLOGY" ||
+        (item.testCatalog.investigationCategory !== null &&
+          item.testCatalog.investigationCategory !== "PATHOLOGY")
+      ) {
+        continue;
+      }
       const st = (item.testCatalog.sampleType ?? "").toUpperCase().trim();
       let matched = false;
       for (const [key, cfg] of Object.entries(TUBE_CONFIG)) {
@@ -474,6 +504,19 @@ export class AccessionService {
       },
     });
     if (!order) throw new NotFoundException("Order not found");
+
+    // Guard: reject if all items are non-pathology
+    const nonPathItems = order.items.filter(
+      (i) =>
+        i.testCatalog.investigationType !== "PATHOLOGY" ||
+        (i.testCatalog.investigationCategory !== null &&
+          i.testCatalog.investigationCategory !== "PATHOLOGY"),
+    );
+    if (nonPathItems.length === order.items.length && order.items.length > 0) {
+      throw new BadRequestException(
+        "No accession required — all items are NonPathology",
+      );
+    }
 
     return this.prisma.$transaction(async (tx) => {
       const createdSamples = [];
