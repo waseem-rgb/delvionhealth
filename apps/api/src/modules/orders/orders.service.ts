@@ -374,13 +374,34 @@ export class OrdersService {
     const limit = Math.min(query.limit ?? 20, 100);
     const skip = (page - 1) * limit;
 
+    // Support comma-separated status values e.g. "APPROVED,REPORTED"
+    const statusValues = query.status
+      ? query.status.split(",").map((s) => s.trim()).filter(Boolean)
+      : [];
+
+    // Support q as alias for search
+    const searchTerm = query.search || query.q;
+
     const where = {
       tenantId,
-      ...(query.status && { status: query.status }),
+      ...(statusValues.length === 1
+        ? { status: statusValues[0] as never }
+        : statusValues.length > 1
+        ? { status: { in: statusValues as never[] } }
+        : {}),
       ...(query.priority && { priority: query.priority as string }),
       ...(query.branchId && { branchId: query.branchId }),
       ...(query.patientId && { patientId: query.patientId }),
-      ...(query.collectionType && { collectionType: query.collectionType }),
+      ...(query.collectionType && { collectionType: query.collectionType as never }),
+      ...(query.reportDeliveryMode && { reportDeliveryMode: query.reportDeliveryMode }),
+      ...(query.deliveredDate
+        ? {
+            dispatchedAt: {
+              gte: new Date(`${query.deliveredDate}T00:00:00.000Z`),
+              lte: new Date(`${query.deliveredDate}T23:59:59.999Z`),
+            },
+          }
+        : {}),
       ...(query.dateFrom || query.dateTo
         ? {
             createdAt: {
@@ -389,16 +410,16 @@ export class OrdersService {
             },
           }
         : {}),
-      ...(query.search
+      ...(searchTerm
         ? {
             OR: [
-              { orderNumber: { contains: query.search, mode: "insensitive" as const } },
+              { orderNumber: { contains: searchTerm, mode: "insensitive" as const } },
               {
                 patient: {
                   OR: [
-                    { firstName: { contains: query.search, mode: "insensitive" as const } },
-                    { lastName: { contains: query.search, mode: "insensitive" as const } },
-                    { mrn: { contains: query.search, mode: "insensitive" as const } },
+                    { firstName: { contains: searchTerm, mode: "insensitive" as const } },
+                    { lastName: { contains: searchTerm, mode: "insensitive" as const } },
+                    { mrn: { contains: searchTerm, mode: "insensitive" as const } },
                   ],
                 },
               },

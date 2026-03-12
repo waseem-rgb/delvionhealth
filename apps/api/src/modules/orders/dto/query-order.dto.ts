@@ -1,8 +1,6 @@
-import { IsEnum, IsOptional, IsString, IsInt, Min, Max } from "class-validator";
+import { IsOptional, IsString, IsInt, Min, Max } from "class-validator";
 import { Type } from "class-transformer";
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { OrderStatus, CollectionType } from "@delvion/types";
-import { OrderPriority } from "./create-order.dto";
 
 export class QueryOrderDto {
   @ApiPropertyOptional({ default: 1 })
@@ -25,15 +23,20 @@ export class QueryOrderDto {
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ enum: OrderStatus })
+  @ApiPropertyOptional({ description: "Alias for search" })
   @IsOptional()
-  @IsEnum(OrderStatus)
-  status?: OrderStatus;
+  @IsString()
+  q?: string;
 
-  @ApiPropertyOptional({ enum: OrderPriority })
+  @ApiPropertyOptional({ description: "Single or comma-separated OrderStatus values" })
   @IsOptional()
-  @IsEnum(OrderPriority)
-  priority?: OrderPriority;
+  @IsString()
+  status?: string;
+
+  @ApiPropertyOptional({ description: "Order priority" })
+  @IsOptional()
+  @IsString()
+  priority?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -45,10 +48,10 @@ export class QueryOrderDto {
   @IsString()
   patientId?: string;
 
-  @ApiPropertyOptional({ enum: CollectionType })
+  @ApiPropertyOptional({ description: "Collection type" })
   @IsOptional()
-  @IsEnum(CollectionType)
-  collectionType?: CollectionType;
+  @IsString()
+  collectionType?: string;
 
   @ApiPropertyOptional({ description: "ISO date string — start of range" })
   @IsOptional()
@@ -59,4 +62,14 @@ export class QueryOrderDto {
   @IsOptional()
   @IsString()
   dateTo?: string;
+
+  @ApiPropertyOptional({ description: "Report delivery mode filter: AUTO, MANUAL, DOWNLOAD" })
+  @IsOptional()
+  @IsString()
+  reportDeliveryMode?: string;
+
+  @ApiPropertyOptional({ description: "Filter by delivered date (ISO date string)" })
+  @IsOptional()
+  @IsString()
+  deliveredDate?: string;
 }
