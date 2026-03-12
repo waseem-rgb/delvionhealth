@@ -181,14 +181,24 @@ export class OrdersService {
 
       const isCreditOrder = dto.isCreditOrder === true;
 
-      // 1. Create order (no samples — barcodes scanned during accession)
+      // Determine initial status: IMAGING tests have no physical tube — skip accession.
+      // Only PATHOLOGY, MOLECULAR, GENETIC require sample collection/accession.
+      const REQUIRES_ACCESSION = new Set(["PATHOLOGY", "MOLECULAR", "GENETIC"]);
+      const needsAccession = tests.some(
+        (t) => REQUIRES_ACCESSION.has((t.investigationType ?? "PATHOLOGY") as string)
+      );
+      const initialStatus = needsAccession
+        ? OrderStatus.PENDING_COLLECTION
+        : OrderStatus.CONFIRMED;
+
+      // 1. Create order (no samples — barcodes scanned during accession for lab tests)
       const newOrder = await tx.order.create({
         data: {
           tenantId,
           branchId: dto.branchId,
           patientId: dto.patientId,
           orderNumber,
-          status: OrderStatus.PENDING_COLLECTION,
+          status: initialStatus,
           priority: dto.priority ?? "ROUTINE",
           totalAmount,
           discountAmount: orderDiscountAmount,
