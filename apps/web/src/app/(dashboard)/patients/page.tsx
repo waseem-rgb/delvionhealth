@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus, Filter, X, Eye, Pencil, ClipboardList, History } from "lucide-react";
 import { DataTable } from "@/components/tables/DataTable";
@@ -47,11 +47,18 @@ const GENDER_TABS = [
 
 export default function PatientsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const urlRegisteredDate = searchParams.get("registeredDate");
+  const todayISO = new Date().toISOString().split("T")[0]!;
+  const initialDateFrom = urlRegisteredDate === "today" ? todayISO : "";
+
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [gender, setGender] = useState("");
   const [patientStatus, setPatientStatus] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [dateFrom, setDateFrom] = useState(initialDateFrom);
 
   // 'n' keyboard shortcut → new patient
   useEffect(() => {
@@ -72,10 +79,11 @@ export default function PatientsPage() {
     ...(search && { search }),
     ...(gender && { gender }),
     ...(patientStatus && { status: patientStatus }),
+    ...(dateFrom && { dateFrom }),
   }).toString();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["patients", queryParams],
+    queryKey: ["patients", queryParams, dateFrom],
     queryFn: async () => {
       const res = await api.get<{ data: QueryResponse }>(`/patients?${queryParams}`);
       return res.data.data;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import api from "@/lib/api";
 import {
   DollarSign,
@@ -114,11 +115,28 @@ type Tab = (typeof TABS)[number];
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function ReceivablesPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("Invoices");
+  const searchParams = useSearchParams();
+
+  const urlTab = searchParams.get("tab");
+  const urlDate = searchParams.get("date");
+  const todayISO = new Date().toISOString().split("T")[0]!;
+
+  // Map ?tab=invoices → "Invoices" etc.
+  const TAB_MAP: Record<string, Tab> = {
+    invoices: "Invoices",
+    payments: "Payments",
+    insurance: "Insurance Claims",
+    aging: "Aging Report",
+  };
+  const initialTab: Tab = (urlTab && TAB_MAP[urlTab]) ? TAB_MAP[urlTab]! : "Invoices";
+  const initialDateFrom = urlDate === "today" ? todayISO : "";
+
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [loading, setLoading] = useState(true);
 
   // Invoices state
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [invoiceDateFrom, setInvoiceDateFrom] = useState(initialDateFrom);
   const [invoiceFilter, setInvoiceFilter] = useState({ status: "", type: "" });
   const [showCreateInvoice, setShowCreateInvoice] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -154,6 +172,7 @@ export default function ReceivablesPage() {
       const params: any = { page: 1, limit: 50 };
       if (invoiceFilter.status) params.status = invoiceFilter.status;
       if (invoiceFilter.type) params.type = invoiceFilter.type;
+      if (invoiceDateFrom) { params.dateFrom = invoiceDateFrom; params.dateTo = invoiceDateFrom; }
       const res = await api.get("/finance/invoices", { params });
       const raw = res.data?.data ?? res.data;
       setInvoices(Array.isArray(raw) ? raw : raw?.invoices ?? raw?.items ?? []);
@@ -223,7 +242,7 @@ export default function ReceivablesPage() {
 
   useEffect(() => {
     fetchInvoices();
-  }, [invoiceFilter]);
+  }, [invoiceFilter, invoiceDateFrom]);
 
   // ── Actions ────────────────────────────────────────────────────────────────
 

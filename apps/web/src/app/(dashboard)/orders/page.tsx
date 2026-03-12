@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus, Eye, CheckCircle2, Circle } from "lucide-react";
 import { DataTable } from "@/components/tables/DataTable";
@@ -132,12 +132,25 @@ function PipelineStepper({ status }: { status: string }) {
 
 export default function OrdersPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Initialise filters from URL query params (e.g. from dashboard card navigation)
+  const urlStatus = searchParams.get("status") ?? "";
+  const urlDate = searchParams.get("date");
+
+  function getTodayISO() {
+    return new Date().toISOString().split("T")[0]!;
+  }
+
+  const initialDateRange: DateRange =
+    urlDate === "today" ? { from: getTodayISO(), to: getTodayISO() } : {};
+
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState(urlStatus);
   const [priority, setPriority] = useState("");
   const [collectionType, setCollectionType] = useState("");
-  const [dateRange, setDateRange] = useState<DateRange>({});
+  const [dateRange, setDateRange] = useState<DateRange>(initialDateRange);
 
   // 'n' keyboard shortcut → new order
   useEffect(() => {

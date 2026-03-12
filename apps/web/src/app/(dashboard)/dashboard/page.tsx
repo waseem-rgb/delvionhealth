@@ -180,6 +180,7 @@ export default function DashboardPage() {
           icon={ClipboardList}
           iconColor="bg-blue-50 text-blue-600"
           isLoading={isLoading}
+          href="/orders?date=today"
         />
         <KPICard
           title="Today's Revenue"
@@ -187,6 +188,7 @@ export default function DashboardPage() {
           icon={Activity}
           iconColor="bg-green-50 text-green-600"
           isLoading={isLoading}
+          href="/finance/receivables?tab=invoices&date=today"
         />
         <KPICard
           title="Today's Patients"
@@ -194,6 +196,7 @@ export default function DashboardPage() {
           icon={Users}
           iconColor="bg-indigo-50 text-indigo-600"
           isLoading={isLoading}
+          href="/patients?registeredDate=today"
         />
         <KPICard
           title="Active Samples"
@@ -202,6 +205,7 @@ export default function DashboardPage() {
           icon={FlaskConical}
           iconColor="bg-teal-50 text-teal-600"
           isLoading={isLoading}
+          href="/orders?status=SAMPLE_COLLECTED,RECEIVED,PENDING_PROCESSING,IN_PROCESSING"
         />
         <KPICard
           title="Pending Results"
@@ -209,6 +213,7 @@ export default function DashboardPage() {
           icon={Beaker}
           iconColor="bg-amber-50 text-amber-600"
           isLoading={isLoading}
+          href="/orders?status=RESULTED,PENDING_APPROVAL"
         />
         <KPICard
           title="Pending Reports"
@@ -217,6 +222,8 @@ export default function DashboardPage() {
           icon={FileText}
           iconColor="bg-orange-50 text-orange-500"
           isLoading={isLoading}
+          href="/orders?status=PENDING_APPROVAL"
+          showPulse={(data?.pendingReports ?? 0) > 0}
         />
       </div>
 

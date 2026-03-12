@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { TrendingUp, TrendingDown, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +11,8 @@ interface KPICardProps {
   icon: LucideIcon;
   iconColor?: string;
   isLoading?: boolean;
+  href?: string;
+  showPulse?: boolean;
 }
 
 export function KPICard({
@@ -21,6 +24,8 @@ export function KPICard({
   icon: Icon,
   iconColor = "bg-slate-100 text-slate-500",
   isLoading = false,
+  href,
+  showPulse = false,
 }: KPICardProps) {
   if (isLoading) {
     return (
@@ -38,8 +43,21 @@ export function KPICard({
   const isPositive = change !== undefined && change >= 0;
   const isNegative = change !== undefined && change < 0;
 
-  return (
-    <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+  const cardContent = (
+    <div
+      className={cn(
+        "relative bg-white rounded-xl p-5 shadow-sm border border-slate-100 transition-all duration-150",
+        href
+          ? "cursor-pointer hover:shadow-md hover:scale-[1.02]"
+          : "hover:shadow-md transition-shadow"
+      )}
+    >
+      {showPulse && (
+        <span className="absolute top-3 right-3 flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+        </span>
+      )}
       <div className="flex items-start justify-between mb-3">
         <div className={cn("p-2.5 rounded-lg", iconColor.split(" ")[0])}>
           <Icon className={cn("w-5 h-5", iconColor.split(" ")[1] ?? iconColor)} size={20} />
@@ -66,4 +84,9 @@ export function KPICard({
       )}
     </div>
   );
+
+  if (href) {
+    return <Link href={href} className="block">{cardContent}</Link>;
+  }
+  return cardContent;
 }
