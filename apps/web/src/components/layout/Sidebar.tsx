@@ -155,6 +155,18 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: "Lab Operations",
+    roles: [Role.FRONT_DESK, Role.LAB_TECHNICIAN, Role.PATHOLOGIST, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
+    items: [
+      { label: "Worklist", href: "/accession", icon: ScanBarcode },
+      { label: "Samples", href: "/samples", icon: TestTubes },
+      { label: "Operations", href: "/operations", icon: Cog },
+      { label: "Approval", href: "/approvals", icon: CheckSquare },
+      { label: "Results", href: "/results", icon: FlaskConical },
+      { label: "Outsourcing", href: "/outsourcing", icon: ExternalLink },
+    ],
+  },
+  {
     label: "Imaging & Investigations",
     roles: [Role.LAB_TECHNICIAN, Role.PATHOLOGIST, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
     items: [
@@ -168,18 +180,6 @@ const NAV_GROUPS: NavGroup[] = [
       { label: "Genetics Reports", href: "/imaging/genetics", icon: Dna },
       { label: "Report Templates", href: "/imaging/templates", icon: BookOpenCheck },
       { label: "Verify Queue", href: "/imaging/verify", icon: ShieldCheck },
-    ],
-  },
-  {
-    label: "Lab Operations",
-    roles: [Role.FRONT_DESK, Role.LAB_TECHNICIAN, Role.PATHOLOGIST, Role.LAB_MANAGER, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
-    items: [
-      { label: "Worklist", href: "/accession", icon: ScanBarcode },
-      { label: "Samples", href: "/samples", icon: TestTubes },
-      { label: "Operations", href: "/operations", icon: Cog },
-      { label: "Approval", href: "/approvals", icon: CheckSquare },
-      { label: "Results", href: "/results", icon: FlaskConical },
-      { label: "Outsourcing", href: "/outsourcing", icon: ExternalLink },
     ],
   },
   {

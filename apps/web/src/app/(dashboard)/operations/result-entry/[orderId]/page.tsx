@@ -21,6 +21,7 @@ import {
   FlaskConical,
   User,
   Building2,
+  ImageIcon,
 } from "lucide-react";
 import { PriorityBadge } from "@/components/shared/PriorityBadge";
 import { cn, formatDate, formatDateTime } from "@/lib/utils";
@@ -266,12 +267,26 @@ export default function ResultEntryPage() {
   const [flags, setFlags] = useState<Record<string, FlagType>>({});
   const [interpretation, setInterpretation] = useState("");
   const [showPrevious, setShowPrevious] = useState(true);
+  const [isImagingOrder, setIsImagingOrder] = useState(false);
 
   // Fetch order result data and transform to expected shape
   const { data: orderData, isLoading } = useQuery({
     queryKey: ["operation-result-entry", orderId],
     queryFn: async () => {
-      const res = await api.get(`/lab/results/${orderId}`);
+      let res;
+      try {
+        res = await api.get(`/lab/results/${orderId}`);
+      } catch (err: unknown) {
+        const e = err as { response?: { status?: number; data?: { message?: string } } };
+        if (e.response?.status === 400) {
+          const msg = e.response.data?.message ?? "";
+          if (msg.toLowerCase().includes("imaging") || msg.toLowerCase().includes("no pathology")) {
+            setIsImagingOrder(true);
+            return null;
+          }
+        }
+        throw err;
+      }
       const raw = res.data.data ?? res.data;
 
       // Transform raw Prisma response → OrderResultData
@@ -454,6 +469,33 @@ export default function ResultEntryPage() {
         <div className="flex flex-col items-center gap-3">
           <Loader2 size={28} className="animate-spin text-[#1B4F8A]" />
           <p className="text-sm text-slate-500">Loading order data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isImagingOrder) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] text-slate-400">
+        <ImageIcon size={40} className="mb-4 text-blue-300" />
+        <p className="text-base font-semibold text-slate-700 mb-1">This is an Imaging / Non-Pathology Order</p>
+        <p className="text-sm text-slate-500 mb-6 text-center max-w-sm">
+          Imaging and non-pathology tests (X-Ray, CT, MRI, USG, Molecular, Genetic) are reported
+          via the Imaging Worklist, not the Lab Operations queue.
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => router.push("/imaging")}
+            className="px-5 py-2 bg-[#1B4F8A] text-white rounded-lg text-sm font-medium hover:bg-[#163d6e] transition-colors"
+          >
+            Go to Imaging Worklist
+          </button>
+          <button
+            onClick={() => router.push("/operations")}
+            className="px-5 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+          >
+            Back to Operations
+          </button>
         </div>
       </div>
     );

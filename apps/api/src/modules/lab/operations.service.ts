@@ -401,15 +401,27 @@ export class OperationsService {
         ];
     }
 
+    // Only show orders that contain at least one PATHOLOGY test
+    // (imaging/non-path orders are handled by the Imaging Worklist)
+    const pathologyFilter = {
+      some: {
+        testCatalog: {
+          investigationType: "PATHOLOGY",
+        },
+      },
+    };
+
     const where: Record<string, unknown> = {
       tenantId,
       status: { in: statusValues },
+      items: pathologyFilter,
     };
 
     if (filters.department) {
       where.items = {
         some: {
           testCatalog: {
+            investigationType: "PATHOLOGY",
             department: { equals: filters.department, mode: "insensitive" },
           },
         },
@@ -446,6 +458,11 @@ export class OperationsService {
             },
           },
           items: {
+            where: {
+              testCatalog: {
+                investigationType: "PATHOLOGY",
+              },
+            },
             include: {
               testCatalog: {
                 select: {

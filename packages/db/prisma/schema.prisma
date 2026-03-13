@@ -668,8 +668,9 @@ model User {
   phone        String?
   isActive     Boolean   @default(true)
   lastLoginAt  DateTime?
-  refreshToken String?
-  createdAt    DateTime  @default(now())
+  refreshToken       String?
+  refreshTokenExpiry DateTime?
+  createdAt          DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   tenant             Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)

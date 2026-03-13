@@ -203,9 +203,8 @@ export class OrdersController {
   // DELETE /orders/:id
   @Delete(":id")
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.LAB_MANAGER)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: "Cancel an order (PENDING/CONFIRMED only)" })
-  cancel(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
-    return this.ordersService.cancel(user.tenantId, id, user.sub);
+  @ApiOperation({ summary: "Delete an unprocessed order (PENDING/CONFIRMED/REJECTED etc.)" })
+  deleteOrder(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.ordersService.deleteOrder(id, user.tenantId, user.sub);
   }
 }

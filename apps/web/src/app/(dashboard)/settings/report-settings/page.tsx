@@ -114,7 +114,7 @@ const TYPE_ICONS: Record<TemplateType, string> = {
 
 // ── Tab type ────────────────────────────────────────────────────────────────
 
-type Tab = "header-footer" | "templates" | "default-templates" | "param-templates";
+type Tab = "header-footer" | "templates" | "default-templates" | "param-templates" | "nonpath-ai-templates";
 
 // ── Parameter Stats Types ────────────────────────────────────────────────────
 
@@ -140,6 +140,17 @@ interface SeedParamResult {
   skipped: number;
   total: number;
   details: { code: string; name: string; action: string; paramCount: number }[];
+}
+
+// ── NonPath AI Generator Types ──────────────────────────────────────────────
+
+interface NonPathJobStatus {
+  status: "IDLE" | "RUNNING" | "COMPLETED" | "FAILED";
+  total: number;
+  processed: number;
+  failed: number;
+  startedAt: string | null;
+  completedAt: string | null;
 }
 
 // ── AI Generator Types ──────────────────────────────────────────────────────
@@ -314,6 +325,33 @@ export default function ReportSettingsPage() {
       setDtEditTarget(null);
     },
     onError: () => toast.error("Failed to update template"),
+  });
+
+  // ── NonPath AI Generator: status query ────────────────────────────────
+
+  const { data: nonPathJobStatus, isLoading: nonPathJobLoading } = useQuery<NonPathJobStatus>({
+    queryKey: ["nonpath-ai-template-status"],
+    queryFn: async () => {
+      const res = await api.get("/non-path/jobs/nonpath-template-status");
+      return (res.data?.data ?? res.data) as NonPathJobStatus;
+    },
+    enabled: tab === "nonpath-ai-templates",
+    staleTime: 5000,
+    refetchInterval: (query) => {
+      const data = query.state.data as NonPathJobStatus | undefined;
+      return data?.status === "RUNNING" ? 3000 : false;
+    },
+  });
+
+  // ── NonPath AI Generator: start mutation ──────────────────────────────
+
+  const startNonPathJobMut = useMutation({
+    mutationFn: () => api.post("/non-path/jobs/generate-nonpath-templates"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["nonpath-ai-template-status"] });
+      toast.success("NonPath template generation started!");
+    },
+    onError: () => toast.error("Failed to start generation"),
   });
 
   // ── AI Generator: regenerate one mutation ─────────────────────────────
@@ -537,12 +575,13 @@ export default function ReportSettingsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 rounded-lg p-1 w-fit">
+      <div className="flex gap-1 bg-slate-100 rounded-lg p-1 w-fit flex-wrap">
         {([
           { key: "header-footer" as Tab, label: "Header & Footer" },
           { key: "templates" as Tab, label: "Report Templates" },
           { key: "default-templates" as Tab, label: "Default Templates" },
           { key: "param-templates" as Tab, label: "Parameter Templates" },
+          { key: "nonpath-ai-templates" as Tab, label: "NonPath AI Templates" },
         ]).map((t) => (
           <button
             key={t.key}
@@ -1612,6 +1651,86 @@ export default function ReportSettingsPage() {
                 );
               })()}
             </>
+          )}
+        </div>
+      )}
+
+      {/* ─── TAB 5: NonPath AI Templates ──────────────────────────────── */}
+      {tab === "nonpath-ai-templates" && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-base font-semibold text-slate-800">Generate AI Templates for Imaging / NonPath Tests</h2>
+            <p className="text-sm text-slate-500 mt-0.5">
+              AI will create structured report templates for all USG, CT, MRI, X-Ray, Doppler, Molecular and Genetics tests in your catalog.
+            </p>
+          </div>
+
+          {nonPathJobLoading ? (
+            <div className="flex items-center justify-center h-40">
+              <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+            </div>
+          ) : nonPathJobStatus?.status === "RUNNING" ? (
+            <div className="bg-white border border-slate-200 rounded-2xl p-10 flex flex-col items-center text-center max-w-lg mx-auto">
+              <Loader2 className="w-10 h-10 text-purple-500 animate-spin mb-4" />
+              <h2 className="text-lg font-semibold text-slate-800 mb-1">Generating templates...</h2>
+              <p className="text-sm text-slate-500 mb-6">
+                {nonPathJobStatus.processed} of {nonPathJobStatus.total} complete
+              </p>
+              <div className="w-full bg-slate-100 rounded-full h-3 mb-3">
+                <div
+                  className="bg-purple-500 h-3 rounded-full transition-all duration-500"
+                  style={{
+                    width: nonPathJobStatus.total > 0
+                      ? `${Math.round((nonPathJobStatus.processed / nonPathJobStatus.total) * 100)}%`
+                      : "0%"
+                  }}
+                />
+              </div>
+              <p className="text-3xl font-bold text-purple-600">
+                {nonPathJobStatus.total > 0
+                  ? `${Math.round((nonPathJobStatus.processed / nonPathJobStatus.total) * 100)}%`
+                  : "0%"}
+              </p>
+            </div>
+          ) : nonPathJobStatus?.status === "COMPLETED" ? (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-10 flex flex-col items-center text-center max-w-lg mx-auto">
+              <CheckCircle className="w-12 h-12 text-emerald-500 mb-4" />
+              <h2 className="text-lg font-semibold text-emerald-800 mb-1">Generation Complete</h2>
+              <p className="text-sm text-emerald-600 mb-2">
+                {nonPathJobStatus.processed} templates generated successfully.
+                {nonPathJobStatus.failed > 0 && ` ${nonPathJobStatus.failed} failed.`}
+              </p>
+              <button
+                onClick={() => startNonPathJobMut.mutate()}
+                disabled={startNonPathJobMut.isPending}
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors"
+              >
+                {startNonPathJobMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                Re-generate
+              </button>
+            </div>
+          ) : (
+            <div className="bg-white border border-slate-200 rounded-2xl p-12 flex flex-col items-center text-center max-w-lg mx-auto">
+              <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mb-4">
+                <Sparkles className="w-8 h-8 text-purple-600" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900 mb-2">Generate NonPath Report Templates</h2>
+              <p className="text-sm text-slate-500 mb-6">
+                AI will create structured report entry templates for all imaging and non-pathology tests (X-Ray, CT, MRI, USG, Doppler, Molecular, Genetics) in your catalog.
+              </p>
+              <button
+                onClick={() => startNonPathJobMut.mutate()}
+                disabled={startNonPathJobMut.isPending}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors"
+              >
+                {startNonPathJobMut.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+                Generate AI Templates for NonPath Tests
+              </button>
+            </div>
           )}
         </div>
       )}

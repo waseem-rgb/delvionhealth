@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronRight,
   ClipboardPlus,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SearchInput } from "@/components/shared/SearchInput";
@@ -360,6 +361,8 @@ export default function AccessionPage() {
   const [scanInput, setScanInput] = useState("");
   const [rejectOrder, setRejectOrder] = useState<AccessionOrder | null>(null);
   const [viewOrder, setViewOrder] = useState<AccessionOrder | null>(null);
+  const [deleteConfirmOrder, setDeleteConfirmOrder] = useState<{ id: string; orderNumber: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const scanRef = useRef<HTMLInputElement>(null);
 
@@ -651,8 +654,14 @@ export default function AccessionPage() {
                           <Scan size={12} /> Accession
                         </button>
                         <button onClick={(e) => { e.stopPropagation(); setRejectOrder(order); }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700">
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700"
+                          title="Reject Sample">
                           <XCircle size={12} />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); setDeleteConfirmOrder({ id: order.id, orderNumber: order.orderNumber }); }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-600 text-white text-xs font-medium rounded-lg hover:bg-slate-700"
+                          title="Delete Order">
+                          <Trash2 size={12} />
                         </button>
                       </>
                     )}
@@ -892,6 +901,49 @@ export default function AccessionPage() {
           onReceive={() => { setViewOrder(null); openAccession(viewOrder.id); }}
           onReject={() => { setViewOrder(null); setRejectOrder(viewOrder); }}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmOrder && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              Delete Order {deleteConfirmOrder.orderNumber}?
+            </h3>
+            <p className="text-sm text-slate-600 mb-4">
+              This will permanently remove this order and all its items. Only unprocessed orders can be deleted.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setDeleteConfirmOrder(null)}
+                className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setDeleting(true);
+                  try {
+                    await api.delete(`/orders/${deleteConfirmOrder.id}`);
+                    toast.success('Order deleted');
+                    void qc.invalidateQueries({ queryKey: ["accession"] });
+                    void qc.invalidateQueries({ queryKey: ["accession-stats"] });
+                    setDeleteConfirmOrder(null);
+                  } catch (e: unknown) {
+                    const err = e as { response?: { data?: { message?: string } } };
+                    toast.error(err.response?.data?.message ?? 'Could not delete order');
+                  } finally {
+                    setDeleting(false);
+                  }
+                }}
+                disabled={deleting}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Delete Order'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

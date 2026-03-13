@@ -10,6 +10,7 @@ import type { JwtPayload } from "@delvion/types";
 import { NonPathService } from "./non-path.service";
 import { NonPathPdfService } from "./non-path-pdf.service";
 import { NonPathTemplateSeedService } from "./template-seed.service";
+import { GenerateNonpathTemplatesService } from "./generate-nonpath-templates.service";
 
 @ApiTags("non-path")
 @ApiBearerAuth()
@@ -20,6 +21,7 @@ export class NonPathController {
     private readonly service: NonPathService,
     private readonly pdfService: NonPathPdfService,
     private readonly seedService: NonPathTemplateSeedService,
+    private readonly generateTemplatesService: GenerateNonpathTemplatesService,
   ) {}
 
   // ── Test Classification ──────────────────────────────────────────────────
@@ -201,6 +203,22 @@ export class NonPathController {
   @ApiOperation({ summary: "Get AI suggestion context for normal findings" })
   getAiSuggestion(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
     return this.service.getAiSuggestion(user.tenantId, id);
+  }
+
+  // ── NonPath AI Template Job ──────────────────────────────────────────────
+
+  @Post("jobs/generate-nonpath-templates")
+  @ApiOperation({ summary: "Start AI generation of NonPath report templates" })
+  startNonpathTemplateJob(@CurrentUser() user: JwtPayload) {
+    // Fire and forget
+    this.generateTemplatesService.startJob(user.tenantId).catch(() => {});
+    return { message: "Job started", status: "RUNNING" };
+  }
+
+  @Get("jobs/nonpath-template-status")
+  @ApiOperation({ summary: "Get NonPath AI template generation job status" })
+  getNonpathTemplateStatus(@CurrentUser() user: JwtPayload) {
+    return this.generateTemplatesService.getJobStatus(user.tenantId);
   }
 
   // ── PDF Endpoints ─────────────────────────────────────────────────────────

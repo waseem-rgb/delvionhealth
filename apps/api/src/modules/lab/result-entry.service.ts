@@ -109,7 +109,10 @@ export class ResultEntryService {
    */
   async getResultEntry(orderId: string, tenantId: string) {
     const order = await this.prisma.order.findFirst({
-      where: { id: orderId, tenantId },
+      where: {
+        tenantId,
+        OR: [{ id: orderId }, { orderNumber: orderId }],
+      },
       include: {
         patient: {
           select: {
@@ -123,6 +126,11 @@ export class ResultEntryService {
           },
         },
         items: {
+          where: {
+            testCatalog: {
+              investigationType: "PATHOLOGY",
+            },
+          },
           include: {
             testCatalog: {
               include: {
@@ -153,6 +161,13 @@ export class ResultEntryService {
 
     if (!order) {
       throw new NotFoundException(`Order ${orderId} not found`);
+    }
+
+    // If no pathology items exist on this order, it may be an imaging/non-path order
+    if (order.items.length === 0) {
+      throw new BadRequestException(
+        "This order contains no pathology tests. Imaging and non-pathology tests are handled in the Imaging Worklist.",
+      );
     }
 
     // Calculate patient age

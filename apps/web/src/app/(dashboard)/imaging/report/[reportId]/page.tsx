@@ -29,6 +29,7 @@ interface Template {
   investigationType: string;
   methodology: string;
   sections: ReportSection[];
+  isDefault?: boolean;
 }
 
 interface Report {
@@ -203,6 +204,16 @@ export default function ReportEditorPage() {
     setSelectedTemplateId(report.templateId);
     setSectionData((report.sectionData ?? {}) as Record<string, string>);
   }, [report]);
+
+  // Auto-select default or only template when templates load and no template is selected
+  useEffect(() => {
+    if (!templates.length || selectedTemplateId) return;
+    // Prefer the default template, fallback to first one if only one exists
+    const defaultTmpl = templates.find((t) => t.isDefault) ?? (templates.length === 1 ? templates[0] : null);
+    if (defaultTmpl) {
+      setSelectedTemplateId(defaultTmpl.id);
+    }
+  }, [templates, selectedTemplateId]);
 
   // Pre-fill technique default when template selected
   useEffect(() => {

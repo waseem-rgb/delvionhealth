@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
+  Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import type { CreateOrderDto } from "./dto/create-order.dto";
@@ -78,6 +80,8 @@ function generateBarcodeId(): string {
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly realtime: RealtimeGateway,
@@ -899,5 +903,42 @@ export class OrdersService {
       orderNumber: order.orderNumber,
       status: OrderStatus.CANCELLED,
     });
+  }
+
+  // ───────────────────────────────────────────
+  // Delete order (unprocessed only)
+  // ───────────────────────────────────────────
+
+  async deleteOrder(id: string, tenantId: string, deletedBy: string): Promise<{ message: string }> {
+    const order = await this.prisma.order.findFirst({
+      where: { id, tenantId },
+      include: { items: true },
+    });
+    if (!order) throw new NotFoundException('Order not found');
+
+    const allowedStatuses = [
+      'PENDING', 'CONFIRMED', 'DRAFT',
+      'PENDING_COLLECTION', 'SAMPLE_COLLECTED', 'SAMPLE_REJECTED', 'CANCELLED',
+    ];
+    if (!allowedStatuses.includes(order.status)) {
+      throw new ConflictException(
+        `Cannot delete: order has status ${order.status}. Only unprocessed orders can be deleted.`
+      );
+    }
+
+    const hasAccession = (order.items as Array<{ accessionNumber?: string | null }>).some(
+      (i) => i.accessionNumber != null
+    );
+    if (hasAccession) {
+      throw new ConflictException('Cannot delete: order has already been accessioned');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.orderItem.deleteMany({ where: { orderId: id } }),
+      this.prisma.order.delete({ where: { id } }),
+    ]);
+
+    this.logger.log(`Order ${id} deleted by ${deletedBy}`);
+    return { message: 'Order deleted successfully' };
   }
 }
