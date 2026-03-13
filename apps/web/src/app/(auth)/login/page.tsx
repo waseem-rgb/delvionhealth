@@ -35,9 +35,7 @@ export default function LoginPage() {
     try {
       await login(data.email, data.password);
       const role = useAuthStore.getState().user?.role;
-      if (role === 'SUPER_ADMIN') {
-        router.push('/super-admin');
-      } else if (role === 'FRONT_DESK') {
+      if (role === 'FRONT_DESK') {
         router.push('/front-desk');
       } else {
         router.push('/dashboard');

@@ -776,7 +776,7 @@ model Patient {
   mergedAt      DateTime?
 
   // Report delivery preference
-  reportDeliveryMode  String?  @default("MANUAL")
+  reportDeliveryMode  String?  @default("AUTO")
   preferredChannel    String[] @default([])
   reportMobile        String?
   reportEmail         String?
@@ -868,7 +868,7 @@ model Order {
   resultRejectionReason String?
 
   // Report delivery
-  reportDeliveryMode  String?  @default("MANUAL")
+  reportDeliveryMode  String?  @default("AUTO")
   preferredChannel    String[] @default([])
   reportMobile        String?
   reportEmail         String?

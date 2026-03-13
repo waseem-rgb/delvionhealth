@@ -214,7 +214,7 @@ export class OrdersService {
           billedAt: new Date(),
           ...(dto.organizationId && { organizationId: dto.organizationId }),
           // Inherit delivery preferences from patient (can be overridden per order)
-          reportDeliveryMode: patient.reportDeliveryMode ?? "MANUAL",
+          reportDeliveryMode: patient.reportDeliveryMode ?? "AUTO",
           preferredChannel: patient.preferredChannel ?? [],
           ...(patient.reportMobile && { reportMobile: patient.reportMobile }),
           ...(patient.reportEmail && { reportEmail: patient.reportEmail }),

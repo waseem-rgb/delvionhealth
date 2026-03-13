@@ -187,7 +187,7 @@ const EMPTY_FORM: RegistrationForm = {
   patientCategory: "",
   allergies: "",
   chiefComplaint: "",
-  reportDeliveryMode: "MANUAL",
+  reportDeliveryMode: "AUTO",
   preferredChannels: ["WHATSAPP"],
   reportMobile: "",
   reportEmail: "",
@@ -1363,7 +1363,7 @@ export default function RegistrationPage() {
     if (form.rateListId) payload.rateListId = form.rateListId;
     if (form.organizationId) payload.organizationId = form.organizationId;
     if (form.referralDoctorId) payload.referralDoctorId = form.referralDoctorId;
-    payload.reportDeliveryMode = form.reportDeliveryMode || "MANUAL";
+    payload.reportDeliveryMode = form.reportDeliveryMode || "AUTO";
     payload.preferredChannel = form.preferredChannels ?? [];
     if (form.reportMobile) payload.reportMobile = form.reportMobile;
     if (form.reportEmail) payload.reportEmail = form.reportEmail;

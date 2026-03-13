@@ -215,6 +215,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "B2B",
     roles: [Role.FIELD_SALES_REP, Role.LAB_MANAGER, Role.FINANCE_EXECUTIVE, Role.TENANT_ADMIN, Role.SUPER_ADMIN],
     items: [
+      { label: "Organisations", href: "/organisations", icon: Building2 },
       { label: "Sales Team", href: "/revenue-crm/sales-team", icon: Users },
       { label: "Doctors & Clinics", href: "/revenue-crm/doctors", icon: Stethoscope },
       { label: "Hospitals & Labs", href: "/revenue-crm/b2b-accounts", icon: Hospital },
@@ -297,6 +298,7 @@ const NAV_GROUPS: NavGroup[] = [
     roles: [Role.TENANT_ADMIN, Role.SUPER_ADMIN, Role.IT_ADMIN],
     items: [
       { label: "Settings", href: "/settings", icon: Settings },
+      { label: "Organisation Settings", href: "/organisations", icon: Building2 },
       { label: "Departments", href: "/settings/departments", icon: Hospital },
       { label: "Doctors", href: "/settings/doctors", icon: Stethoscope },
       { label: "Report Settings", href: "/settings/report-settings", icon: FileText },
